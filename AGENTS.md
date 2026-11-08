@@ -23,6 +23,7 @@ Pleos Connect 차량 앱입니다. 차량 위치 주변 아파트 시세를 조�
 ## 절대 규칙
 
 - `local.properties`와 키를 읽거나, 출력하거나, 커밋하지 않습니다.
+- 앱 코드는 Clean Architecture + MVI 규칙을 따르고, 현재 프로젝트의 SDK 환경을 변경하지 않습니다.
 - SDK 호출은 `vehicle/` 패키지에만 둡니다.
 - 차량 모델명으로 분기하지 않습니다. 지원 여부 API로 확인합니다.
 - 주행 규제 상태에서 영상을 재생하지 않고, Driving view를 가리지 않습니다.
@@ -42,7 +43,7 @@ Pleos Connect 차량 앱입니다. 차량 위치 주변 아파트 시세를 조�
 | Pleos 설계 원칙 | [docs/principles/](docs/principles/README.md) |
 | SDK·API 정책 | [docs/platform/](docs/platform/README.md) |
 | 디자인, 화면 명세 | [docs/design/](docs/design/README.md) |
-| 구조와 의존 방향 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| 앱 아키텍처(Clean + MVI), SDK 환경 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | 완료 기준과 검증 | [docs/QUALITY.md](docs/QUALITY.md) |
 | 개발 환경 | [docs/SETUP.md](docs/SETUP.md) |
 | 결정 기록 | [docs/decisions/](docs/decisions/README.md) |

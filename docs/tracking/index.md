@@ -49,3 +49,4 @@
 | SCR-006 | screen | 동의와 설정 | draft | `design/screens/SCR-006-consent-settings.md` | T-011 | F-007, S-007 |
 | ADR-001 | decision | 주행 중 알림 범위와 앱 카테고리 | reserved | `decisions/ADR-001-driving-tts-category.md` | T-001 | F-006, S-003 |
 | ADR-002 | decision | Pleos SDK 경계 격리 | draft | `decisions/ADR-002-pleos-sdk-boundary.md` | T-004 | - |
+| ADR-003 | decision | Clean Architecture + MVI 채택 | approved | `decisions/ADR-003-clean-architecture-mvi.md` | T-012 | - |

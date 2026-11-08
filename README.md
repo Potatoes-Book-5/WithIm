@@ -23,6 +23,7 @@
 ```bash
 git clone https://github.com/Potatoes-Book-5/King-of-real-estate.git
 cd King-of-real-estate
+./harness/setup.sh                              # 커밋 규칙 훅 활성화 (클론 후 1회, Windows는 Git Bash)
 cp local.properties.example local.properties   # Pleos 키 입력 (git 제외 파일)
 ./gradlew installDebug                          # Pleos AVD 실행 중이어야 함
 ```

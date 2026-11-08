@@ -1,24 +1,306 @@
-# 아키텍처
+# 앱 아키텍처
 
-## 모듈
+Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용합니다. 결정 배경은 [ADR-003](decisions/ADR-003-clean-architecture-mvi.md)과 [ADR-002](decisions/ADR-002-pleos-sdk-boundary.md)에 있습니다.
 
-단일 `app` 모듈을 유지합니다. 빌드 시간이나 팀 경계 문제가 생기면 분리를 다시 검토합니다.
+## 개발 환경 기준
 
-## 패키지와 의존 방향
+새 코드는 아래 현재 프로젝트 환경을 그대로 사용합니다. 값의 원본은 출처 파일이며, 바뀌면 이 표도 같은 PR에서 갱신합니다.
 
-```
-ui ──────▶ domain ◀────── data
-                  ◀────── vehicle
-```
-
-| 패키지 | 책임 | 규칙 |
+| 항목 | 값 | 출처 |
 |---|---|---|
-| `ui` | Compose 화면, 상태 표시 | SDK를 직접 호출하지 않음 |
-| `domain` | 순위 계산, 조건 판정, 알림 정책 | Android와 Pleos 의존 없음 |
-| `data` | 시세 API, 캐시, 저장소 | `domain` 인터페이스 구현 |
-| `vehicle` | Pleos SDK, AAOS API 호출 | SDK 의존은 이 패키지에만 존재 |
+| namespace, applicationId | `com.potatoes.book5.realestate` | `app/build.gradle.kts` |
+| compileSdk / targetSdk | 35 / 35 | `app/build.gradle.kts` |
+| minSdk | 28 (Pleos 요구사항) | `app/build.gradle.kts` |
+| JDK / jvmTarget | 17 / 17 | `app/build.gradle.kts` |
+| AGP / Gradle | 8.8.2 / 8.10.2 | `gradle/libs.versions.toml`, `gradle-wrapper.properties` |
+| Kotlin | 2.0.0 | `gradle/libs.versions.toml` |
+| Compose BOM | 2024.04.01 | `gradle/libs.versions.toml` |
+| Lifecycle | 2.9.0 | `gradle/libs.versions.toml` |
+| Activity Compose | 1.10.1 | `gradle/libs.versions.toml` |
+| Core KTX | 1.16.0 | `gradle/libs.versions.toml` |
+| Pleos Vehicle SDK | 2.3.2 (카탈로그에만 선언, 아직 비활성) | `gradle/libs.versions.toml` |
+| Pleos Maven 저장소 | `nexus-playground.pleos.ai` | `settings.gradle.kts` |
+| 실행 환경 | Pleos Connect Emulator v2.1.0 (Android 14, API 34) | [SETUP.md](SETUP.md) |
+| 화면 방향 | 미지정 (기본 portrait, window 1개) | `AndroidManifest.xml` |
 
-결정 배경은 [ADR-002](decisions/ADR-002-pleos-sdk-boundary.md)에 있습니다.
+### 환경 규칙
+
+- SDK, Kotlin, AGP, Gradle 버전을 변경하려면 ADR을 먼저 작성합니다.
+- Pleos 버전 기준은 공식 Vehicle SDK Sample App입니다.
+- targetSdk는 35이고 실행 환경은 API 34이므로, API 35 전용 기능은 사용하지 않습니다.
+- 버전은 `libs.versions.toml`에서만 관리하고 `build.gradle.kts`에 직접 쓰지 않습니다.
+- Pleos 키는 `local.properties`와 `BuildConfig`로만 전달합니다.
+
+### 라이브러리 사용 기준
+
+| 구분 | 라이브러리 | 처리 |
+|---|---|---|
+| 사용 가능 | Compose UI, Material3, `lifecycle-viewmodel`, `lifecycle-viewmodel-savedstate`, `lifecycle-runtime-ktx` | 그대로 사용 |
+| 첫 MVI 화면 구현 시 추가 | `lifecycle-viewmodel-compose`, `lifecycle-runtime-compose` | 기존 `lifecycle` 버전 재사용, 빌드 확인 |
+| 첫 MVI 화면 구현 시 직접 선언 | `kotlinx-coroutines-android`, 테스트용 `kotlinx-coroutines-test` | 현재 전이 의존성 1.7.3, 직접 선언으로 고정 |
+| 사용 시 활성화 | Pleos Vehicle, TextToSpeech, SpeechToText, FusedLocation | [sdk-usage-map.md](platform/sdk-usage-map.md) 먼저 갱신 |
+| ADR 필요 | 내비게이션, DI 프레임워크, HTTP, 로컬 DB, DataStore | 도입 전에 ADR 작성 |
+
+## 계층과 의존 방향
+
+```mermaid
+flowchart LR
+    UI[ui<br/>Compose + MVI] --> Domain[domain<br/>UseCase, Model, Policy, Port]
+    Data[data<br/>Repository 구현] --> Domain
+    Vehicle[vehicle<br/>Pleos SDK, AAOS 어댑터] --> Domain
+    DI[di<br/>AppContainer] --> UI
+    DI --> Data
+    DI --> Vehicle
+```
+
+의존성은 항상 `domain`을 향합니다. `domain`은 어떤 계층도 알지 못합니다.
+
+| 패키지 | 책임 | 참조 가능 | 금지 |
+|---|---|---|---|
+| `ui` | 화면, MVI 상태 관리 | `domain` | `data`, `vehicle`, SDK, DTO |
+| `domain` | 비즈니스 규칙, UseCase, 포트 | Kotlin 표준, coroutines core | `android.*`, `androidx.*`, SDK, 다른 계층 |
+| `data` | 시세 API, 캐시, 저장소 | `domain` | `ui`, `vehicle`, SDK |
+| `vehicle` | Pleos SDK, AAOS API 어댑터 | `domain`, SDK | `ui`, `data` |
+| `di` | 구현체 조립 | 전체 | 비즈니스 로직 |
+
+Gradle 모듈은 단일 `app`을 유지하고 계층은 패키지로 구분합니다.
+
+## 패키지 구조
+
+```
+com.potatoes.book5.realestate/
+├── MainActivity.kt
+├── RealEstateApplication.kt     # AppContainer 보유
+├── di/AppContainer.kt
+├── ui/
+│   ├── theme/
+│   ├── common/
+│   ├── ranking/                 # SCR-001
+│   │   ├── RankingContract.kt   # State, Intent, Result, Effect
+│   │   ├── RankingReducer.kt
+│   │   ├── RankingViewModel.kt
+│   │   ├── RankingRoute.kt      # ViewModel 연결
+│   │   └── RankingScreen.kt     # 상태 없는 UI
+│   ├── detail/                  # SCR-002
+│   ├── interest/                # SCR-003
+│   ├── driving/                 # SCR-004
+│   ├── alert/                   # SCR-005
+│   └── settings/                # SCR-006
+├── domain/
+│   ├── model/                   # Apartment, Price, InterestCondition, DrivingState
+│   ├── error/                   # DomainError, Outcome
+│   ├── policy/                  # RankingPolicy, MatchingPolicy, AlertPolicy
+│   ├── port/                    # 외부 의존 인터페이스
+│   └── usecase/
+├── data/
+│   ├── repository/
+│   ├── remote/
+│   ├── local/
+│   └── mapper/
+└── vehicle/
+    ├── location/                # F-001, FusedLocation
+    ├── restriction/             # CarUxRestrictions
+    └── speech/                  # TextToSpeech, 오디오 포커스
+```
+
+현재는 `MainActivity`와 `ui/theme`만 있습니다. 패키지는 기능을 구현할 때 추가합니다.
+
+## 계층별 규칙
+
+### domain
+
+- UseCase는 동작 하나를 담고 `operator fun invoke`를 제공합니다.
+- 외부 의존은 `domain/port`의 인터페이스로 표현합니다. 예: `PriceRepository`, `VehicleLocationProvider`, `DrivingStateProvider`, `AlertSpeaker`
+- 순위, 조건 일치, 알림 허용 판단은 `policy`의 순수 함수로 작성합니다.
+- 예상 가능한 실패는 예외가 아니라 `Outcome`으로 반환합니다.
+
+```kotlin
+sealed interface DomainError {
+    data object Offline : DomainError
+    data object Timeout : DomainError
+    data class Unsupported(val capability: String) : DomainError
+    data class Unknown(val cause: Throwable) : DomainError
+}
+
+sealed interface Outcome<out T> {
+    data class Success<T>(val value: T) : Outcome<T>
+    data class Failure(val error: DomainError) : Outcome<Nothing>
+}
+```
+
+### data
+
+- DTO와 DB 엔티티는 `data` 밖으로 노출하지 않고 `mapper`에서 도메인 모델로 변환합니다.
+- 최근 조회 결과를 캐시하고 재시도와 타임아웃을 적용합니다(HW-005, HW-006).
+- 개인정보를 로그에 남길 때는 마스킹합니다(SP-005).
+
+### vehicle
+
+- SDK 타입은 이 패키지 밖으로 노출하지 않습니다.
+- 호출 전에 지원 여부를 확인하고, 미지원이면 `DomainError.Unsupported`를 반환합니다(CP-001, CP-004).
+- 차량 모델명으로 분기하지 않습니다(CP-006).
+- 주행 규제 상태는 `CarUxRestrictionsManager`에서 받아 `DrivingState`로 변환합니다(DI-001).
+- 오디오 포커스 획득과 상실 처리는 `AlertSpeaker` 구현 안에 둡니다(AF-001).
+
+## MVI
+
+```mermaid
+flowchart LR
+    Screen -- Intent --> VM[ViewModel]
+    VM -- 호출 --> UC[UseCase]
+    UC -- Outcome/Flow --> VM
+    VM -- Result --> Reducer
+    Reducer -- 새 State --> VM
+    VM -- StateFlow --> Screen
+    VM -- Effect --> Route
+```
+
+| 요소 | 역할 | 규칙 |
+|---|---|---|
+| State | 화면에 필요한 전체 상태 | 불변 `data class`, 화면당 하나 |
+| Intent | 사용자 동작과 화면 이벤트 | `sealed interface`, 동작 이름으로 작성 |
+| Result | UseCase 결과를 상태 변경으로 표현 | `sealed interface`, ViewModel 내부 사용 |
+| Reducer | `(State, Result) -> State` | 순수 함수, 부수 효과 금지 |
+| Effect | 일회성 이벤트 | 화면 이동 등 상태로 표현할 수 없는 것만 |
+| ViewModel | Intent 처리, UseCase 호출 | 상태 변경은 Reducer로만 수행 |
+| Route | ViewModel과 Effect 연결 | 비즈니스 로직 금지 |
+| Screen | State를 그리고 Intent 전달 | ViewModel을 받지 않음, Preview 가능 |
+
+### 화면 구현 형식
+
+```kotlin
+// RankingContract.kt
+data class RankingState(
+    val isLoading: Boolean = false,
+    val items: List<RankedApartmentUi> = emptyList(),
+    val isOffline: Boolean = false,
+)
+
+sealed interface RankingIntent {
+    data object Refresh : RankingIntent
+    data class SelectApartment(val id: String) : RankingIntent
+}
+
+sealed interface RankingResult {
+    data object Loading : RankingResult
+    data class Loaded(val items: List<RankedApartmentUi>) : RankingResult
+    data class Failed(val error: DomainError) : RankingResult
+}
+
+sealed interface RankingEffect {
+    data class OpenDetail(val id: String) : RankingEffect
+}
+
+// RankingReducer.kt
+internal fun reduceRanking(state: RankingState, result: RankingResult): RankingState =
+    when (result) {
+        RankingResult.Loading -> state.copy(isLoading = true)
+        is RankingResult.Loaded -> state.copy(isLoading = false, items = result.items, isOffline = false)
+        is RankingResult.Failed -> state.copy(isLoading = false, isOffline = result.error == DomainError.Offline)
+    }
+
+// RankingViewModel.kt
+class RankingViewModel(
+    private val getNearbyRanking: GetNearbyRankingUseCase,
+) : ViewModel() {
+    private val _state = MutableStateFlow(RankingState())
+    val state: StateFlow<RankingState> = _state.asStateFlow()
+
+    private val _effect = Channel<RankingEffect>(Channel.BUFFERED)
+    val effect: Flow<RankingEffect> = _effect.receiveAsFlow()
+
+    fun onIntent(intent: RankingIntent) {
+        when (intent) {
+            RankingIntent.Refresh -> refresh()
+            is RankingIntent.SelectApartment ->
+                viewModelScope.launch { _effect.send(RankingEffect.OpenDetail(intent.id)) }
+        }
+    }
+
+    private fun refresh() {
+        viewModelScope.launch {
+            apply(RankingResult.Loading)
+            when (val outcome = getNearbyRanking()) {
+                is Outcome.Success -> apply(RankingResult.Loaded(outcome.value.map { it.toUi() }))
+                is Outcome.Failure -> apply(RankingResult.Failed(outcome.error))
+            }
+        }
+    }
+
+    private fun apply(result: RankingResult) {
+        _state.update { reduceRanking(it, result) }
+    }
+}
+```
+
+### MVI 규칙
+
+- `MutableStateFlow`는 ViewModel 밖으로 노출하지 않습니다.
+- Composable에서 UseCase나 저장소를 호출하지 않습니다.
+- 화면 표시용 값은 `ui` 모델로 변환하고, 문자열과 형식은 `ui`에서 처리합니다.
+- State는 `collectAsStateWithLifecycle`로 구독해 백그라운드에서 수집을 멈춥니다(SM-006).
+- Effect는 Route에서 수명주기에 맞춰 수집합니다.
+- 프로세스 재생성 후에도 필요한 입력값은 `SavedStateHandle`로 복원합니다(SM-009).
+
+## 차량 상태 처리
+
+### 주행 규제
+
+```mermaid
+flowchart LR
+    Manager[CarUxRestrictionsManager] --> Provider[DrivingStateProvider]
+    Provider --> UC[ObserveDrivingStateUseCase]
+    UC --> Root[AppViewModel]
+    Root -- parked --> Normal[일반 화면]
+    Root -- restricted --> Driving[SCR-004 간소 화면]
+```
+
+- 앱 전체 주행 상태는 `AppViewModel` 하나에서 관리합니다.
+- 개별 화면이 규제 API를 직접 구독하지 않습니다.
+- 기능별 허용 범위는 [feature-state-matrix.md](product/feature-state-matrix.md)를 따릅니다.
+
+### 관심 매물 알림
+
+```mermaid
+flowchart LR
+    Location[VehicleLocationProvider] --> Match[MatchNearbyInterestUseCase]
+    Prices[PriceRepository] --> Match
+    Interest[InterestRepository] --> Match
+    Driving[DrivingStateProvider] --> Decide[AlertPolicy]
+    Match --> Decide
+    Decide --> Speak[AlertSpeaker]
+```
+
+- 조건 일치와 알림 허용 판단은 `domain`에 두어 JVM 테스트로 검증합니다.
+- 실행 위치(포그라운드 또는 백그라운드)와 주행 중 허용 여부는 T-001 답변 후 확정합니다.
+- 폴링을 최소화하고 위치 갱신 조건을 정의합니다(SM-007, SM-008).
+- 주행 중 CPU 5% 미만 기준을 지킵니다(PF-002).
+
+## 의존성 주입
+
+DI 프레임워크 없이 `AppContainer`로 구현체를 수동 조립합니다. `RealEstateApplication`이 컨테이너를 보유하고 ViewModel Factory에서 사용합니다. 프레임워크가 필요해지면 ADR을 작성합니다.
+
+## 테스트
+
+| 대상 | 방법 | 레벨 |
+|---|---|---|
+| `domain` policy, UseCase | JVM 단위 테스트, 포트는 Fake 구현 | L1 |
+| Reducer | JVM 단위 테스트 (입력 상태와 Result로 검증) | L1 |
+| ViewModel | Fake UseCase, `kotlinx-coroutines-test` | L1 |
+| `data` mapper, repository | JVM 단위 테스트 | L1 |
+| Screen | Compose UI 테스트 | L2 |
+| `vehicle` 어댑터 | Pleos 에뮬레이터, Virtual Console | L2, L3 |
+
+검증 명령은 [QUALITY.md](QUALITY.md)를 봅니다.
+
+## 코드 리뷰 체크리스트
+
+- [ ] 의존 방향을 지켰는가 (`domain`에 Android import 없음, `ui`에 `data`·`vehicle` import 없음)
+- [ ] SDK 타입이 `vehicle` 밖으로 나가지 않는가
+- [ ] 상태 변경이 Reducer로만 이루어지는가
+- [ ] Screen이 ViewModel 없이 Preview 가능한가
+- [ ] 지원 여부 확인과 미지원 동작이 있는가
+- [ ] 새 라이브러리가 [라이브러리 사용 기준](#라이브러리-사용-기준)을 따르는가
 
 ## 저장소 구조
 
@@ -42,7 +324,3 @@ King-of-real-estate/
     ├── references/   # 외부 자료
     └── learnings/    # 실패와 개선 기록
 ```
-
-## 현재 상태
-
-`MainActivity`의 Hello World와 테마만 있습니다. 패키지는 기능 구현 시 추가합니다.

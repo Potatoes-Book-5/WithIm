@@ -84,7 +84,11 @@ git clone https://github.com/Potatoes-Book-5/King-of-real-estate.git ~/AndroidSt
    - `pleos.projectId` — 프로젝트 ID(Key)
    - `pleos.clientId`, `pleos.clientSecret` — SDK 클라이언트 ID / 시크릿 (TTS·STT SDK에서 사용)
    - 빌드 시 `BuildConfig.PLEOS_PROJECT_ID` / `PLEOS_CLIENT_ID` / `PLEOS_CLIENT_SECRET`으로 들어갑니다.
-3. Gradle Sync가 끝나기를 기다립니다. 처음에는 Gradle 8.10.2와 의존성을 내려받느라 몇 분 걸립니다.
+3. git 훅을 활성화합니다. 클론 후 한 번만 실행하며, 빠뜨리면 [커밋 규칙](team/git-workflow.md)이 검사되지 않습니다.
+   ```bash
+   ./harness/setup.sh
+   ```
+4. Gradle Sync가 끝나기를 기다립니다. 처음에는 Gradle 8.10.2와 의존성을 내려받느라 몇 분 걸립니다.
    - Gradle JDK가 17 미만이면: **Settings > Build, Execution, Deployment > Build Tools > Gradle > Gradle JDK**를 내장 JDK(jbr)로 지정
 
 ---
@@ -153,6 +157,7 @@ adb reboot
 | Android SDK 기본 경로 | `~/Library/Android/sdk` | `%LOCALAPPDATA%\Android\Sdk` |
 | `local.properties`의 sdk.dir | `/Users/<사용자>/Library/Android/sdk` | `C\:\\Users\\<사용자>\\AppData\\Local\\Android\\Sdk` (`:`와 `\` 이스케이프) |
 | local.properties 복사 | `cp local.properties.example local.properties` | `copy local.properties.example local.properties` |
+| git 훅 활성화 | 터미널에서 `./harness/setup.sh` | **Git Bash**에서 `./harness/setup.sh` |
 | Gradle 실행 | `./gradlew installDebug` | `gradlew.bat installDebug` |
 | adb 위치 | `$ANDROID_HOME/platform-tools` | `%LOCALAPPDATA%\Android\Sdk\platform-tools` |
 

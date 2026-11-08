@@ -15,3 +15,4 @@
 | T-009 | docs | F-001~F-005, F-007 기능 명세 작성 | todo | - | P1 | - | T-005 |
 | T-010 | docs | S-001, S-002, S-004~S-007 시나리오 작성 | todo | - | P1 | - | T-009 |
 | T-011 | design | SCR 화면 명세 작성과 Figma 프레임 구성 | todo | - | P1 | - | T-002, T-010 |
+| T-012 | docs | Clean Architecture + MVI 아키텍처 문서 작성 | review | - | P1 | ADR-003 | - |
