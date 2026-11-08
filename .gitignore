@@ -1,0 +1,32 @@
+# Gradle / build
+.gradle/
+build/
+/app/build/
+.kotlin/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+output-metadata.json
+
+# Android Studio / IntelliJ
+*.iml
+.idea/
+.navigation/
+
+# 로컬 설정 및 비밀값 — 절대 커밋하지 않음 (Pleos SDK 키 포함)
+local.properties
+secrets.properties
+*.jks
+*.keystore
+google-services.json
+
+# AI 하네스 로컬 파일
+.claude/settings.local.json
+harness/runs/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,6 @@
+# T-008에서 담당자를 지정한 뒤 주석을 해제합니다.
+# /docs/principles/     <github-handle>
+# /docs/platform/       <github-handle>
+# /docs/design/         <github-handle>
+# /.claude/             <github-handle>
+# /harness/             <github-handle>

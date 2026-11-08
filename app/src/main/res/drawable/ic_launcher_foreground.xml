@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 임시 런처 아이콘: 단순한 집 모양 (108dp 어댑티브 아이콘 안전 영역 66dp 내부) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 지붕 -->
+    <path
+        android:fillColor="#FFC94A"
+        android:pathData="M54,32 L78,52 L72,52 L54,37 L36,52 L30,52 Z" />
+    <!-- 몸체 + 문 -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,52 L54,39 L70,52 L70,76 L59,76 L59,63 L49,63 L49,76 L38,76 Z" />
+</vector>

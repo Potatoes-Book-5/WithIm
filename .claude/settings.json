@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./harness/verify.sh:*)",
+      "Bash(./harness/check-docs.sh:*)",
+      "Bash(./harness/check-registry.sh:*)"
+    ],
+    "deny": [
+      "Read(./local.properties)",
+      "Edit(./local.properties)",
+      "Write(./local.properties)",
+      "Read(./secrets.properties)",
+      "Bash(git push --force:*)",
+      "Bash(git push origin main:*)"
+    ]
+  }
+}

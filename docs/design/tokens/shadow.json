@@ -1,0 +1,17 @@
+{
+  "source": "https://document.pleos.ai/docs/connect/guide/docs-design/foundations/shadow",
+  "checked": "2026-11-08",
+  "shadow": {
+    "level1": [
+      { "name": "Shadow 1-2", "x": 0, "y": 6, "blur": 24, "spread": 0, "color": "#14000000" }
+    ],
+    "level2": [
+      { "name": "Shadow 1-1", "x": 0, "y": 8, "blur": 32, "spread": 0, "color": "#29000000" },
+      { "name": "Shadow 1-2", "x": 0, "y": 2, "blur": 2, "spread": 0, "color": "#14000000" }
+    ],
+    "level3": [
+      { "name": "Shadow 1-1", "x": 0, "y": 20, "blur": 40, "spread": 0, "color": "#3D000000" },
+      { "name": "Shadow 1-2", "x": 0, "y": 2, "blur": 4, "spread": 0, "color": "#33000000" }
+    ]
+  }
+}

@@ -1,0 +1,18 @@
+# 이 파일을 local.properties로 복사한 뒤 값을 채우세요. local.properties는 git에 올라가지 않습니다.
+#   macOS/Linux: cp local.properties.example local.properties
+#   Windows:     copy local.properties.example local.properties
+
+# Android SDK 경로 (Android Studio가 프로젝트를 열 때 자동으로 채워 줍니다)
+#   macOS:   sdk.dir=/Users/<사용자>/Library/Android/sdk
+#   Windows: sdk.dir=C\:\\Users\\<사용자>\\AppData\\Local\\Android\\Sdk
+# sdk.dir=
+
+# Pleos Playground > Workspace > My Project > 프로젝트 정보
+# 프로젝트 ID(Key): 앱 심사 요청 시 Pleos App Market Console에 입력
+pleos.projectId=
+# SDK 클라이언트 ID / 시크릿: 서버 연결이 필요한 SDK(TextToSpeech, SpeechToText)에서 사용
+pleos.clientId=
+pleos.clientSecret=
+
+# 테스트 정보 > CRN: 데브박스(실차 개발 보드)용. Pleos Connect Emulator 2.1.0 이상에서는 필요 없음
+pleos.testCrn=
