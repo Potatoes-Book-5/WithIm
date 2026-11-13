@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440">
+<title>SCR-010/landscape/parked/light</title>
+<rect id="display" x="0" y="0" width="2560" height="1440" rx="0" fill="#E9EBEF"/>
+<g id="context (system, not app)">
+<rect x="0" y="0" width="2560" height="112" rx="0" fill="#E1E4E9"/>
+<text x="1280.0" y="70" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">Status bar</text>
+<text x="2512" y="70" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="600" fill="#8A909C" text-anchor="end">10:24</text>
+<rect x="24" y="112" width="789" height="1116" rx="24" fill="#DDE0E6"/>
+<text x="418.5" y="640" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#8A909C" text-anchor="middle">Driving View</text>
+<text x="418.5" y="696" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">시스템 영역 · 앱이 가릴 수 없음</text>
+<rect x="0" y="1252" width="2560" height="188" rx="0" fill="#E1E4E9"/>
+<text x="1280.0" y="1358" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">System dock</text>
+</g>
+<clipPath id="clip-SCR-010 마이 페이지"><rect x="837" y="112" width="1699" height="1140" rx="24"/></clipPath>
+<g id="app/SCR-010 마이 페이지">
+<rect id="app-window" x="837" y="112" width="1699" height="1140" rx="24" fill="#FFFFFF"/>
+<g id="app-bar/back">
+<rect x="869" y="136" width="120" height="120" rx="60" fill="#F2F4F7"/>
+<path d="M939 170 L913 196 L939 222" fill="none" stroke="#111318" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<text x="1021" y="190" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="56" font-weight="700" fill="#111318" text-anchor="start">마이 페이지</text>
+<text x="1021" y="240" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">스크랩한 단지를 내 조건과 비교</text>
+<g id="my-conditions">
+<rect x="885" y="292" width="560" height="912" rx="32" fill="#F2F4F7"/>
+<text x="925" y="364" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="700" fill="#111318" text-anchor="start">내 조건</text>
+<path d="M1165.0 588.0 L1197.3 611.5 L1185.0 649.5 L1145.0 649.5 L1132.7 611.5 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M1165.0 554.0 L1229.7 601.0 L1205.0 677.0 L1125.0 677.0 L1100.3 601.0 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M1165.0 520.0 L1262.0 590.5 L1225.0 704.5 L1105.0 704.5 L1068.0 590.5 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M1165.0 486.0 L1294.3 580.0 L1244.9 732.0 L1085.1 732.0 L1035.7 580.0 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M1165.0 452.0 L1326.7 569.5 L1264.9 759.5 L1065.1 759.5 L1003.3 569.5 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<line x1="1165.0" y1="622" x2="1165.0" y2="452.0" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="1165.0" y1="622" x2="1326.7" y2="569.5" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="1165.0" y1="622" x2="1264.9" y2="759.5" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="1165.0" y1="622" x2="1065.1" y2="759.5" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="1165.0" y1="622" x2="1003.3" y2="569.5" stroke="#D3D7DE" stroke-width="2"/>
+<text x="1165.0" y="402.0" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="700" fill="#111318" text-anchor="middle">가격대</text>
+<text x="1364.7218684219822" y="565.1064311812611" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="700" fill="#111318" text-anchor="start">평수</text>
+<text x="1288.4349029814193" y="817.8935688187389" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="700" fill="#111318" text-anchor="start">동네</text>
+<text x="1041.5650970185807" y="817.8935688187389" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="700" fill="#111318" text-anchor="end">세대수</text>
+<text x="965.2781315780178" y="565.1064311812611" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="700" fill="#111318" text-anchor="end">신축</text>
+<path d="M1165.0 452.0 L1326.7 569.5 L1264.9 759.5 L1065.1 759.5 L1003.3 569.5 Z" fill="#2F5BEA" fill-opacity="0.2" stroke="#2F5BEA" stroke-width="5" stroke-linejoin="round"/>
+<text x="925" y="892" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="500" fill="#5B6270" text-anchor="start">정자동, 수내동 · 10~15억</text>
+<text x="925" y="940" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="500" fill="#5B6270" text-anchor="start">30평대 · 500세대+ · 2015년 이후</text>
+<g id="button/조건 수정">
+<rect x="925" y="1044" width="480" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="1165.0" y="1118.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#111318" text-anchor="middle">조건 수정</text>
+</g>
+</g>
+<text x="1485" y="344" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="38" font-weight="700" fill="#111318" text-anchor="start">스크랩 상위 3곳 · 일치율 순</text>
+<g id="scrap/한빛마을 1단지">
+<rect x="1485" y="376" width="318" height="520" rx="28" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="3"/>
+<path d="M1644.0 562.0 L1666.8 578.6 L1658.1 605.4 L1629.9 605.4 L1621.2 578.6 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M1644.0 538.0 L1689.7 571.2 L1672.2 624.8 L1615.8 624.8 L1598.3 571.2 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M1644.0 514.0 L1712.5 563.8 L1686.3 644.2 L1601.7 644.2 L1575.5 563.8 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M1644.0 490.0 L1735.3 556.3 L1700.4 663.7 L1587.6 663.7 L1552.7 556.3 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M1644.0 466.0 L1758.1 548.9 L1714.5 683.1 L1573.5 683.1 L1529.9 548.9 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<line x1="1644.0" y1="586" x2="1644.0" y2="466.0" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="1644.0" y1="586" x2="1758.1" y2="548.9" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="1644.0" y1="586" x2="1714.5" y2="683.1" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="1644.0" y1="586" x2="1573.5" y2="683.1" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="1644.0" y1="586" x2="1529.9" y2="548.9" stroke="#D3D7DE" stroke-width="2"/>
+<path d="M1644.0 466.0 L1758.1 548.9 L1714.5 683.1 L1573.5 683.1 L1529.9 548.9 Z" fill="none" fill-opacity="0" stroke="#5B6270" stroke-width="3" stroke-linejoin="round" stroke-dasharray="10 8"/>
+<path d="M1644.0 466.0 L1758.1 548.9 L1714.5 683.1 L1587.6 663.7 L1552.7 556.3 Z" fill="#2F5BEA" fill-opacity="0.3" stroke="#2F5BEA" stroke-width="4" stroke-linejoin="round"/>
+<text x="1517" y="808" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="38" font-weight="700" fill="#111318" text-anchor="start">한빛마을 1단지</text>
+<text x="1517" y="862" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="34" font-weight="800" fill="#2F5BEA" text-anchor="start">조건 일치 92%</text>
+<rect x="1611" y="400" width="160" height="52" rx="26" fill="#E6ECFD"/>
+<text x="1691.0" y="436.08" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="28" font-weight="600" fill="#2F5BEA" text-anchor="middle">새 실거래</text>
+</g>
+<g id="scrap/모아뜰 2단지">
+<rect x="1827" y="376" width="318" height="520" rx="28" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<path d="M1986.0 562.0 L2008.8 578.6 L2000.1 605.4 L1971.9 605.4 L1963.2 578.6 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M1986.0 538.0 L2031.7 571.2 L2014.2 624.8 L1957.8 624.8 L1940.3 571.2 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M1986.0 514.0 L2054.5 563.8 L2028.3 644.2 L1943.7 644.2 L1917.5 563.8 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M1986.0 490.0 L2077.3 556.3 L2042.4 663.7 L1929.6 663.7 L1894.7 556.3 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M1986.0 466.0 L2100.1 548.9 L2056.5 683.1 L1915.5 683.1 L1871.9 548.9 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<line x1="1986.0" y1="586" x2="1986.0" y2="466.0" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="1986.0" y1="586" x2="2100.1" y2="548.9" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="1986.0" y1="586" x2="2056.5" y2="683.1" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="1986.0" y1="586" x2="1915.5" y2="683.1" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="1986.0" y1="586" x2="1871.9" y2="548.9" stroke="#D3D7DE" stroke-width="2"/>
+<path d="M1986.0 466.0 L2100.1 548.9 L2056.5 683.1 L1915.5 683.1 L1871.9 548.9 Z" fill="none" fill-opacity="0" stroke="#5B6270" stroke-width="3" stroke-linejoin="round" stroke-dasharray="10 8"/>
+<path d="M1986.0 490.0 L2100.1 548.9 L2056.5 683.1 L1943.7 644.2 L1940.3 571.2 Z" fill="#2F5BEA" fill-opacity="0.3" stroke="#2F5BEA" stroke-width="4" stroke-linejoin="round"/>
+<text x="1859" y="808" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="38" font-weight="700" fill="#111318" text-anchor="start">모아뜰 2단지</text>
+<text x="1859" y="862" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="34" font-weight="800" fill="#2F5BEA" text-anchor="start">조건 일치 78%</text>
+</g>
+<g id="scrap/새솔 리버뷰">
+<rect x="2169" y="376" width="318" height="520" rx="28" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<path d="M2328.0 562.0 L2350.8 578.6 L2342.1 605.4 L2313.9 605.4 L2305.2 578.6 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M2328.0 538.0 L2373.7 571.2 L2356.2 624.8 L2299.8 624.8 L2282.3 571.2 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M2328.0 514.0 L2396.5 563.8 L2370.3 644.2 L2285.7 644.2 L2259.5 563.8 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M2328.0 490.0 L2419.3 556.3 L2384.4 663.7 L2271.6 663.7 L2236.7 556.3 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<path d="M2328.0 466.0 L2442.1 548.9 L2398.5 683.1 L2257.5 683.1 L2213.9 548.9 Z" fill="none" fill-opacity="0" stroke="#D3D7DE" stroke-width="2" stroke-linejoin="round"/>
+<line x1="2328.0" y1="586" x2="2328.0" y2="466.0" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="2328.0" y1="586" x2="2442.1" y2="548.9" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="2328.0" y1="586" x2="2398.5" y2="683.1" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="2328.0" y1="586" x2="2257.5" y2="683.1" stroke="#D3D7DE" stroke-width="2"/>
+<line x1="2328.0" y1="586" x2="2213.9" y2="548.9" stroke="#D3D7DE" stroke-width="2"/>
+<path d="M2328.0 466.0 L2442.1 548.9 L2398.5 683.1 L2257.5 683.1 L2213.9 548.9 Z" fill="none" fill-opacity="0" stroke="#5B6270" stroke-width="3" stroke-linejoin="round" stroke-dasharray="10 8"/>
+<path d="M2328.0 538.0 L2442.1 548.9 L2398.5 683.1 L2271.6 663.7 L2259.5 563.8 Z" fill="#2F5BEA" fill-opacity="0.3" stroke="#2F5BEA" stroke-width="4" stroke-linejoin="round"/>
+<text x="2201" y="808" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="38" font-weight="700" fill="#111318" text-anchor="start">새솔 리버뷰</text>
+<text x="2201" y="862" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="34" font-weight="800" fill="#2F5BEA" text-anchor="start">조건 일치 61%</text>
+</g>
+<text x="1485" y="956" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="28" font-weight="500" fill="#5B6270" text-anchor="start">점선: 내 조건  ·  채움: 단지</text>
+<g id="tile/스크랩 전체 8곳 보기">
+<rect x="1485" y="996" width="1003" height="208" rx="28" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="3"/>
+<text x="1525" y="1092.0" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="44" font-weight="700" fill="#111318" text-anchor="start">스크랩 전체 8곳 보기</text>
+<text x="1525" y="1146.0" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="500" fill="#5B6270" text-anchor="start">변동 2건</text>
+<text x="2448" y="1116.0" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="64" font-weight="700" fill="#2F5BEA" text-anchor="end">›</text>
+</g>
+</g>
+</svg>

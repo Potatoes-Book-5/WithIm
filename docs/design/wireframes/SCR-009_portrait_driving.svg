@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440">
+<title>SCR-009/portrait/driving/light</title>
+<rect id="display" x="0" y="0" width="2560" height="1440" rx="0" fill="#E9EBEF"/>
+<g id="context (system, not app)">
+<rect x="0" y="0" width="2560" height="112" rx="0" fill="#E1E4E9"/>
+<text x="1280.0" y="70" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">Status bar</text>
+<text x="2512" y="70" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="600" fill="#8A909C" text-anchor="end">10:24</text>
+<rect x="24" y="112" width="789" height="1116" rx="24" fill="#DDE0E6"/>
+<text x="418.5" y="640" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#8A909C" text-anchor="middle">Driving View</text>
+<text x="418.5" y="696" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">시스템 영역 · 앱이 가릴 수 없음</text>
+<rect x="0" y="1252" width="2560" height="188" rx="0" fill="#E1E4E9"/>
+<text x="1280.0" y="1358" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">System dock</text>
+<rect x="1698" y="112" width="838" height="1140" rx="24" fill="#DDE0E6"/>
+<text x="2117.0" y="672.0" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#8A909C" text-anchor="middle">다른 앱 (예: 내비게이션)</text>
+<text x="2117.0" y="728.0" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">Portrait window B</text>
+</g>
+<clipPath id="clip-SCR-009 시안 A"><rect x="837" y="112" width="837" height="1140" rx="24"/></clipPath>
+<g id="app/SCR-009 시안 A">
+<rect id="app-window" x="837" y="112" width="837" height="1140" rx="24" fill="#FFFFFF"/>
+<g id="header/mode-toggle">
+<rect x="869" y="140" width="360" height="104" rx="52" fill="#F2F4F7"/>
+<text x="963" y="206" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="38" font-weight="600" fill="#5B6270" text-anchor="middle">순위</text>
+<rect x="1049" y="148" width="172" height="88" rx="44" fill="#111318"/>
+<text x="1135" y="206" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="38" font-weight="700" fill="#FFFFFF" text-anchor="middle">지도</text>
+</g>
+<text x="1257" y="204" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="600" fill="#5B6270" text-anchor="start">반경 10km</text>
+<rect x="1490" y="160" width="145" height="64" rx="32" fill="#111318"/>
+<text x="1562.5" y="203.52" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="600" fill="#FFFFFF" text-anchor="middle">주행 중</text>
+<clipPath id="clipA"><rect x="869" y="272" width="773" height="724" rx="28"/></clipPath>
+<g id="map" clip-path="url(#clipA)">
+<rect x="869" y="272" width="773" height="724" rx="0" fill="#EDEFF3"/>
+<path d="M849 402.32 C1100.9 344.4 1294.15 503.68 1662 431.28" fill="none" stroke="#D6E4F5" stroke-width="70" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="915.38" y="619.52" width="170.06" height="115.84" rx="24" fill="#E3EDE3"/>
+<path d="M1255.5 1016 L1255.5 252" fill="none" stroke="#FFFFFF" stroke-width="64" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1255.5 1016 L1255.5 252" fill="none" stroke="#D3D7DE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M849 489.2 L1662 459.2" fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M849 691.92 L1662 661.92" fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M849 894.64 L1662 864.64" fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1471.94 252 L1410.1 1016" fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="1255.5" cy="836.72" r="116" fill="none" stroke="#2F5BEA" stroke-width="4" stroke-dasharray="18 14"/>
+<text x="1349.86" y="744.36" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="700" fill="#2F5BEA" text-anchor="start">2km</text>
+<circle cx="1255.5" cy="836.72" r="290" fill="none" stroke="#9AA1AD" stroke-width="4"/>
+<text x="1473.4" y="620.82" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="700" fill="#5B6270" text-anchor="start">5km</text>
+<circle cx="1023.6" cy="438.52" r="12" fill="#A9AFBA"/>
+<circle cx="1448.75" cy="691.9200000000001" r="12" fill="#A9AFBA"/>
+<circle cx="1162.74" cy="1053.92" r="12" fill="#A9AFBA"/>
+<circle cx="1510.59" cy="909.12" r="12" fill="#A9AFBA"/>
+<circle cx="977.22" cy="800.52" r="12" fill="#A9AFBA"/>
+<circle cx="1332.8" cy="387.84000000000003" r="12" fill="#A9AFBA"/>
+<g id="pin/rank-1">
+<circle cx="1441.02" cy="547.12" r="34" fill="#2F5BEA"/>
+<text x="1441.02" y="561.12" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="38" font-weight="800" fill="#FFFFFF" text-anchor="middle">1</text>
+<path d="M1419.0 499.1 L1419.0 473.1 L1431.0 485.1 L1441.0 467.1 L1451.0 485.1 L1463.0 473.1 L1463.0 499.1 Z" fill="#2F5BEA" stroke="#2F5BEA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<g id="pin/rank-2">
+<circle cx="1023.6" cy="387.84000000000003" r="34" fill="#111318"/>
+<text x="1023.6" y="401.84000000000003" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="38" font-weight="800" fill="#FFFFFF" text-anchor="middle">2</text>
+</g>
+<g id="pin/interest">
+<circle cx="1124.09" cy="713.64" r="34" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="3"/>
+<path d="M1124.1 693.6 L1129.4 706.4 L1143.1 707.5 L1132.6 716.4 L1135.8 729.8 L1124.1 722.6 L1112.3 729.8 L1115.5 716.4 L1105.1 707.5 L1118.8 706.4 Z" fill="#2F5BEA" stroke="#2F5BEA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<circle cx="1255.5" cy="836.72" r="70" fill="#2F5BEA"/>
+<circle cx="1255.5" cy="836.72" r="70" fill="#2F5BEA" opacity="0.15"/>
+<circle cx="1255.5" cy="836.72" r="44" fill="#FFFFFF"/>
+<path d="M1255.5 809.44 L1275.74 858.72 L1255.5 847.28 L1235.26 858.72 Z" fill="#2F5BEA" stroke="#2F5BEA" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="1017.02" y="511.12" width="372" height="72" rx="36" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="3"/>
+<text x="1045.02" y="559.12" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="34" font-weight="600" fill="#111318" text-anchor="start">새솔 리버뷰</text>
+<text x="1361.02" y="559.12" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="36" font-weight="800" fill="#2F5BEA" text-anchor="end">24.5억</text>
+<rect x="1073.6" y="351.84000000000003" width="406" height="72" rx="36" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="1101.6" y="399.84000000000003" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="34" font-weight="600" fill="#111318" text-anchor="start">은행나무 파크</text>
+<text x="1451.6" y="399.84000000000003" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="36" font-weight="800" fill="#111318" text-anchor="end">22.1억</text>
+<rect x="1174.09" y="677.64" width="411" height="72" rx="36" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="3"/>
+<text x="1202.09" y="725.64" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="34" font-weight="600" fill="#111318" text-anchor="start">한빛마을 1단지</text>
+<text x="1557.09" y="725.64" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="36" font-weight="800" fill="#2F5BEA" text-anchor="end">1.2km</text>
+</g>
+<g id="offscreen/rank-3">
+<rect x="893" y="892" width="320" height="80" rx="40" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="2"/>
+<path d="M933 916 L933 950 M919 936 L933 952 L947 936" fill="none" stroke="#111318" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="967" y="946" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="600" fill="#111318" text-anchor="start">3위 뒤쪽 6.8km</text>
+</g>
+<text x="1618" y="328" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="700" fill="#5B6270" text-anchor="end">진행 방향 ↑</text>
+<g id="summary-strip">
+<rect x="869" y="1020" width="773" height="200" rx="28" fill="#F2F4F7"/>
+<text x="897.0" y="1092" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="600" fill="#5B6270" text-anchor="start">1 새솔 리버뷰</text>
+<text x="897.0" y="1160" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="48" font-weight="800" fill="#2F5BEA" text-anchor="start">24.5억</text>
+<line x1="1126.6666666666667" y1="1056" x2="1126.6666666666667" y2="1184" stroke="#D3D7DE" stroke-width="2"/>
+<text x="1154.6666666666667" y="1092" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="600" fill="#5B6270" text-anchor="start">2 은행나무 파크</text>
+<text x="1154.6666666666667" y="1160" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="48" font-weight="800" fill="#111318" text-anchor="start">22.1억</text>
+<line x1="1384.3333333333335" y1="1056" x2="1384.3333333333335" y2="1184" stroke="#D3D7DE" stroke-width="2"/>
+<text x="1412.3333333333335" y="1092" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="600" fill="#5B6270" text-anchor="start">3 청솔 하이츠</text>
+<text x="1412.3333333333335" y="1160" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="48" font-weight="800" fill="#111318" text-anchor="start">19.8억</text>
+</g>
+</g>
+</svg>

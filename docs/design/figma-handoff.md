@@ -12,6 +12,11 @@
 
 예: `SCR-001/portrait/parked/dark`
 
+## 프레임 크기
+
+- 2560×1440 px, Connect-L 12.9인치 기준입니다. 영역 수치는 [layout.md](foundations/layout.md)에 있습니다.
+- 와이어프레임 SVG와 가져오기 방법은 [wireframes/README.md](wireframes/README.md)에 있습니다.
+
 ## 페이지 구성
 
 | 페이지 | 내용 |

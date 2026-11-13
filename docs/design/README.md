@@ -23,3 +23,5 @@ Figma 디자인과 화면 가이드의 입력 문서입니다. [Pleos Connect UI
 | 파일 | 링크 | 담당 |
 |---|---|---|
 | 팀 디자인 파일 | 미정 | - |
+| 와이어프레임 화면 가이드(캔버스, 비공개) | https://claude.ai/artifact/2KA9gccXWjpw8CVjeGRBBZ | - |
+| 와이어프레임 원본 SVG | [wireframes/](wireframes/README.md) | - |

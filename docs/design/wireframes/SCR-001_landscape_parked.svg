@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440">
+<title>SCR-001/landscape/parked/light</title>
+<rect id="display" x="0" y="0" width="2560" height="1440" rx="0" fill="#E9EBEF"/>
+<g id="context (system, not app)">
+<rect x="0" y="0" width="2560" height="112" rx="0" fill="#E1E4E9"/>
+<text x="1280.0" y="70" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">Status bar</text>
+<text x="2512" y="70" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="600" fill="#8A909C" text-anchor="end">10:24</text>
+<rect x="24" y="112" width="789" height="1116" rx="24" fill="#DDE0E6"/>
+<text x="418.5" y="640" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#8A909C" text-anchor="middle">Driving View</text>
+<text x="418.5" y="696" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">시스템 영역 · 앱이 가릴 수 없음</text>
+<rect x="0" y="1252" width="2560" height="188" rx="0" fill="#E1E4E9"/>
+<text x="1280.0" y="1358" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">System dock</text>
+</g>
+<clipPath id="clip-SCR-001 홈"><rect x="837" y="112" width="1699" height="1140" rx="24"/></clipPath>
+<g id="app/SCR-001 홈">
+<rect id="app-window" x="837" y="112" width="1699" height="1140" rx="24" fill="#FFFFFF"/>
+<text x="885" y="190" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="56" font-weight="700" fill="#111318" text-anchor="start">임과 함께</text>
+<text x="885" y="240" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">정자동 · 반경 10km · 실거래 신고 기준 11.13 09:00</text>
+<g id="button/설정">
+<rect x="2268" y="136" width="220" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="2378.0" y="210.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#111318" text-anchor="middle">설정</text>
+</g>
+<g id="button/마이 페이지">
+<rect x="1924" y="136" width="320" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="2084.0" y="210.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#111318" text-anchor="middle">마이 페이지</text>
+</g>
+<g id="ranking/leader-card">
+<rect x="885" y="292" width="1040" height="440" rx="32" fill="#E6ECFD" stroke="#2F5BEA" stroke-width="3"/>
+<path d="M933.0 384.2 L933.0 353.5 L947.2 367.6 L959.0 346.4 L970.8 367.6 L985.0 353.5 L985.0 384.2 Z" fill="#2F5BEA" stroke="#2F5BEA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1001" y="384" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="700" fill="#2F5BEA" text-anchor="start">대장 아파트</text>
+<text x="1877" y="384" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="48" font-weight="700" fill="#2F5BEA" text-anchor="end">1위</text>
+<text x="933" y="502" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="64" font-weight="700" fill="#111318" text-anchor="start">새솔 리버뷰</text>
+<text x="933" y="622" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="96" font-weight="800" fill="#111318" text-anchor="start">24억 5,000</text>
+<text x="933" y="688" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">34평 · 2026.10.21 거래 · 2.4km</text>
+</g>
+<g id="ranking/row-2">
+<rect x="885" y="756" width="1040" height="200" rx="28" fill="#F2F4F7"/>
+<text x="949" y="878" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="64" font-weight="800" fill="#5B6270" text-anchor="middle">2</text>
+<text x="1021" y="848" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="48" font-weight="700" fill="#111318" text-anchor="start">은행나무 파크</text>
+<text x="1021" y="908" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">38평 · 2026.09.30 · 4.1km</text>
+<text x="1877" y="878" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="56" font-weight="700" fill="#111318" text-anchor="end">22억 1,000</text>
+</g>
+<g id="ranking/row-3">
+<rect x="885" y="980" width="1040" height="200" rx="28" fill="#F2F4F7"/>
+<text x="949" y="1102" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="64" font-weight="800" fill="#5B6270" text-anchor="middle">3</text>
+<text x="1021" y="1072" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="48" font-weight="700" fill="#111318" text-anchor="start">청솔 하이츠</text>
+<text x="1021" y="1132" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">33평 · 2026.10.12 · 6.8km</text>
+<text x="1877" y="1102" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="56" font-weight="700" fill="#111318" text-anchor="end">19억 8,000</text>
+</g>
+<g id="side/scrap-change">
+<rect x="1965" y="292" width="523" height="260" rx="28" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="3"/>
+<circle cx="2436" cy="344" r="14" fill="#D93636"/>
+<text x="2005" y="374" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="700" fill="#111318" text-anchor="start">스크랩 변동 2건</text>
+<text x="2005" y="430" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">한빛마을 1단지</text>
+<text x="2005" y="474" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">새 실거래 등록 외 1건</text>
+<text x="2005" y="526" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="700" fill="#2F5BEA" text-anchor="start">확인하기 ›</text>
+</g>
+<g id="side/interest">
+<rect x="1965" y="576" width="523" height="260" rx="28" fill="#F2F4F7"/>
+<text x="2005" y="658" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="700" fill="#111318" text-anchor="start">관심 조건</text>
+<text x="2005" y="714" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">정자동, 수내동</text>
+<text x="2005" y="758" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">10~15억 · 30평대</text>
+<text x="2005" y="810" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="700" fill="#111318" text-anchor="start">오늘 일치 0건</text>
+</g>
+<g id="side/tile-스크랩 8">
+<rect x="1965" y="860" width="523" height="160" rx="28" fill="#F2F4F7"/>
+<text x="2005" y="956" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="700" fill="#111318" text-anchor="start">스크랩 8</text>
+<text x="2448" y="956" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="48" font-weight="700" fill="#5B6270" text-anchor="end">›</text>
+</g>
+<g id="side/tile-지난 주행 요약">
+<rect x="1965" y="1044" width="523" height="160" rx="28" fill="#F2F4F7"/>
+<text x="2005" y="1140" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="700" fill="#111318" text-anchor="start">지난 주행 요약</text>
+<text x="2448" y="1140" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="48" font-weight="700" fill="#5B6270" text-anchor="end">›</text>
+</g>
+</g>
+</svg>

@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440">
+<title>SCR-003/landscape/parked/light</title>
+<rect id="display" x="0" y="0" width="2560" height="1440" rx="0" fill="#E9EBEF"/>
+<g id="context (system, not app)">
+<rect x="0" y="0" width="2560" height="112" rx="0" fill="#E1E4E9"/>
+<text x="1280.0" y="70" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">Status bar</text>
+<text x="2512" y="70" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="600" fill="#8A909C" text-anchor="end">10:24</text>
+<rect x="24" y="112" width="789" height="1116" rx="24" fill="#DDE0E6"/>
+<text x="418.5" y="640" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#8A909C" text-anchor="middle">Driving View</text>
+<text x="418.5" y="696" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">시스템 영역 · 앱이 가릴 수 없음</text>
+<rect x="0" y="1252" width="2560" height="188" rx="0" fill="#E1E4E9"/>
+<text x="1280.0" y="1358" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">System dock</text>
+</g>
+<clipPath id="clip-SCR-003 관심 조건"><rect x="837" y="112" width="1699" height="1140" rx="24"/></clipPath>
+<g id="app/SCR-003 관심 조건">
+<rect id="app-window" x="837" y="112" width="1699" height="1140" rx="24" fill="#FFFFFF"/>
+<text x="885" y="190" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="56" font-weight="700" fill="#111318" text-anchor="start">어떤 집을 함께 찾고 있나요?</text>
+<text x="885" y="240" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">조건은 주차 중에 언제든 바꿀 수 있어요</text>
+<g id="button/나중에 할게요">
+<rect x="2168" y="136" width="320" height="120" rx="0" fill="none"/>
+<text x="2328.0" y="210.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#5B6270" text-anchor="middle">나중에 할게요</text>
+</g>
+<g id="condition/동네">
+<text x="885" y="376" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="44" font-weight="700" fill="#111318" text-anchor="start">동네</text>
+<text x="885" y="424" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#5B6270" text-anchor="start">주변 추천</text>
+<g id="chip/정자동">
+<rect x="1185" y="312" width="244" height="120" rx="60" fill="#E6ECFD" stroke="#2F5BEA" stroke-width="3"/>
+<path d="M1219 372.0 L1231 384.0 L1251 360.0" fill="none" stroke="#2F5BEA" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1269" y="386.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#2F5BEA" text-anchor="start">정자동</text>
+</g>
+<g id="chip/수내동">
+<rect x="1453" y="312" width="244" height="120" rx="60" fill="#E6ECFD" stroke="#2F5BEA" stroke-width="3"/>
+<path d="M1487 372.0 L1499 384.0 L1519 360.0" fill="none" stroke="#2F5BEA" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1537" y="386.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#2F5BEA" text-anchor="start">수내동</text>
+</g>
+<g id="chip/서현동">
+<rect x="1721" y="312" width="200" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="1761" y="386.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="400" fill="#111318" text-anchor="start">서현동</text>
+</g>
+<g id="chip/판교동">
+<rect x="1945" y="312" width="200" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="1985" y="386.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="400" fill="#111318" text-anchor="start">판교동</text>
+</g>
+<g id="chip/이매동">
+<rect x="2169" y="312" width="200" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="2209" y="386.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="400" fill="#111318" text-anchor="start">이매동</text>
+</g>
+<g id="button/voice-search">
+<rect x="1185" y="456" width="440" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<rect x="1203.0" y="488.0" width="20" height="32" rx="10" fill="none" stroke="#111318" stroke-width="4"/>
+<path d="M1193.0 510.0 Q1193.0 532.0 1213.0 532.0 Q1233.0 532.0 1233.0 510.0" fill="none" stroke="#111318" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1213.0 532.0 L1213.0 542.0" fill="none" stroke="#111318" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1433.0" y="530.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#111318" text-anchor="middle">음성으로 동네 찾기</text>
+</g>
+</g>
+<line x1="885" y1="604" x2="2488" y2="604" stroke="#D3D7DE" stroke-width="2"/>
+<g id="condition/가격대">
+<text x="885" y="696" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="44" font-weight="700" fill="#111318" text-anchor="start">가격대</text>
+<text x="885" y="744" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#5B6270" text-anchor="start">여러 개 선택</text>
+<g id="chip/5억 이하">
+<rect x="1185" y="632" width="236" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="1225" y="706.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="400" fill="#111318" text-anchor="start">5억 이하</text>
+</g>
+<g id="chip/5~10억">
+<rect x="1445" y="632" width="215" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="1485" y="706.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="400" fill="#111318" text-anchor="start">5~10억</text>
+</g>
+<g id="chip/10~15억">
+<rect x="1684" y="632" width="283" height="120" rx="60" fill="#E6ECFD" stroke="#2F5BEA" stroke-width="3"/>
+<path d="M1718 692.0 L1730 704.0 L1750 680.0" fill="none" stroke="#2F5BEA" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1768" y="706.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#2F5BEA" text-anchor="start">10~15억</text>
+</g>
+<g id="chip/15~20억">
+<rect x="1991" y="632" width="239" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="2031" y="706.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="400" fill="#111318" text-anchor="start">15~20억</text>
+</g>
+<g id="chip/20억 이상">
+<rect x="1185" y="776" width="260" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="1225" y="850.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="400" fill="#111318" text-anchor="start">20억 이상</text>
+</g>
+</g>
+<line x1="885" y1="924" x2="2488" y2="924" stroke="#D3D7DE" stroke-width="2"/>
+<g id="condition/평수">
+<text x="885" y="1016" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="44" font-weight="700" fill="#111318" text-anchor="start">평수</text>
+<text x="885" y="1064" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#5B6270" text-anchor="start">여러 개 선택</text>
+<g id="chip/20평 미만">
+<rect x="1185" y="952" width="260" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="1225" y="1026.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="400" fill="#111318" text-anchor="start">20평 미만</text>
+</g>
+<g id="chip/20평대">
+<rect x="1469" y="952" width="208" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="1509" y="1026.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="400" fill="#111318" text-anchor="start">20평대</text>
+</g>
+<g id="chip/30평대">
+<rect x="1701" y="952" width="252" height="120" rx="60" fill="#E6ECFD" stroke="#2F5BEA" stroke-width="3"/>
+<path d="M1735 1012.0 L1747 1024.0 L1767 1000.0" fill="none" stroke="#2F5BEA" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="1785" y="1026.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#2F5BEA" text-anchor="start">30평대</text>
+</g>
+<g id="chip/40평 이상">
+<rect x="1977" y="952" width="260" height="120" rx="60" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="3"/>
+<text x="2017" y="1026.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="400" fill="#111318" text-anchor="start">40평 이상</text>
+</g>
+</g>
+<g id="footer">
+<text x="885" y="1176" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="36" font-weight="600" fill="#5B6270" text-anchor="start">정자동, 수내동 · 10~15억 · 30평대</text>
+<g id="button/이 조건으로 시작">
+<rect x="2008" y="1084" width="480" height="120" rx="60" fill="#2F5BEA"/>
+<text x="2248.0" y="1158.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#FFFFFF" text-anchor="middle">이 조건으로 시작</text>
+</g>
+</g>
+</g>
+</svg>

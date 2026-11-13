@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440">
+<title>SCR-007/landscape/parked/light</title>
+<rect id="display" x="0" y="0" width="2560" height="1440" rx="0" fill="#E9EBEF"/>
+<g id="context (system, not app)">
+<rect x="0" y="0" width="2560" height="112" rx="0" fill="#E1E4E9"/>
+<text x="1280.0" y="70" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">Status bar</text>
+<text x="2512" y="70" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="600" fill="#8A909C" text-anchor="end">10:24</text>
+<rect x="24" y="112" width="789" height="1116" rx="24" fill="#DDE0E6"/>
+<text x="418.5" y="640" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#8A909C" text-anchor="middle">Driving View</text>
+<text x="418.5" y="696" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">시스템 영역 · 앱이 가릴 수 없음</text>
+<rect x="0" y="1252" width="2560" height="188" rx="0" fill="#E1E4E9"/>
+<text x="1280.0" y="1358" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="400" fill="#8A909C" text-anchor="middle">System dock</text>
+</g>
+<clipPath id="clip-SCR-007 스크랩"><rect x="837" y="112" width="1699" height="1140" rx="24"/></clipPath>
+<g id="app/SCR-007 스크랩">
+<rect id="app-window" x="837" y="112" width="1699" height="1140" rx="24" fill="#FFFFFF"/>
+<g id="app-bar/back">
+<rect x="869" y="136" width="120" height="120" rx="60" fill="#F2F4F7"/>
+<path d="M939 170 L913 196 L939 222" fill="none" stroke="#111318" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<text x="1021" y="216" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="56" font-weight="700" fill="#111318" text-anchor="start">스크랩</text>
+<g id="filter">
+<rect x="1848" y="144" width="640" height="112" rx="56" fill="#F2F4F7"/>
+<rect x="1856" y="152" width="312" height="96" rx="48" fill="#FFFFFF" stroke="#D3D7DE" stroke-width="2"/>
+<text x="2012" y="214" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="36" font-weight="700" fill="#111318" text-anchor="middle">전체 8</text>
+<text x="2328" y="214" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="36" font-weight="400" fill="#5B6270" text-anchor="middle">변동 있음 2</text>
+</g>
+<g id="item/한빛마을 1단지">
+<rect x="885" y="288" width="1603" height="168" rx="28" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="3"/>
+<circle cx="929" cy="372" r="12" fill="#D93636"/>
+<text x="965" y="364" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="48" font-weight="700" fill="#111318" text-anchor="start">한빛마을 1단지</text>
+<text x="965" y="420" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">정자동 · 34평 · 10.28 스크랩</text>
+<text x="2400" y="392" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="52" font-weight="700" fill="#111318" text-anchor="end">15억 8,000</text>
+<rect x="1902.96" y="344" width="177" height="64" rx="32" fill="#E6ECFD"/>
+<text x="1991.46" y="387.52" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="600" fill="#2F5BEA" text-anchor="middle">새 실거래</text>
+</g>
+<g id="item/모아뜰 2단지">
+<rect x="885" y="472" width="1603" height="168" rx="28" fill="#FFFFFF" stroke="#2F5BEA" stroke-width="3"/>
+<circle cx="929" cy="556" r="12" fill="#D93636"/>
+<text x="965" y="548" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="48" font-weight="700" fill="#111318" text-anchor="start">모아뜰 2단지</text>
+<text x="965" y="604" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">수내동 · 32평 · 10.21 스크랩</text>
+<text x="2400" y="576" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="52" font-weight="700" fill="#111318" text-anchor="end">13억 4,000</text>
+<rect x="1806.32" y="528" width="274" height="64" rx="32" fill="#FDECEC"/>
+<text x="1943.32" y="571.52" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="600" fill="#D93636" text-anchor="middle">가격 ▲ 2,000만</text>
+</g>
+<g id="item/새솔 리버뷰">
+<rect x="885" y="656" width="1603" height="168" rx="28" fill="#F2F4F7"/>
+<text x="965" y="732" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="48" font-weight="700" fill="#111318" text-anchor="start">새솔 리버뷰</text>
+<text x="965" y="788" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">정자동 · 34평 · 11.02 스크랩</text>
+<text x="2400" y="760" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="52" font-weight="700" fill="#111318" text-anchor="end">24억 5,000</text>
+</g>
+<g id="item/청솔 하이츠">
+<rect x="885" y="840" width="1603" height="168" rx="28" fill="#F2F4F7"/>
+<text x="965" y="916" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="48" font-weight="700" fill="#111318" text-anchor="start">청솔 하이츠</text>
+<text x="965" y="972" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">서현동 · 33평 · 10.15 스크랩</text>
+<text x="2400" y="944" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="52" font-weight="700" fill="#111318" text-anchor="end">19억 8,000</text>
+</g>
+<g id="item/은행나무 파크">
+<rect x="885" y="1024" width="1603" height="168" rx="28" fill="#F2F4F7"/>
+<text x="965" y="1100" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="48" font-weight="700" fill="#111318" text-anchor="start">은행나무 파크</text>
+<text x="965" y="1156" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="32" font-weight="400" fill="#5B6270" text-anchor="start">이매동 · 38평 · 09.30 스크랩</text>
+<text x="2400" y="1128" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="52" font-weight="700" fill="#111318" text-anchor="end">22억 1,000</text>
+</g>
+</g>
+</svg>
