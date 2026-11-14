@@ -11,8 +11,11 @@ import com.potatoes.book5.realestate.domain.model.PriceRange
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
 import com.potatoes.book5.realestate.domain.port.InterestRepository
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
@@ -25,6 +28,17 @@ class PreferenceConsentRepository(
     private val prefs: SharedPreferences,
     private val io: CoroutineDispatcher,
 ) : ConsentRepository {
+
+    override fun observe(): Flow<ConsentSettings?> = callbackFlow {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == KEY_DECIDED || key == KEY_LOCATION || key == KEY_ALERT_INTEREST || key == KEY_ALERT_LEADER) {
+                trySend(Unit)
+            }
+        }
+        prefs.registerOnSharedPreferenceChangeListener(listener)
+        trySend(Unit)
+        awaitClose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
+    }.map { get() }.distinctUntilChanged()
 
     override suspend fun get(): ConsentSettings? = withContext(io) {
         if (!prefs.getBoolean(KEY_DECIDED, false)) return@withContext null

@@ -7,6 +7,7 @@ import java.time.YearMonth
 /** 한 번의 실거래. 가격은 만원 단위. */
 data class Deal(
     val date: LocalDate,
+    /** 전용면적(㎡)을 평으로 환산한 값 */
     val areaPyeong: Int,
     val floor: Int,
     val priceManwon: Long,
@@ -48,22 +49,23 @@ data class Scrap(
 
 data class PricePoint(val month: YearMonth, val priceManwon: Long)
 
-/** 아파트 상세(SCR-002). 실거래가 API(T-005) 연결 전에는 샘플 데이터다. */
+/** 아파트 상세(SCR-002). 제공되지 않는 단지 메타데이터는 null로 둔다. */
 data class ApartmentDetail(
     val id: String,
     val name: String,
     val district: String,
     val neighborhood: String,
-    val households: Int,
-    val builtYear: Int,
-    val minPyeong: Int,
-    val maxPyeong: Int,
-    /** 현재 차량과의 거리. 위치를 모르면 null */
+    val households: Int?,
+    val builtYear: Int?,
+    /** 전용면적을 환산한 평형 범위. 면적 정보가 없으면 null */
+    val minPyeong: Int?,
+    val maxPyeong: Int?,
+    /** 화면에 명시한 기준점과의 직선거리. 좌표를 모르면 null */
     val distanceKm: Double?,
     val latestDeal: Deal,
     /** 최근 거래 직전의 거래. 첫 거래면 null */
     val previousDeal: Deal?,
-    /** 최근 1년 월별 실거래가 */
+    /** 조회기간 내 실제 월별 거래값. 제공된 월만 포함 */
     val trend: List<PricePoint>,
     /** 최근 거래 3건 */
     val recentDeals: List<Deal>,

@@ -98,7 +98,7 @@ private fun AppBar(state: DetailState, onIntent: (DetailIntent) -> Unit) {
             if (detail != null) {
                 Text(text = detail.name, style = MaterialTheme.typography.headlineLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
-                    text = stringResource(R.string.detail_meta, detail.district, detail.neighborhood, formatCount(detail.households), detail.builtYear),
+                    text = stringResource(R.string.detail_meta, detail.district, detail.neighborhood),
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Normal),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -170,14 +170,23 @@ private fun TrendCard(trend: List<PricePoint>, modifier: Modifier) {
         Column(Modifier.padding(40.wpx)) {
             Text(text = stringResource(R.string.detail_trend_title), style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
             Spacer(Modifier.height(32.wpx))
-            // 차트는 추세만 보여 주는 단순 선 그래프다(SCR-002 차트 단순화). 정확한 값은 최근 거래 목록에서 읽는다.
+            if (trend.size < 2) {
+                Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = stringResource(R.string.detail_trend_insufficient),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.onSurfaceVariant,
+                    )
+                }
+                return@Column
+            }
+            // API에서 받은 월별 실제 거래값만 연결한다. 정확한 거래는 아래 목록에 표시한다.
             val line = colors.outline
             val accent = colors.primary
             Canvas(Modifier.fillMaxWidth().weight(1f).clearAndSetSemantics {}) {
                 val rows = 4
                 val gap = size.height / (rows - 1)
                 repeat(rows) { i -> drawLine(line, Offset(0f, gap * i), Offset(size.width, gap * i), strokeWidth = 2.wpx.toPx()) }
-                if (trend.size < 2) return@Canvas
                 val min = trend.minOf { it.priceManwon }
                 val max = trend.maxOf { it.priceManwon }
                 val span = (max - min).coerceAtLeast(1)
@@ -210,9 +219,26 @@ private fun InfoColumn(detail: ApartmentDetail, modifier: Modifier) {
         Text(text = stringResource(R.string.detail_info), style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(16.wpx))
         Divider()
-        InfoRow(stringResource(R.string.detail_households), stringResource(R.string.detail_households_value, formatCount(detail.households)))
-        InfoRow(stringResource(R.string.detail_built), stringResource(R.string.detail_built_value, detail.builtYear))
-        InfoRow(stringResource(R.string.detail_pyeong), stringResource(R.string.detail_pyeong_value, detail.minPyeong, detail.maxPyeong))
+        InfoRow(
+            stringResource(R.string.detail_households),
+            detail.households?.let { stringResource(R.string.detail_households_value, formatCount(it)) }
+                ?: stringResource(R.string.detail_info_unknown),
+        )
+        InfoRow(
+            stringResource(R.string.detail_built),
+            detail.builtYear?.let { stringResource(R.string.detail_built_value, it) }
+                ?: stringResource(R.string.detail_info_unknown),
+        )
+        val minPyeong = detail.minPyeong
+        val maxPyeong = detail.maxPyeong
+        val pyeong = when {
+            minPyeong != null && maxPyeong != null && minPyeong != maxPyeong ->
+                stringResource(R.string.detail_pyeong_value, minPyeong, maxPyeong)
+            minPyeong != null -> stringResource(R.string.detail_pyeong_single, minPyeong)
+            maxPyeong != null -> stringResource(R.string.detail_pyeong_single, maxPyeong)
+            else -> stringResource(R.string.detail_info_unknown)
+        }
+        InfoRow(stringResource(R.string.detail_pyeong), pyeong)
         InfoRow(
             stringResource(R.string.detail_distance),
             detail.distanceKm?.let { formatDistance(it) } ?: stringResource(R.string.detail_distance_unknown),

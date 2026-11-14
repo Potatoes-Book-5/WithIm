@@ -64,21 +64,29 @@ private const val TOP_PADDING_RATIO = 0.48f
 private val OtherDot = Color(0xFFA9AFBA)
 
 /**
- * SCR-009 주행 지도. 네이버 지도 클라이언트 ID와 차량 위치가 있으면 네이버 지도를, 없으면 간이 지도를 그린다(ADR-004).
+ * SCR-009 주행 지도. 위치 또는 네이버 지도를 쓸 수 없으면 상태를 표시한다.
  */
 @Composable
 fun DrivingMap(state: DrivingScreenState, naverMapAvailable: Boolean, modifier: Modifier = Modifier) {
     val vehicle = state.vehicle
-    if (vehicle != null && naverMapAvailable) {
-        NaverDrivingMap(vehicle, state.ranking, state.interestMatches, state.others, modifier)
-    } else {
-        SchematicMap(state.ranking, state.interestMatches, state.others, modifier)
+    if (vehicle == null || !naverMapAvailable) {
+        Surface(modifier = modifier, shape = RoundedCornerShape(28.wpx), color = MaterialTheme.colorScheme.surfaceVariant) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text(
+                    text = stringResource(if (vehicle == null) R.string.driving_location_waiting else R.string.driving_map_unavailable),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        return
     }
+    NaverDrivingMap(vehicle, state.ranking, state.interestMatches, state.others, modifier)
 }
 
 /**
  * 네이버 지도 위에 차량, 순위 핀, 관심 매물, 그 밖의 단지, 거리 원을 그린다.
- * 진행 방향이 위이고, 주행 중 조작을 막기 위해 모든 제스처와 컨트롤을 끈다. 카메라는 애니메이션 없이 바꾼다(DD-005).
+ * 진행 방향이 확인되면 그 방향을 위로, 없으면 북쪽을 위로 둔다. 주행 중 조작을 막기 위해 모든 제스처와 컨트롤을 끈다. 카메라는 애니메이션 없이 바꾼다(DD-005).
  */
 @Composable
 private fun NaverDrivingMap(
@@ -144,16 +152,18 @@ private fun NaverDrivingMap(
         val heightPx = constraints.maxHeight
         // 차량에서 위쪽(높이의 0.74)과 좌우(너비의 0.5) 중 짧은 쪽에 반경이 들어오게 한다.
         val visibleDp = with(density) { min(widthPx * 0.5f, heightPx * 0.74f).toDp().value }
+        val visibleRadius = maxOf(VISIBLE_RADIUS_METERS,
+            (ranking.maxOfOrNull { it.distanceKm } ?: 0.0) * 1_000.0 + 500.0)
 
         AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize())
 
         val map = naverMap
         if (map != null) {
-            DisposableEffect(map, vehicle, widthPx, heightPx) {
+            DisposableEffect(map, vehicle, widthPx, heightPx, visibleRadius) {
                 map.setContentPadding(0, (heightPx * TOP_PADDING_RATIO).toInt(), 0, 0)
                 map.moveCamera(
                     CameraUpdate.toCameraPosition(
-                        CameraPosition(vehicle.location.toLatLng(), zoomFor(Projection.getMetersPerDp(vehicle.location.latitude, 0.0), visibleDp), 0.0, vehicle.headingDeg),
+                        CameraPosition(vehicle.location.toLatLng(), zoomFor(Projection.getMetersPerDp(vehicle.location.latitude, 0.0), visibleDp, visibleRadius), 0.0, vehicle.headingDeg ?: 0.0),
                     ).animate(CameraAnimation.None),
                 )
                 onDispose { }
@@ -172,7 +182,7 @@ private fun NaverDrivingMap(
             color = MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
         ) {
             Text(
-                text = stringResource(R.string.driving_heading_up),
+                text = stringResource(if (vehicle.headingDeg == null) R.string.driving_north_up else R.string.driving_heading_up),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.wpx, vertical = 8.wpx),
@@ -215,8 +225,8 @@ private fun NaverMap.applyDrivingSettings() {
  * [visibleDp] 길이에 [VISIBLE_RADIUS_METERS]가 들어가는 줌. 줌이 1 오를 때마다 dp당 미터가 절반이 된다.
  * @param metersPerDpAtZoom0 차량 위도에서 줌 0의 dp당 미터(`Projection.getMetersPerDp`)
  */
-internal fun zoomFor(metersPerDpAtZoom0: Double, visibleDp: Float): Double {
-    val wantedMetersPerDp = VISIBLE_RADIUS_METERS / visibleDp
+internal fun zoomFor(metersPerDpAtZoom0: Double, visibleDp: Float, radiusMeters: Double = VISIBLE_RADIUS_METERS): Double {
+    val wantedMetersPerDp = radiusMeters / visibleDp
     return ln(metersPerDpAtZoom0 / wantedMetersPerDp) / ln(2.0)
 }
 
@@ -262,7 +272,7 @@ private fun buildOverlays(
             }
         }
     }
-    val car = marker(vehicle.location, images.vehicle, z = 20)
+    val car = marker(vehicle.location, if (vehicle.headingDeg == null) images.vehiclePosition else images.vehicle, z = 20)
     return circles + dots + interests + pins + car
 }
 
@@ -320,6 +330,15 @@ private class MarkerImages(private val colors: MarkerColors, private val sizes: 
                 close()
             }
             canvas.drawPath(arrow, fill(colors.accent))
+        }
+    }
+
+    val vehiclePosition: OverlayImage by lazy {
+        draw(sizes.vehicle, sizes.vehicle) { canvas, w, _ ->
+            val c = w / 2
+            canvas.drawCircle(c, c, c, fill(withAlpha(colors.accent, 0.15f)))
+            canvas.drawCircle(c, c, w * 0.32f, fill(colors.accent))
+            canvas.drawCircle(c, c, w * 0.16f, fill(colors.ground))
         }
     }
 

@@ -46,7 +46,7 @@ private val MapPark = Color(0xFFE3EDE3)
 private val MapDot = Color(0xFFA9AFBA)
 
 /**
- * 네이버 지도(ADR-004)를 쓸 수 없을 때의 간이 지도. 클라이언트 ID나 차량 위치가 없으면 [DrivingMap]이 이 지도를 그린다.
+ * 디자인 Preview용 간이 지도. 실제 앱의 [DrivingMap]은 위치나 네이버 지도가 없을 때 상태 메시지를 표시한다.
  * 진행 방향이 위쪽이고 차량은 아래쪽 3/4 지점에 고정한다. 배경 도로는 장식이며 실제 도로가 아니다.
  */
 @Composable
