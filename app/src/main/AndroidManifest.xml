@@ -9,8 +9,8 @@
     -->
     <!-- FusedLocation 위치 수신(F-001, T-029). protection level dangerous라 SCR-006 동의 저장 후 런타임에 요청한다. -->
     <uses-permission android:name="pleos.car.permission.FUSED_LOCATION" />
-    <!-- 기어 상태 조회·구독(T-034). Gear API의 @RequiresPermission 값. 공식 샘플 앱은 normal 보호 수준이라 런타임 요청이 없다. -->
-    <uses-permission android:name="pleos.car.permission.CAR_DRIVE" />
+    <!-- 기어 상태(AAOS GEAR_SELECTION, T-034). normal 보호 수준이라 런타임 요청이 없다. -->
+    <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
 
     <application
         android:name=".RealEstateApplication"
