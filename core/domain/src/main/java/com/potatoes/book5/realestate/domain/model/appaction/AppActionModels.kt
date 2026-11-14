@@ -2,7 +2,7 @@ package com.potatoes.book5.realestate.domain.model.appaction
 
 enum class AreaTargetKind { CURRENT_LOCATION, LAST_REFERENCED_AREA, NAMED_AREA }
 data class AreaTarget(val kind: AreaTargetKind, val query: String? = null)
-data class AppCallContext(val requestId: String, val appSessionId: String, val profileScope: String)
+data class AppCallContext(val requestId: String, val appSessionId: String, val profileScope: String, val voice: VoiceContextSnapshot? = null)
 data class ResolvedArea(val id: String, val name: String)
 enum class ExecutionMode { DUMMY }
 data class ResultMetadata(
