@@ -10,15 +10,23 @@ import androidx.room.RoomDatabase
  * 앱 로컬 DB(ADR-005). 스키마는 app/schemas에 내보낸다.
  * 버전을 올릴 때는 마이그레이션을 함께 추가한다.
  * - v2(T-017): scraps에 households, built_year 추가(값 없음으로 시작)
+ * - v3(T-018): 주행 요약 테이블 4개 추가
  */
 @Database(
-    entities = [ScrapEntity::class],
-    version = 2,
+    entities = [
+        ScrapEntity::class,
+        DriveSessionEntity::class,
+        DriveRankEntity::class,
+        DriveLeaderChangeEntity::class,
+        DrivePassedInterestEntity::class,
+    ],
+    version = 3,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3)],
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun scrapDao(): ScrapDao
+    abstract fun driveDao(): DriveDao
 
     companion object {
         const val NAME = "im_with_you.db"

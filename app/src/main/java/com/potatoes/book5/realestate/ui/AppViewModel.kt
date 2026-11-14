@@ -6,8 +6,10 @@ import com.potatoes.book5.realestate.domain.model.DrivingState
 import com.potatoes.book5.realestate.domain.model.OnboardingStep
 import com.potatoes.book5.realestate.domain.usecase.GetOnboardingStepUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveDrivingStateUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveUnseenDriveSummaryUseCase
 import com.potatoes.book5.realestate.domain.usecase.RefreshScrapChangesUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateAreaChangeUseCase
+import com.potatoes.book5.realestate.domain.usecase.SimulateDriveEndUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateDrivingUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateNewDealsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +30,8 @@ sealed interface Screen {
     data class Detail(val apartmentId: String) : Screen
     /** SCR-010 */
     data object MyPage : Screen
+    /** SCR-008. sessionId가 null이면 가장 최근 요약 */
+    data class DriveSummary(val sessionId: Long? = null) : Screen
 }
 
 data class AppState(
@@ -53,6 +57,7 @@ sealed interface AppIntent {
     data class DevSetDriving(val driving: Boolean) : AppIntent
     data object DevMoveToNextArea : AppIntent
     data object DevPublishNewDeals : AppIntent
+    data object DevEndDrive : AppIntent
 }
 
 sealed interface AppResult {
@@ -61,6 +66,8 @@ sealed interface AppResult {
     data class Push(val screen: Screen) : AppResult
     data object Pop : AppResult
     data class DrivingChanged(val state: DrivingState) : AppResult
+    /** 확인하지 않은 주행 요약이 생겼다(F-009 규칙 3). */
+    data class SummaryReady(val sessionId: Long) : AppResult
 }
 
 internal fun reduceApp(state: AppState, result: AppResult): AppState = when (result) {
@@ -78,6 +85,9 @@ internal fun reduceApp(state: AppState, result: AppResult): AppState = when (res
     is AppResult.Push -> if (state.current == result.screen) state else state.copy(stack = state.stack + result.screen)
     AppResult.Pop -> if (state.canGoBack) state.copy(stack = state.stack.dropLast(1)) else state
     is AppResult.DrivingChanged -> state.copy(drivingState = result.state)
+    // 온보딩 중에는 띄우지 않는다. 이미 요약 화면이면 다시 쌓지 않는다.
+    is AppResult.SummaryReady -> if (!state.onboardingDone || state.current is Screen.DriveSummary) state
+        else state.copy(stack = state.stack + Screen.DriveSummary(result.sessionId))
 }
 
 class AppViewModel(
@@ -87,6 +97,8 @@ class AppViewModel(
     private val simulateDriving: SimulateDrivingUseCase,
     private val simulateAreaChange: SimulateAreaChangeUseCase,
     private val simulateNewDeals: SimulateNewDealsUseCase,
+    private val observeUnseenDriveSummary: ObserveUnseenDriveSummaryUseCase,
+    private val simulateDriveEnd: SimulateDriveEndUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AppState())
@@ -97,6 +109,10 @@ class AppViewModel(
         viewModelScope.launch { observeDrivingState().collect { apply(AppResult.DrivingChanged(it)) } }
         // 앱을 실행할 때 스크랩 단지의 변동을 확인한다(F-008 규칙 4).
         viewModelScope.launch { refreshScrapChanges() }
+        // 주행 요약이 생기면 주차 중 화면 위에 띄운다. 앱이 꺼져 있었다면 다음 실행 때 띄운다(S-009).
+        viewModelScope.launch {
+            observeUnseenDriveSummary().collect { id -> if (id != null) apply(AppResult.SummaryReady(id)) }
+        }
     }
 
     fun onIntent(intent: AppIntent) {
@@ -108,6 +124,7 @@ class AppViewModel(
             is AppIntent.DevSetDriving -> simulateDriving(intent.driving)
             AppIntent.DevMoveToNextArea -> simulateAreaChange()
             AppIntent.DevPublishNewDeals -> viewModelScope.launch { simulateNewDeals() }
+            AppIntent.DevEndDrive -> simulateDriveEnd()
         }
     }
 

@@ -82,7 +82,6 @@
     <string name="scrap_price_down">가격 하락</string>
     <string name="scrap_rank_change">순위 변동</string>
     <string name="coming_soon_settings">설정은 준비 중이에요</string>
-    <string name="coming_soon_drive_summary">주행 요약은 준비 중이에요</string>
 
     <!-- 공통 -->
     <string name="back">뒤로</string>
@@ -147,6 +146,22 @@
     <string name="my_page_needs_condition">조건을 정하면 스크랩한 단지가 얼마나 맞는지 비교해 드려요</string>
     <string name="my_page_no_scraps">아직 스크랩한 단지가 없어요. 단지 상세에서 스크랩하면 여기서 비교해 드려요</string>
 
+    <!-- SCR-008 주행 요약 -->
+    <string name="summary_title_today">오늘의 임장 요약</string>
+    <string name="summary_title_date">%1$d월 %2$d일 임장 요약</string>
+    <string name="summary_date">%1$d월 %2$d일</string>
+    <string name="summary_duration_short">1분 미만</string>
+    <string name="summary_duration_minutes">%d분</string>
+    <string name="summary_duration_hours">%1$d시간 %2$d분</string>
+    <string name="summary_close">닫기</string>
+    <string name="summary_final_ranking">최종 순위 · 반경 %dkm</string>
+    <string name="summary_leader_changes">대장 교체 %d회</string>
+    <string name="summary_no_leader_change">대장 교체 없음</string>
+    <string name="summary_passed">지나친 관심 매물 %d</string>
+    <string name="summary_passed_empty">이번 주행에서 지나친 관심 매물이 없어요</string>
+    <string name="summary_open_scraps">스크랩 목록 보기 ›</string>
+    <string name="summary_empty">아직 주행 기록이 없어요. 주행을 마치면 순위와 지나친 관심 매물을 정리해 드려요</string>
+
     <!-- SCR-004, SCR-009, SCR-005 주행 중 -->
     <string name="driving_mode_rank">순위</string>
     <string name="driving_mode_map">지도</string>
@@ -170,4 +185,5 @@
     <string name="dev_park">주차</string>
     <string name="dev_next_area">지역 이동(대장 교체)</string>
     <string name="dev_new_deals">새 실거래(스크랩)</string>
+    <string name="dev_end_drive">주행 종료(요약)</string>
 </resources>

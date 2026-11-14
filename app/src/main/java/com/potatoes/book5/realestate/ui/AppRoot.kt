@@ -20,6 +20,7 @@ import com.potatoes.book5.realestate.ui.home.HomeRoute
 import com.potatoes.book5.realestate.ui.interest.InterestRoute
 import com.potatoes.book5.realestate.ui.mypage.MyPageRoute
 import com.potatoes.book5.realestate.ui.scrap.ScrapListRoute
+import com.potatoes.book5.realestate.ui.summary.DriveSummaryRoute
 
 @Composable
 fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)) {
@@ -60,6 +61,9 @@ fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)
                 Screen.MyPage -> ProvideScreenStore(stores, currentKey) {
                     MyPageRoute(onOpen = open, onBack = onBack)
                 }
+                is Screen.DriveSummary -> ProvideScreenStore(stores, currentKey) {
+                    DriveSummaryRoute(sessionId = screen.sessionId, onOpen = open, onClose = onBack)
+                }
             }
         }
         // 실제 주행 상태 연동 전까지 개발 빌드에서만 주행과 시세 변동을 흉내 낸다.
@@ -69,6 +73,7 @@ fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)
                 onSetDriving = { viewModel.onIntent(AppIntent.DevSetDriving(it)) },
                 onNextArea = { viewModel.onIntent(AppIntent.DevMoveToNextArea) },
                 onPublishNewDeals = { viewModel.onIntent(AppIntent.DevPublishNewDeals) },
+                onEndDrive = { viewModel.onIntent(AppIntent.DevEndDrive) },
                 modifier = Modifier.align(Alignment.TopCenter),
             )
         }

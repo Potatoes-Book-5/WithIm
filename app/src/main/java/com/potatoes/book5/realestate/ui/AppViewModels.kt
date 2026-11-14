@@ -20,6 +20,7 @@ import com.potatoes.book5.realestate.ui.interest.InterestViewModel
 import com.potatoes.book5.realestate.ui.mypage.MyPageViewModel
 import com.potatoes.book5.realestate.ui.scrap.ScrapFilter
 import com.potatoes.book5.realestate.ui.scrap.ScrapListViewModel
+import com.potatoes.book5.realestate.ui.summary.DriveSummaryViewModel
 
 /** AppContainer에서 ViewModel을 만든다. */
 object AppViewModels {
@@ -27,11 +28,17 @@ object AppViewModels {
     val APARTMENT_ID_KEY = object : CreationExtras.Key<String> {}
     val SCRAP_FILTER_KEY = object : CreationExtras.Key<ScrapFilter> {}
     val INTEREST_EDITING_KEY = object : CreationExtras.Key<Boolean> {}
+    val DRIVE_SESSION_KEY = object : CreationExtras.Key<Long> {}
+    /** DRIVE_SESSION_KEY 값. 가장 최근 요약을 뜻한다. */
+    const val LATEST_SESSION = -1L
 
     val Factory: ViewModelProvider.Factory = viewModelFactory {
         initializer {
             val c = container()
-            AppViewModel(c.getOnboardingStep, c.observeDrivingState, c.refreshScrapChanges, c.simulateDriving, c.simulateAreaChange, c.simulateNewDeals)
+            AppViewModel(
+                c.getOnboardingStep, c.observeDrivingState, c.refreshScrapChanges, c.simulateDriving, c.simulateAreaChange,
+                c.simulateNewDeals, c.observeUnseenDriveSummary, c.simulateDriveEnd,
+            )
         }
         initializer { ConsentViewModel(container().saveConsent) }
         initializer {
@@ -54,6 +61,16 @@ object AppViewModels {
             DrivingViewModel(createSavedStateHandle(), c.observeNearbyRanking, c.observeLeaderChanges)
         }
         initializer { MyPageViewModel(container().observeMyPage) }
+        initializer {
+            val c = container()
+            DriveSummaryViewModel(
+                sessionId = this[DRIVE_SESSION_KEY]?.takeIf { it != LATEST_SESSION },
+                observeDriveSummary = c.observeDriveSummary,
+                observeScrappedIds = c.observeScrappedIds,
+                markSeen = c.markDriveSummarySeen,
+                toggleScrapById = c.toggleScrapById,
+            )
+        }
         initializer {
             ScrapListViewModel(this[SCRAP_FILTER_KEY] ?: ScrapFilter.ALL, container().observeScraps)
         }

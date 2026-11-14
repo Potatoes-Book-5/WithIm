@@ -73,7 +73,7 @@ Gradle 모듈은 단일 `app`을 유지하고 계층은 패키지로 구분합�
 ```
 com.potatoes.book5.realestate/
 ├── MainActivity.kt
-├── RealEstateApplication.kt     # AppContainer 보유
+├── RealEstateApplication.kt     # AppContainer 보유, 주행 기록기 실행(앱 프로세스 범위)
 ├── di/AppContainer.kt
 ├── ui/
 │   ├── AppRoot.kt, AppViewModel.kt  # 화면 스택, 주행 상태
@@ -94,7 +94,7 @@ com.potatoes.book5.realestate/
 │   ├── scrap/                   # SCR-007
 │   ├── detail/                  # SCR-002
 │   ├── mypage/                  # SCR-010
-│   └── (예정) summary/
+│   └── summary/                 # SCR-008
 ├── domain/
 │   ├── model/                   # Apartment, RankingSnapshot, InterestCondition, DrivingState, Scrap, ApartmentDetail
 │   ├── policy/                  # 스크랩 변동 판단, 조건 일치율 등 순수 규칙

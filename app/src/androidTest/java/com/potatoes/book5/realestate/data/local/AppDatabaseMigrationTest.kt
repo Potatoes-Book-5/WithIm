@@ -41,6 +41,19 @@ class AppDatabaseMigrationTest {
         db.close()
     }
 
+    @Test
+    fun migrate2To3AddsEmptyDriveTables() {
+        helper.createDatabase(DB, 2).close()
+        val db = helper.runMigrationsAndValidate(DB, 3, true)
+        listOf("drive_sessions", "drive_ranks", "drive_leader_changes", "drive_passed_interests").forEach { table ->
+            db.query("SELECT COUNT(*) FROM $table").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(0, c.getInt(0))
+            }
+        }
+        db.close()
+    }
+
     private companion object {
         const val DB = "migration-test.db"
     }

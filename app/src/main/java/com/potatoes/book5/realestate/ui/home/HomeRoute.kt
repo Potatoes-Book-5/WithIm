@@ -35,7 +35,6 @@ fun HomeRoute(
                 is HomeEffect.ShowComingSoon -> {
                     val text = when (effect.destination) {
                         HomeDestination.SETTINGS -> R.string.coming_soon_settings
-                        HomeDestination.DRIVE_SUMMARY -> R.string.coming_soon_drive_summary
                     }
                     snackbar.currentSnackbarData?.dismiss()
                     snackbar.showSnackbar(context.getString(text))
