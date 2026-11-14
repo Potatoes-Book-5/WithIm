@@ -13,6 +13,7 @@ import com.potatoes.book5.realestate.domain.model.DriveLeaderChange
 import com.potatoes.book5.realestate.domain.model.DriveRank
 import com.potatoes.book5.realestate.domain.model.DriveSummary
 import com.potatoes.book5.realestate.domain.model.PassedInterest
+import com.potatoes.book5.realestate.domain.model.DriveRecommendation
 import java.time.LocalDateTime
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -95,7 +96,13 @@ interface DriveRecordRepository {
     suspend fun openSessionId(): Long?
     suspend fun startSession(at: LocalDateTime, radiusKm: Int): Long
     /** 최종 Top 3를 덮어쓰고, 관심 매물은 더하거나 더 가까운 거리로 바꾸고, 마지막 기록 시각을 갱신한다. */
-    suspend fun recordSnapshot(sessionId: Long, at: LocalDateTime, top: List<DriveRank>, passed: List<PassedInterest>)
+    suspend fun recordSnapshot(
+        sessionId: Long,
+        at: LocalDateTime,
+        top: List<DriveRank>,
+        passed: List<PassedInterest>,
+        recommendations: List<DriveRecommendation> = emptyList(),
+    )
     suspend fun recordLeaderChange(sessionId: Long, change: DriveLeaderChange)
     suspend fun recordRound(
         sessionId: Long, at: LocalDateTime,

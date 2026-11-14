@@ -37,8 +37,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.potatoes.book5.realestate.R
 import com.potatoes.book5.realestate.domain.model.DriveLeaderChange
 import com.potatoes.book5.realestate.domain.model.DriveRank
+import com.potatoes.book5.realestate.domain.model.DriveRecommendation
 import com.potatoes.book5.realestate.domain.model.DriveSummary
 import com.potatoes.book5.realestate.domain.model.PassedInterest
+import com.potatoes.book5.realestate.domain.model.RecommendationKey
 import com.potatoes.book5.realestate.ui.common.CrownIcon
 import com.potatoes.book5.realestate.ui.common.MinTouchHeight
 import com.potatoes.book5.realestate.ui.common.PillButton
@@ -80,6 +82,7 @@ fun DriveSummaryScreen(state: DriveSummaryState, onIntent: (DriveSummaryIntent) 
                     LeaderTimeline(summary.leaderChanges)
                 }
                 PassedInterests(
+                    recommendations = summary.recommendationTop,
                     items = summary.passedInterests,
                     state = state,
                     onIntent = onIntent,
@@ -219,15 +222,14 @@ private fun LeaderTimeline(changes: List<DriveLeaderChange>) {
 
 @Composable
 private fun PassedInterests(
+    recommendations: List<DriveRecommendation>,
     items: List<PassedInterest>,
     state: DriveSummaryState,
     onIntent: (DriveSummaryIntent) -> Unit,
     modifier: Modifier,
 ) {
     Column(modifier) {
-        Text(text = stringResource(R.string.summary_passed, items.size), style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(24.wpx))
-        if (items.isEmpty()) {
+        if (items.isEmpty() && recommendations.isEmpty()) {
             Spacer(Modifier.weight(1f))
         } else {
             LazyColumn(
@@ -235,14 +237,33 @@ private fun PassedInterests(
                 contentPadding = PaddingValues(bottom = 16.wpx),
                 verticalArrangement = Arrangement.spacedBy(24.wpx),
             ) {
-                items(items, key = { it.apartmentId }) { item ->
-                    PassedRow(
-                        item = item,
-                        scrapped = item.apartmentId in state.scrappedIds,
-                        toggling = item.apartmentId in state.togglingIds,
-                        onOpen = { onIntent(DriveSummaryIntent.OpenApartment(item.apartmentId)) },
-                        onToggle = { onIntent(DriveSummaryIntent.ToggleScrap(item.apartmentId)) },
-                    )
+                if (recommendations.isNotEmpty()) {
+                    item(key = "recommendations-title") {
+                        Text(text = stringResource(R.string.summary_recommendations), style = MaterialTheme.typography.titleMedium)
+                    }
+                    items(recommendations, key = { "recommendation-${it.apartmentId}" }) { item ->
+                        RecommendationRow(
+                            item = item,
+                            scrapped = item.apartmentId in state.scrappedIds,
+                            toggling = item.apartmentId in state.togglingIds,
+                            onOpen = { onIntent(DriveSummaryIntent.OpenApartment(item.apartmentId)) },
+                            onToggle = { onIntent(DriveSummaryIntent.ToggleScrap(item.apartmentId)) },
+                        )
+                    }
+                }
+                if (recommendations.isEmpty()) {
+                    item(key = "passed-title") {
+                        Text(text = stringResource(R.string.summary_passed, items.size), style = MaterialTheme.typography.titleMedium)
+                    }
+                    items(items, key = { it.apartmentId }) { item ->
+                        PassedRow(
+                            item = item,
+                            scrapped = item.apartmentId in state.scrappedIds,
+                            toggling = item.apartmentId in state.togglingIds,
+                            onOpen = { onIntent(DriveSummaryIntent.OpenApartment(item.apartmentId)) },
+                            onToggle = { onIntent(DriveSummaryIntent.ToggleScrap(item.apartmentId)) },
+                        )
+                    }
                 }
             }
             Spacer(Modifier.height(24.wpx))
@@ -266,6 +287,74 @@ private fun PassedInterests(
                 .padding(horizontal = 16.wpx, vertical = 36.wpx),
         )
     }
+}
+
+@Composable
+private fun RecommendationRow(
+    item: DriveRecommendation,
+    scrapped: Boolean,
+    toggling: Boolean,
+    onOpen: () -> Unit,
+    onToggle: () -> Unit,
+) {
+    Surface(
+        onClick = onOpen,
+        modifier = Modifier.fillMaxWidth().heightIn(min = 192.wpx),
+        shape = RoundedCornerShape(28.wpx),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+    ) {
+        Row(Modifier.padding(horizontal = 40.wpx, vertical = 24.wpx), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(text = item.name, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = "${recommendationKeyword(item)} · ${formatPrice(item.priceManwon)}",
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Normal),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Spacer(Modifier.width(24.wpx))
+            ScrapToggleButton(scrapped = scrapped, enabled = !toggling, onToggle = onToggle, modifier = Modifier.width(300.wpx))
+        }
+    }
+}
+
+@Composable
+private fun recommendationKeyword(item: DriveRecommendation): String = when (item.mainRecoKey) {
+    RecommendationKey.PRICE -> stringResource(when {
+        item.priceManwon < 50_000 -> R.string.recommendation_keyword_price_under_5
+        item.priceManwon < 100_000 -> R.string.recommendation_keyword_price_5_10
+        item.priceManwon < 150_000 -> R.string.recommendation_keyword_price_10_15
+        item.priceManwon < 200_000 -> R.string.recommendation_keyword_price_15_20
+        else -> R.string.recommendation_keyword_price_over_20
+    })
+    RecommendationKey.AREA -> stringResource(when {
+        item.areaPyeong < 20 -> R.string.recommendation_keyword_area_small
+        item.areaPyeong < 30 -> R.string.recommendation_keyword_area_medium
+        item.areaPyeong < 40 -> R.string.recommendation_keyword_area_preferred
+        else -> R.string.recommendation_keyword_area_large
+    })
+    RecommendationKey.NEIGHBORHOOD -> item.neighborhoodName?.takeIf { it.isNotBlank() }?.let {
+        stringResource(R.string.recommendation_keyword_neighborhood, it)
+    } ?: stringResource(R.string.recommendation_keyword_neighborhood_generic)
+    RecommendationKey.HOUSEHOLDS -> item.households?.let { count ->
+        stringResource(when {
+            count >= 1_000 -> R.string.recommendation_keyword_households_large
+            count >= 500 -> R.string.recommendation_keyword_households_medium
+            count >= 300 -> R.string.recommendation_keyword_households_300
+            else -> R.string.recommendation_keyword_households_near
+        })
+    } ?: stringResource(R.string.recommendation_keyword_households_unknown)
+    RecommendationKey.NEWNESS -> item.builtYear?.let { builtYear ->
+        val age = (LocalDate.now().year - builtYear).coerceAtLeast(0)
+        stringResource(when {
+            age <= 10 -> R.string.recommendation_keyword_newness_new
+            age <= 15 -> R.string.recommendation_keyword_newness_recent
+            else -> R.string.recommendation_keyword_newness_near
+        })
+    } ?: stringResource(R.string.recommendation_keyword_newness_unknown)
 }
 
 @Composable
@@ -313,6 +402,10 @@ private val previewSummary = DriveSummary(
         PassedInterest("m", "모아뜰 2단지", 3.4, 134_000),
     ),
     seen = false,
+    recommendations = listOf(
+        DriveRecommendation("h", "한빛마을 1단지", 158_000, 34, 92, 1.2, RecommendationKey.NEWNESS, "매탄동", builtYear = 2020),
+        DriveRecommendation("m", "모아뜰 2단지", 134_000, 32, 88, 3.4, RecommendationKey.AREA, "망포동"),
+    ),
 )
 
 @Preview(widthDp = 1187, heightDp = 797, showBackground = true)

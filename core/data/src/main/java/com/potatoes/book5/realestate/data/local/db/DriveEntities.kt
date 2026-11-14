@@ -64,6 +64,27 @@ data class DrivePassedInterestEntity(
 )
 
 @Entity(
+    tableName = "drive_recommendations",
+    primaryKeys = ["session_id", "apartment_id"],
+    foreignKeys = [ForeignKey(entity = DriveSessionEntity::class, parentColumns = ["id"], childColumns = ["session_id"], onDelete = ForeignKey.CASCADE)],
+    indices = [Index(value = ["session_id", "score_percent", "closest_km"])],
+)
+data class DriveRecommendationEntity(
+    @ColumnInfo(name = "session_id") val sessionId: Long,
+    @ColumnInfo(name = "apartment_id") val apartmentId: String,
+    @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "price_manwon") val priceManwon: Long,
+    @ColumnInfo(name = "area_pyeong") val areaPyeong: Int,
+    @ColumnInfo(name = "score_percent") val scorePercent: Int,
+    @ColumnInfo(name = "closest_km") val closestKm: Double,
+    /** Stable axis identifier; user-facing keyword mapping is a later presentation rule. */
+    @ColumnInfo(name = "main_reco_key") val mainRecoKey: String,
+    @ColumnInfo(name = "neighborhood_name") val neighborhoodName: String?,
+    @ColumnInfo(name = "households") val households: Int?,
+    @ColumnInfo(name = "built_year") val builtYear: Int?,
+)
+
+@Entity(
     tableName = "drive_region_rounds",
     primaryKeys = ["session_id", "round_id"],
     foreignKeys = [ForeignKey(entity = DriveSessionEntity::class, parentColumns = ["id"],

@@ -3,6 +3,7 @@ package com.potatoes.book5.realestate.fakes
 import com.potatoes.book5.realestate.domain.model.DriveLeaderChange
 import com.potatoes.book5.realestate.domain.model.DriveRank
 import com.potatoes.book5.realestate.domain.model.DriveSummary
+import com.potatoes.book5.realestate.domain.model.DriveRecommendation
 import com.potatoes.book5.realestate.domain.model.PassedInterest
 import com.potatoes.book5.realestate.domain.port.DriveRecordRepository
 import java.time.LocalDateTime
@@ -23,6 +24,7 @@ class FakeDriveRecordRepository : DriveRecordRepository {
         val top: List<DriveRank> = emptyList(),
         val changes: List<DriveLeaderChange> = emptyList(),
         val passed: List<PassedInterest> = emptyList(),
+        val recommendations: List<DriveRecommendation> = emptyList(),
         val seen: Boolean = false,
     )
 
@@ -39,10 +41,22 @@ class FakeDriveRecordRepository : DriveRecordRepository {
         return id
     }
 
-    override suspend fun recordSnapshot(sessionId: Long, at: LocalDateTime, top: List<DriveRank>, passed: List<PassedInterest>) = edit(sessionId) { s ->
+    override suspend fun recordSnapshot(
+        sessionId: Long,
+        at: LocalDateTime,
+        top: List<DriveRank>,
+        passed: List<PassedInterest>,
+        recommendations: List<DriveRecommendation>,
+    ) = edit(sessionId) { s ->
         val merged = s.passed.associateBy { it.apartmentId }.toMutableMap()
         passed.forEach { p -> merged[p.apartmentId] = merged[p.apartmentId]?.let { o -> p.copy(closestKm = minOf(o.closestKm, p.closestKm)) } ?: p }
-        s.copy(top = top, passed = merged.values.toList(), lastRecordedAt = at)
+        val recommendationsById = s.recommendations.associateBy { it.apartmentId }.toMutableMap()
+        recommendations.forEach { r ->
+            recommendationsById[r.apartmentId] = recommendationsById[r.apartmentId]?.let { old ->
+                r.copy(closestKm = minOf(old.closestKm, r.closestKm))
+            } ?: r
+        }
+        s.copy(top = top, passed = merged.values.toList(), recommendations = recommendationsById.values.toList(), lastRecordedAt = at)
     }
 
     override suspend fun recordLeaderChange(sessionId: Long, change: DriveLeaderChange) = edit(sessionId) { it.copy(changes = it.changes + change) }
@@ -52,7 +66,7 @@ class FakeDriveRecordRepository : DriveRecordRepository {
 
     override suspend fun finishSession(sessionId: Long, endedAt: LocalDateTime?): Boolean {
         val s = sessions.value[sessionId] ?: return false
-        if (s.top.isEmpty()) {
+        if (s.top.isEmpty() && s.recommendations.isEmpty()) {
             sessions.update { it - sessionId }
             return false
         }
@@ -76,5 +90,5 @@ class FakeDriveRecordRepository : DriveRecordRepository {
 
     override suspend fun deleteAll() = sessions.update { emptyMap() }
 
-    private fun Session.toSummary() = DriveSummary(id, startedAt, endedAt!!, null, radiusKm, top, changes, passed, seen)
+    private fun Session.toSummary() = DriveSummary(id, startedAt, endedAt!!, null, radiusKm, top, changes, passed, seen, recommendations = recommendations)
 }

@@ -5,7 +5,7 @@
     <string name="alert_leader_detail">최근 실거래가 %1$s · %2$s</string>
     <string name="alert_leader_title">대장 아파트가 바뀌었어요</string>
     <string name="alert_speaking">음성 안내 중</string>
-    <string name="alert_interest_title">관심 조건에 맞는 매물 · %s</string>
+    <string name="alert_interest_title">추천 매물 · %s</string>
     <string name="alert_interest_detail">%1$s · %2$d평</string>
     <string name="alert_interest_scrap">스크랩</string>
     <string name="alert_interest_scrapped">스크랩함</string>

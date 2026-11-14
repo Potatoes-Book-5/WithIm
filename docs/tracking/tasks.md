@@ -40,3 +40,4 @@
 | T-034 | feature | 차량 기어 상태로 주행 중과 주행 완료(P) 판정 | review | - | P1 | F-009, S-005, S-009, SCR-008 | - |
 | T-035 | feature | 주행 화면 DO 선언과 CarUxRestrictions 적용 | review | - | P1 | F-007, S-005, SCR-004, SCR-009 | T-034 |
 | T-036 | fix | 이동 중 조회 취소 감소와 실거래 메모리 캐시 재사용 개선 | review | - | P1 | F-002, F-003, SCR-009 | T-031 |
+| T-037 | feature | 주행 관심 매물 실시간 추천 | doing | - | P1 | F-010, S-011, SCR-008 | T-001, T-005, T-027, T-034, T-036 |
