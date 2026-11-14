@@ -24,6 +24,7 @@
 ## 이 앱에 적용
 
 - 주행 상태 수신은 `vehicle/` 패키지에서 처리하고 domain에는 앱 자체 상태로 전달합니다.
+- 주행 중·주행 완료(`DrivingState`, 화면 전환과 주행 세션)는 Pleos 기어로 정합니다(T-034, [sdk-usage-map.md](sdk-usage-map.md#기어-상태-t-032)). 이 문서의 `CarUxRestrictions`는 기능별 제한 플래그에 쓰며 아직 연결하지 않았습니다.
 
 ## 원문에 없는 항목
 

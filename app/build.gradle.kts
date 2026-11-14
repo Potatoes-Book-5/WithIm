@@ -100,8 +100,8 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:ui"))
     implementation(project(":feature:driving"))
-    // Pleos Connect SDK — 요구사항 확정 후 주석 해제
-    // implementation(libs.pleos.vehicle)
+    // 기어 상태로 주행 중·주행 완료 판정(T-034). 호출은 vehicle/ 패키지에만 둔다.
+    implementation(libs.pleos.vehicle)
     // 차량 위치(F-001, T-029). 호출은 vehicle/ 패키지에만 둔다.
     implementation(libs.pleos.fused.location)
 
