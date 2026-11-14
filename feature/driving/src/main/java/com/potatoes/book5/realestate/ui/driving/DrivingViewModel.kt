@@ -65,8 +65,6 @@ class DrivingViewModel(
                     fromDate = snapshot.periodStart ?: today.minusMonths(1),
                     toDate = snapshot.periodEnd ?: today,
                     loading = snapshot.loading,
-                    rows = snapshot.top.map { DrivingTradeUi(it.apartment.name, it.apartment.priceManwon,
-                        it.apartment.dealDate, it.distanceKm) },
                     error = snapshot.error?.let { error -> when (error) {
                         DomainError.MissingApiKey -> "API 키 설정을 확인해 주세요"
                         DomainError.Offline -> "네트워크에 연결할 수 없어요"

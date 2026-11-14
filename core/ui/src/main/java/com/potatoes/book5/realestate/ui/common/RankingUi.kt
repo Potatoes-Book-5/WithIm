@@ -27,7 +27,10 @@ data class MapPointUi(
     val distanceKm: Double,
     val bearingDeg: Double,
     val location: GeoPoint? = null,
-)
+    val directionKnown: Boolean = true,
+) {
+    val isAhead: Boolean get() = directionKnown && bearingDeg in -90.0..90.0
+}
 
 fun NearbyApartment.toRankItem(rank: Int) = RankItemUi(
     id = apartment.id,
@@ -42,4 +45,4 @@ fun NearbyApartment.toRankItem(rank: Int) = RankItemUi(
     directionKnown = directionKnown,
 )
 
-fun NearbyApartment.toMapPoint() = MapPointUi(apartment.id, apartment.name, distanceKm, bearingDeg, apartment.location)
+fun NearbyApartment.toMapPoint() = MapPointUi(apartment.id, apartment.name, distanceKm, bearingDeg, apartment.location, directionKnown)
