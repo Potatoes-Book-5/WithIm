@@ -68,7 +68,7 @@ import java.time.LocalDate
 /**
  * 주행 중 화면. 와이어프레임:
  * SCR-004_landscape_driving(순위), SCR-009_landscape_driving(지도), SCR-005_landscape_driving(대장 교체 알림)
- * 주행 중에는 Top 3만 크게 보여 주고, 화면 전환 외의 조작은 두지 않는다(DD-002, DG-004).
+ * 순위 보기는 Top 3, 지도 보기는 Top 5를 표시하고 화면 전환 외의 조작은 두지 않는다(DD-002, DG-004).
  */
 @Composable
 fun DrivingScreen(state: DrivingScreenState, onIntent: (DrivingIntent) -> Unit, naverMapAvailable: Boolean = false) {
@@ -252,11 +252,13 @@ private fun MapWithList(state: DrivingScreenState, naverMapAvailable: Boolean) {
         Column(Modifier.width(520.wpx).fillMaxHeight()) {
             Text(stringResource(R.string.driving_list_title, state.radiusKm), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(24.wpx))
-            if (state.ranking.isEmpty()) {
+            if (state.mapRanking.isEmpty()) {
                 TradeStateText(state.actualTrades)
             } else {
-                Column(verticalArrangement = Arrangement.spacedBy(20.wpx)) {
-                    state.ranking.forEach { RankListRow(it) }
+                Column(Modifier.weight(1f, fill = false), verticalArrangement = Arrangement.spacedBy(20.wpx)) {
+                    state.mapRanking.forEach {
+                        RankListRow(it, Modifier.weight(1f, fill = false).height(176.wpx))
+                    }
                 }
             }
             state.interestMatches.firstOrNull()?.let {
@@ -269,10 +271,10 @@ private fun MapWithList(state: DrivingScreenState, naverMapAvailable: Boolean) {
 
 /** SCR-009 순위 목록 행(520×176) */
 @Composable
-private fun RankListRow(item: RankItemUi) {
+private fun RankListRow(item: RankItemUi, modifier: Modifier = Modifier.height(176.wpx)) {
     val leader = item.rank == 1
     Surface(
-        modifier = Modifier.fillMaxWidth().height(176.wpx),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.wpx),
         color = if (leader) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
         contentColor = MaterialTheme.colorScheme.onSurface,
