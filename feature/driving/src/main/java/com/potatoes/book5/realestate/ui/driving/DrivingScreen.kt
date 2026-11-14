@@ -21,6 +21,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -46,6 +49,7 @@ import com.potatoes.book5.realestate.core.ui.R as CoreUiR
 import com.potatoes.book5.realestate.ui.common.CrownIcon
 import com.potatoes.book5.realestate.ui.common.MapPointUi
 import com.potatoes.book5.realestate.ui.common.MinTouchHeight
+import com.potatoes.book5.realestate.ui.common.PillButton
 import com.potatoes.book5.realestate.ui.common.RankBadge
 import com.potatoes.book5.realestate.ui.common.RankItemUi
 import com.potatoes.book5.realestate.ui.common.SpeakerIcon
@@ -88,7 +92,11 @@ fun DrivingScreen(state: DrivingScreenState, onIntent: (DrivingIntent) -> Unit, 
                 DrivingTradeTable(state.actualTrades, Modifier.weight(0.43f).fillMaxHeight())
             }
         }
-        state.alert?.let { LeaderAlertOverlay(it) }
+        when (val alert = state.alert) {
+            is LeaderAlertUi -> LeaderAlertOverlay(alert)
+            is InterestAlertUi -> InterestAlertBanner(alert, onScrap = { onIntent(DrivingIntent.ScrapAlert(alert.key)) })
+            null -> Unit
+        }
     }
 }
 
@@ -214,16 +222,85 @@ private fun RankListRow(item: RankItemUi) {
 private fun directionText(ahead: Boolean, km: Double): String =
     stringResource(if (ahead) R.string.driving_ahead else R.string.driving_behind, formatDistance(km))
 
-/** SCR-005 Landscape: 대장 교체 알림. 8초 뒤 자동으로 닫힌다. */
+/** 알림이 닫힐 때까지 남은 비율(1 → 0). 화면을 움직이지 않고 막대 길이만 줄인다(DD-005). */
 @Composable
-private fun LeaderAlertOverlay(alert: LeaderAlertUi) {
-    var progress by remember(alert.key) { mutableFloatStateOf(1f) }
+private fun rememberAlertProgress(key: Long): Float {
+    var progress by remember(key) { mutableFloatStateOf(1f) }
     val animated by animateFloatAsState(
         targetValue = progress,
         animationSpec = tween(DrivingViewModel.ALERT_DURATION_MILLIS.toInt(), easing = LinearEasing),
         label = "alert-timeout",
     )
-    LaunchedEffect(alert.key) { progress = 0f }
+    LaunchedEffect(key) { progress = 0f }
+    return animated
+}
+
+/**
+ * SCR-005 관심 매물 상단 배너(A안, T-025). 화면을 덮지 않고 위쪽에 8초 동안 띄운다.
+ * 스크랩은 한 번 탭으로만 한다(F-008, 주행 중 허용 여부는 T-001).
+ */
+@Composable
+private fun InterestAlertBanner(alert: InterestAlertUi, onScrap: () -> Unit) {
+    val animated = rememberAlertProgress(alert.key)
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 32.wpx, vertical = 28.wpx)
+            .semantics { liveRegion = LiveRegionMode.Polite },
+        shape = RoundedCornerShape(36.wpx),
+        color = colors.onSurface,
+        contentColor = colors.surface,
+        shadowElevation = 12.wpx,
+    ) {
+        Column {
+            Row(
+                modifier = Modifier.padding(start = 40.wpx, end = 32.wpx, top = 36.wpx, bottom = 32.wpx),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Surface(shape = CircleShape, color = colors.surface, modifier = Modifier.size(128.wpx)) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(Icons.Filled.Star, contentDescription = null, tint = colors.primary, modifier = Modifier.size(80.wpx))
+                    }
+                }
+                Spacer(Modifier.width(36.wpx))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.alert_interest_title, directionText(alert.isAhead, alert.distanceKm)),
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                    Text(alert.name, style = MaterialTheme.typography.headlineLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(
+                        stringResource(R.string.alert_interest_detail, formatPrice(alert.priceManwon), alert.areaPyeong),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+                Spacer(Modifier.width(24.wpx))
+                // TTS(F-006)는 아직 연결 전이라 표시만 한다.
+                SpeakerIcon(size = 40.wpx, color = colors.surface)
+                Spacer(Modifier.width(12.wpx))
+                Text(stringResource(R.string.alert_speaking), style = MaterialTheme.typography.labelMedium)
+                Spacer(Modifier.width(36.wpx))
+                PillButton(
+                    text = stringResource(if (alert.scrap == ScrapButtonState.SAVED) R.string.alert_interest_scrapped else R.string.alert_interest_scrap),
+                    onClick = onScrap,
+                    enabled = alert.scrap == ScrapButtonState.IDLE,
+                )
+            }
+            LinearProgressIndicator(
+                progress = { animated },
+                modifier = Modifier.fillMaxWidth().height(8.wpx),
+                color = colors.primary,
+                trackColor = colors.onSurfaceVariant,
+            )
+        }
+    }
+}
+
+/** SCR-005 Landscape: 대장 교체 알림. 8초 뒤 자동으로 닫힌다. */
+@Composable
+private fun LeaderAlertOverlay(alert: LeaderAlertUi) {
+    val animated = rememberAlertProgress(alert.key)
     Box(
         Modifier
             .fillMaxSize()
@@ -305,6 +382,20 @@ private fun DrivingAlertPreview() {
     KingOfRealEstateTheme(darkTheme = false) {
         DrivingScreen(
             DrivingScreenState(ranking = previewRanking, alert = LeaderAlertUi(1, "은행나무 파크", "새솔 리버뷰", 245_000, 2.4)),
+            onIntent = {},
+        )
+    }
+}
+
+@Preview(widthDp = 1187, heightDp = 797, showBackground = true)
+@Composable
+private fun DrivingInterestBannerPreview() {
+    KingOfRealEstateTheme(darkTheme = false) {
+        DrivingScreen(
+            DrivingScreenState(
+                ranking = previewRanking,
+                alert = InterestAlertUi(1, "h", "한빛마을 1단지", 158_000, 34, 1.2, -70.0),
+            ),
             onIntent = {},
         )
     }

@@ -28,3 +28,4 @@
 | T-022 | debt | 앱 코드를 도메인 데이터 영통구 기능 모듈로 분리 | review | - | P1 | ADR-008 | T-021 |
 | T-023 | feature | 주행 중 영통구 실거래 랭킹 표시 | review | - | P1 | SCR-004, SCR-009 | T-021 |
 | T-024 | debt | 주행 화면을 feature driving 모듈로 분리하고 디자인시스템·공용 UI 모듈 추가 | review | - | P1 | ADR-009 | T-013, T-022 |
+| T-025 | feature | 주행 중 관심 매물 상단 배너 알림(SCR-005 A안) | review | - | P1 | SCR-005 | T-024 |
