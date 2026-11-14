@@ -16,18 +16,20 @@ Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용�
 | Kotlin | 2.0.0 | `gradle/libs.versions.toml` |
 | Compose BOM | 2024.04.01 | `gradle/libs.versions.toml` |
 | Lifecycle | 2.9.0 | `gradle/libs.versions.toml` |
+| Compose UI (실제 적용) | 1.7.8 (lifecycle-runtime-compose 2.9.0이 BOM의 1.6.6을 올림) | `./gradlew :app:dependencies` |
+| Coroutines | 1.7.3 | `gradle/libs.versions.toml` |
 | Activity Compose | 1.10.1 | `gradle/libs.versions.toml` |
 | Core KTX | 1.16.0 | `gradle/libs.versions.toml` |
 | Pleos Vehicle SDK | 2.3.2 (카탈로그에만 선언, 아직 비활성) | `gradle/libs.versions.toml` |
 | Pleos Maven 저장소 | `nexus-playground.pleos.ai` | `settings.gradle.kts` |
-| 실행 환경 | Pleos Connect Emulator v2.1.0 (Android 14, API 34) | [SETUP.md](SETUP.md) |
+| 실행 환경 | Pleos Connect Emulator v2.1.0. 기기 실측 API 35, 앱 창 229dpi (2026-11-14) | `adb shell getprop ro.build.version.sdk` |
 | 화면 방향 | 미지정 (기본 portrait, window 1개) | `AndroidManifest.xml` |
 
 ### 환경 규칙
 
 - SDK, Kotlin, AGP, Gradle 버전을 변경하려면 ADR을 먼저 작성합니다.
 - Pleos 버전 기준은 공식 Vehicle SDK Sample App입니다.
-- targetSdk는 35이고 실행 환경은 API 34이므로, API 35 전용 기능은 사용하지 않습니다.
+- 에뮬레이터 실측은 API 35지만 문서(SETUP.md)에는 API 34 이미지로 적혀 있습니다. 실차 API가 확인될 때까지 API 35 전용 기능은 쓰지 않습니다.
 - 버전은 `libs.versions.toml`에서만 관리하고 `build.gradle.kts`에 직접 쓰지 않습니다.
 - Pleos 키는 `local.properties`와 `BuildConfig`로만 전달합니다.
 
@@ -36,8 +38,8 @@ Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용�
 | 구분 | 라이브러리 | 처리 |
 |---|---|---|
 | 사용 가능 | Compose UI, Material3, `lifecycle-viewmodel`, `lifecycle-viewmodel-savedstate`, `lifecycle-runtime-ktx` | 그대로 사용 |
-| 첫 MVI 화면 구현 시 추가 | `lifecycle-viewmodel-compose`, `lifecycle-runtime-compose` | 기존 `lifecycle` 버전 재사용, 빌드 확인 |
-| 첫 MVI 화면 구현 시 직접 선언 | `kotlinx-coroutines-android`, 테스트용 `kotlinx-coroutines-test` | 현재 전이 의존성 1.7.3, 직접 선언으로 고정 |
+| 사용 중 (T-014에서 추가) | `lifecycle-viewmodel-compose`, `lifecycle-runtime-compose` | 기존 `lifecycle` 버전 재사용. Compose UI가 1.7.8로 올라감 |
+| 사용 중 (T-014에서 직접 선언) | `kotlinx-coroutines-android`, 테스트용 `kotlinx-coroutines-test` | 1.7.3 고정 |
 | 사용 시 활성화 | Pleos Vehicle, TextToSpeech, SpeechToText, FusedLocation | [sdk-usage-map.md](platform/sdk-usage-map.md) 먼저 갱신 |
 | ADR 필요 | 내비게이션, DI 프레임워크, HTTP, 로컬 DB, DataStore | 도입 전에 ADR 작성 |
 

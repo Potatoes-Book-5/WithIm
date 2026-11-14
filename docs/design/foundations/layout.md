@@ -28,6 +28,21 @@
 - 앱은 Driving View를 가릴 수 없습니다(SM-001).
 - `screenOrientation`을 지정하지 않으면 Portrait 창 1개로 실행됩니다.
 
+## 에뮬레이터 실측 (2026-11-14)
+
+Pleos Connect Emulator v2.1.0에서 직접 확인한 값입니다. 공식 일러스트와 다릅니다.
+
+| 항목 | 값 | 확인 방법 |
+|---|---|---|
+| 화면 | 2560×1440 | `adb shell wm size` |
+| AVD 설정 밀도 | 160dpi | `hw.lcd.density`, `wm density` |
+| 앱 창 실제 밀도 | **229dpi** (1dp ≈ 1.43px) | `dumpsys activity`의 앱 설정 |
+| Driving View | 없음. 앱이 가로 전체를 사용 | 스크린샷 |
+| 앱 창 | 2560×1268 (상태바 76px, 하단 독 96px) | 스크린샷 |
+
+- 코드에서는 와이어프레임 px 값을 `wpx`·`wsp` 단위로 적어 229dpi 기준으로 환산합니다(`ui/theme/Dimens.kt`).
+- 실차에서 Driving View와 창 분할이 일러스트대로 나오는지는 확인이 필요합니다.
+
 ## 크기 기준
 
 공식 수치를 px로 환산한 값과 팀 제안값입니다.
@@ -47,4 +62,4 @@
 - [ ] 공식 `.fig`에서 영역 수치 확인
 - [ ] 우핸들 차량 레이아웃
 - [ ] 앱 창의 모서리 반경과 window bar
-- [ ] dp 밀도 값(실기기 확인)
+- [x] dp 밀도 값: 에뮬레이터 229dpi 확인, 실차 확인 필요
