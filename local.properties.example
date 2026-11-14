@@ -14,5 +14,10 @@ pleos.projectId=
 pleos.clientId=
 pleos.clientSecret=
 
+# 네이버 클라우드 플랫폼 > Maps > Application > 인증 정보 > Client ID (Dynamic Map 선택 필요)
+# 주행 지도 모드(SCR-009)에서 사용. 비어 있으면 간이 지도로 대체. Client Secret은 앱에 넣지 않음
+# 콘솔 헤더 이름인 X-NCP-APIGW-API-KEY-ID로 적어도 읽음
+naver.map.clientId=
+
 # 테스트 정보 > CRN: 데브박스(실차 개발 보드)용. Pleos Connect Emulator 2.1.0 이상에서는 필요 없음
 pleos.testCrn=

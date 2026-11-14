@@ -174,7 +174,7 @@
     <string name="driving_behind">뒤 %s</string>
     <string name="driving_interest_meta">관심 매물 · %s</string>
     <string name="driving_heading_up">진행 방향 ↑</string>
-    <string name="driving_map_note">지도 SDK 연결 전 간이 지도</string>
+    <string name="driving_map_note">지도를 불러올 수 없어 간이 지도로 표시</string>
     <string name="alert_leader_title">대장 아파트가 바뀌었어요</string>
     <string name="alert_leader_change">%1$s → %2$s</string>
     <string name="alert_leader_detail">최근 실거래가 %1$s · %2$s</string>

@@ -16,7 +16,7 @@
 | T-010 | docs | S-001, S-002, S-004~S-007 시나리오 작성 | review | - | P1 | - | T-009 |
 | T-011 | design | SCR 화면 명세 작성과 Figma 프레임 구성 | review | - | P1 | - | T-002, T-010 |
 | T-012 | docs | Clean Architecture + MVI 아키텍처 문서 작성 | review | - | P1 | ADR-003 | - |
-| T-013 | research | 지도 SDK와 지도 데이터 선정 | todo | - | P1 | - | - |
+| T-013 | research | 지도 SDK와 지도 데이터 선정 | doing | - | P1 | ADR-004, SCR-009 | - |
 | T-014 | feature | 온보딩 화면 구현(SCR-006 동의, SCR-003 관심 조건) | review | - | P0 | SCR-006, SCR-003 | - |
 | T-015 | feature | 홈·주행 화면 구현(SCR-001, SCR-004, SCR-009, SCR-005) | review | - | P0 | SCR-001, SCR-004, SCR-009, SCR-005 | T-014 |
 | T-016 | feature | 스크랩 기능 구현(SCR-007, SCR-002, Room 저장) | review | - | P0 | SCR-007, SCR-002, ADR-005 | T-015 |

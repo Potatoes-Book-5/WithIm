@@ -175,12 +175,7 @@ private fun RankCards(ranking: List<RankItemUi>) {
 @Composable
 private fun MapWithList(state: DrivingScreenState) {
     Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(32.wpx)) {
-        SchematicMap(
-            ranking = state.ranking,
-            interestMatches = state.interestMatches,
-            others = state.others,
-            modifier = Modifier.weight(1f).fillMaxHeight(),
-        )
+        DrivingMap(state = state, modifier = Modifier.weight(1f).fillMaxHeight())
         Column(Modifier.width(520.wpx), verticalArrangement = Arrangement.spacedBy(20.wpx)) {
             Text(stringResource(R.string.driving_list_title, state.radiusKm), style = MaterialTheme.typography.titleMedium)
             state.ranking.forEach { item -> RankListRow(item) }

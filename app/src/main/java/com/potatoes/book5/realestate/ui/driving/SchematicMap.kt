@@ -46,8 +46,8 @@ private val MapPark = Color(0xFFE3EDE3)
 private val MapDot = Color(0xFFA9AFBA)
 
 /**
- * 지도 SDK(T-013, ADR-004) 결정 전까지 쓰는 간이 지도. 진행 방향이 위쪽이고 차량은 아래쪽 3/4 지점에 고정한다.
- * 배경 도로는 장식이며 실제 도로가 아니다. SDK가 정해지면 이 Composable만 교체한다.
+ * 네이버 지도(ADR-004)를 쓸 수 없을 때의 간이 지도. 클라이언트 ID나 차량 위치가 없으면 [DrivingMap]이 이 지도를 그린다.
+ * 진행 방향이 위쪽이고 차량은 아래쪽 3/4 지점에 고정한다. 배경 도로는 장식이며 실제 도로가 아니다.
  */
 @Composable
 fun SchematicMap(

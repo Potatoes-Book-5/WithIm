@@ -1,5 +1,6 @@
 package com.potatoes.book5.realestate.ui.common
 
+import com.potatoes.book5.realestate.domain.model.GeoPoint
 import com.potatoes.book5.realestate.domain.model.NearbyApartment
 import java.time.LocalDate
 
@@ -13,12 +14,19 @@ data class RankItemUi(
     val dealDate: LocalDate,
     val distanceKm: Double,
     val bearingDeg: Double,
+    val location: GeoPoint? = null,
 ) {
     val isAhead: Boolean get() = bearingDeg in -90.0..90.0
 }
 
 /** 지도에 찍을 점(관심 매물, 그 밖의 단지). */
-data class MapPointUi(val id: String, val name: String, val distanceKm: Double, val bearingDeg: Double)
+data class MapPointUi(
+    val id: String,
+    val name: String,
+    val distanceKm: Double,
+    val bearingDeg: Double,
+    val location: GeoPoint? = null,
+)
 
 fun NearbyApartment.toRankItem(rank: Int) = RankItemUi(
     id = apartment.id,
@@ -29,6 +37,7 @@ fun NearbyApartment.toRankItem(rank: Int) = RankItemUi(
     dealDate = apartment.dealDate,
     distanceKm = distanceKm,
     bearingDeg = bearingDeg,
+    location = apartment.location,
 )
 
-fun NearbyApartment.toMapPoint() = MapPointUi(apartment.id, apartment.name, distanceKm, bearingDeg)
+fun NearbyApartment.toMapPoint() = MapPointUi(apartment.id, apartment.name, distanceKm, bearingDeg, apartment.location)
