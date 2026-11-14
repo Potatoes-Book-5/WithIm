@@ -60,6 +60,8 @@ task: T-009
 ## 미결 사항
 
 - [ ] 갱신 기준 거리 확정
-- [ ] Pleos 위치 API 지원 여부·권한 상태를 입력 포트 상태와 연결
-- [ ] 주행 방향 정보 필요 여부
-- [ ] 친구의 Pleos 위치 콜백을 `VehicleLocationInput.updateLocation`에 연결
+- [x] Pleos 위치 API 지원 여부·권한 상태를 입력 포트 상태와 연결(T-029 `PleosFusedLocationBridge`)
+- [ ] 주행 방향 정보 필요 여부. SDK `heading`은 단위가 문서에 없어 T-029는 진행 방향을 미확인(null)으로 넘긴다.
+- [x] Pleos 위치 콜백을 `VehicleLocationInput.updateLocation`에 연결(T-029)
+- [ ] 위치 정확도 기준(제안값 100m): SDK `confidence`의 단위가 문서에 없어 적용하지 못한다. T-029는 정확도를 미제공(null)으로 넘긴다.
+- [ ] 이동 거리 기준 갱신(규칙 3): SDK에 갱신 주기·거리 설정 API가 문서에 없다. T-029는 받은 위치를 입력 포트로 넘기고, 시세 재계산 기준은 T-027이 맡는다.

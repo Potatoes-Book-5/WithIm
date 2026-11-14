@@ -19,5 +19,11 @@ pleos.clientSecret=
 # 콘솔 헤더 이름인 X-NCP-APIGW-API-KEY-ID로 적어도 읽음
 naver.map.clientId=
 
+# 공공데이터포털 국토교통부 아파트 매매 실거래가 서비스 키(docs/platform/molit-api.md)
+# 포털이 주는 인코딩 키(%2B 등 포함)와 디코딩 키 모두 받는다. 백슬래시(\)는 쓰지 않는다
+MOLIT_API_KEY=
+# 브이월드 오픈 API 인증키(docs/platform/vworld-api.md). 주소 좌표 변환에 사용
+VWORLD_API_KEY=
+
 # 테스트 정보 > CRN: 데브박스(실차 개발 보드)용. Pleos Connect Emulator 2.1.0 이상에서는 필요 없음
 pleos.testCrn=

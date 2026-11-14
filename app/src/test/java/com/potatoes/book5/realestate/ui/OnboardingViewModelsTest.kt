@@ -32,6 +32,8 @@ import com.potatoes.book5.realestate.ui.interest.NeighborhoodUi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -89,7 +91,10 @@ class OnboardingViewModelsTest {
         val vm = consentViewModel(repo)
         vm.onIntent(ConsentIntent.SetLeaderAlert(false))
         vm.onIntent(ConsentIntent.Agree)
-        assertEquals(ConsentEffect.OpenInterestConditions, vm.effect.first())
+        assertEquals(
+            listOf(ConsentEffect.RequestLocationPermission, ConsentEffect.OpenInterestConditions),
+            vm.effect.take(2).toList(),
+        )
         assertTrue(repo.stored!!.locationConsented)
         assertFalse(repo.stored!!.leaderAlertEnabled)
     }
@@ -178,7 +183,7 @@ class OnboardingViewModelsTest {
         vm.onIntent(ConsentIntent.SetLocation(true))
         vm.onIntent(ConsentIntent.SetLeaderAlert(false))
         vm.onIntent(ConsentIntent.Save)
-        assertEquals(ConsentEffect.Close, vm.effect.first())
+        assertEquals(listOf(ConsentEffect.RequestLocationPermission, ConsentEffect.Close), vm.effect.take(2).toList())
         assertEquals(ConsentSettings(locationConsented = true, interestAlertEnabled = false, leaderAlertEnabled = false), repo.stored)
     }
 

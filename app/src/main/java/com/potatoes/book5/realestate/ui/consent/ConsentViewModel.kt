@@ -70,6 +70,7 @@ class ConsentViewModel(
                 )
             )
             apply(ConsentResult.Saved)
+            if (locationConsented) _effect.send(ConsentEffect.RequestLocationPermission)
             _effect.send(next)
         }
     }

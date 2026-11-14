@@ -21,13 +21,14 @@ class VehicleLocationInput(private val consentRepository: ConsentRepository) : V
 
     fun updateLocation(
         pose: VehiclePose,
-        accuracyMeters: Double,
+        /** 미터. SDK가 단위를 문서로 제공하지 않으면 null(미제공)이고 정확도 기준을 적용하지 않는다(T-029). */
+        accuracyMeters: Double?,
         observedAt: Instant,
         source: LocationSource = LocationSource.VEHICLE,
     ) {
         val valid = pose.location.latitude.isFinite() && pose.location.latitude in -90.0..90.0 &&
             pose.location.longitude.isFinite() && pose.location.longitude in -180.0..180.0 &&
-            accuracyMeters.isFinite() && accuracyMeters in 0.0..100.0
+            (accuracyMeters == null || (accuracyMeters.isFinite() && accuracyMeters in 0.0..100.0))
         incoming.value = VehicleLocationState(
             pose = pose.takeIf { valid }?.copy(headingDeg = pose.headingDeg?.takeIf {
                 it.isFinite() && it in 0.0..360.0

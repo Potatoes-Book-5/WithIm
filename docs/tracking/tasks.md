@@ -31,3 +31,5 @@
 | T-025 | feature | 주행 중 관심 매물 상단 배너 알림(SCR-005 A안) | review | - | P1 | SCR-005 | T-024 |
 | T-026 | feature | 주차 후 관심 매물 모아보기 화면과 주행 요약 연결(E안) | review | - | P1 | SCR-011 | T-025 |
 | T-027 | feature | 앱 전체 부동산 샘플을 실거래 데이터로 전환 | review | - | P1 | F-001, F-002, F-003, SCR-001, SCR-009 | T-023, T-024 |
+| T-028 | harness | 공공 API 키를 local.properties에서 읽도록 빌드 설정 변경 | review | - | P2 | - | - |
+| T-029 | feature | Pleos FusedLocation 콜백을 차량 위치 입력 포트에 연결하고 주행 지도에 반영 | review | - | P1 | F-001, SCR-009 | T-027 |

@@ -49,4 +49,6 @@ sealed interface ConsentEffect {
     /** 수정 모드를 닫고 이전 화면으로 */
     data object Close : ConsentEffect
     data object ShowDataDeleted : ConsentEffect
+    /** 위치 사용에 동의하고 저장했다. FusedLocation 런타임 권한을 요청한다(F-001, T-029). 화면 이동 Effect보다 먼저 보낸다. */
+    data object RequestLocationPermission : ConsentEffect
 }

@@ -4,7 +4,7 @@ T-020, [ADR-006](../decisions/ADR-006-molit-retrofit.md)의 구현 사용법이�
 
 ## 설정
 
-발급받은 서비스 키를 빌드 프로세스의 `MOLIT_API_KEY` 환경 변수 또는 사용자 Gradle 속성으로 전달한다. 코드, 문서, 저장소 설정 파일에 키를 쓰지 않는다. 키가 없으면 조회 결과는 `DomainError.MissingApiKey`다. 앱의 `BuildConfig`에 들어간 키는 APK에서 추출될 수 있으므로 배포용 키 관리 방식은 별도로 결정해야 한다.
+발급받은 서비스 키를 git 제외 파일 `local.properties`의 `MOLIT_API_KEY`에 넣는다. 없으면 사용자 Gradle 속성, 그다음 빌드 환경 변수 `MOLIT_API_KEY`(CI)에서 찾는다. 코드, 문서, 저장소 설정 파일에 키를 쓰지 않는다. 키가 없으면 조회 결과는 `DomainError.MissingApiKey`다. 앱의 `BuildConfig`에 들어간 키는 APK에서 추출될 수 있으므로 배포용 키 관리 방식은 별도로 결정해야 한다.
 
 ## 호출
 

@@ -48,6 +48,11 @@ cp local.properties.example local.properties   # Pleos 키 입력 (git 제외 �
 | `pleos.clientId` | `PLEOS_CLIENT_ID` | TextToSpeech / SpeechToText SDK 앱 등록 |
 | `pleos.clientSecret` | `PLEOS_CLIENT_SECRET` | 〃 |
 | `pleos.testCrn` | — | 데브박스 테스트용 (에뮬레이터 2.1.0+에서는 불필요) |
+| `naver.map.clientId` | `NAVER_MAP_CLIENT_ID` | 주행 지도(네이버 지도) |
+| `MOLIT_API_KEY` | `MOLIT_API_KEY` | 국토부 실거래가 조회 |
+| `VWORLD_API_KEY` | `VWORLD_API_KEY` | 브이월드 주소 좌표 변환 |
+
+`MOLIT_API_KEY`, `VWORLD_API_KEY`는 `local.properties`에 없으면 사용자 Gradle 속성(`~/.gradle/gradle.properties`, `-P`), 그다음 환경 변수(CI)에서 찾습니다. 프로젝트의 `gradle.properties`는 git에 올라가므로 키를 넣지 마세요.
 
 **키를 코드나 커밋에 직접 넣지 마세요.**
 
