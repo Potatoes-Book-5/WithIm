@@ -21,7 +21,18 @@ import com.potatoes.book5.realestate.ui.theme.wpx
 
 /** SCR-008 주행 요약. ViewModel과 Effect를 연결한다. */
 @Composable
-fun DriveSummaryRoute(
+fun DriveSummaryRoute(sessionId: Long?, onOpen: (Screen) -> Unit, onClose: () -> Unit) {
+    DriveRecordRoute(sessionId, onOpen, onClose) { state, onIntent -> DriveSummaryScreen(state = state, onIntent = onIntent) }
+}
+
+/** SCR-011 관심 매물 모아보기. SCR-008과 같은 ViewModel을 쓴다. */
+@Composable
+fun InterestCatchUpRoute(sessionId: Long, onOpen: (Screen) -> Unit, onClose: () -> Unit) {
+    DriveRecordRoute(sessionId, onOpen, onClose) { state, onIntent -> InterestCatchUpScreen(state = state, onIntent = onIntent) }
+}
+
+@Composable
+private fun DriveRecordRoute(
     sessionId: Long?,
     onOpen: (Screen) -> Unit,
     onClose: () -> Unit,
@@ -29,6 +40,7 @@ fun DriveSummaryRoute(
         factory = AppViewModels.Factory,
         extras = AppViewModels.extrasWith(AppViewModels.DRIVE_SESSION_KEY, sessionId ?: AppViewModels.LATEST_SESSION),
     ),
+    content: @Composable (DriveSummaryState, (DriveSummaryIntent) -> Unit) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithAppLifecycle()
     val snackbar = remember { SnackbarHostState() }
@@ -46,7 +58,7 @@ fun DriveSummaryRoute(
         }
     }
     Box(Modifier.fillMaxSize()) {
-        DriveSummaryScreen(state = state, onIntent = viewModel::onIntent)
+        content(state, viewModel::onIntent)
         LargeSnackbarHost(hostState = snackbar, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.wpx))
     }
 }

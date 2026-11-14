@@ -5,6 +5,14 @@
     <string name="alert_leader_detail">최근 실거래가 %1$s · %2$s</string>
     <string name="alert_leader_title">대장 아파트가 바뀌었어요</string>
     <string name="alert_speaking">음성 안내 중</string>
+    <string name="alert_interest_title">관심 조건에 맞는 매물 · %s</string>
+    <string name="alert_interest_detail">%1$s · %2$d평</string>
+    <string name="alert_interest_scrap">스크랩</string>
+    <string name="alert_interest_scrapped">스크랩함</string>
+    <string name="alert_voice_scrap_command">“스크랩해 줘”</string>
+    <string name="alert_voice_scrap_hint">라고 말하면 저장돼요</string>
+    <string name="alert_voice_scrapped">스크랩했어요</string>
+    <string name="alert_voice_scrapped_detail">주차 후 스크랩 목록에서 확인</string>
     <string name="driving_ahead">앞 %s</string>
     <string name="driving_badge">주행 중</string>
     <string name="driving_behind">뒤 %s</string>

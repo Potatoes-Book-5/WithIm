@@ -14,4 +14,9 @@ internal fun reduceDriving(state: DrivingScreenState, result: DrivingResult): Dr
     is DrivingResult.AlertShown -> state.copy(alert = result.alert)
     // 더 새로운 알림이 떠 있으면 이전 알림의 만료로 지우지 않는다.
     is DrivingResult.AlertExpired -> if (state.alert?.key == result.key) state.copy(alert = null) else state
+    // 배너가 이미 닫혔거나 다른 알림으로 바뀌었으면 무시한다.
+    is DrivingResult.AlertScrapChanged -> when (val alert = state.alert) {
+        is InterestAlertUi -> if (alert.key == result.key) state.copy(alert = alert.copy(scrap = result.scrap)) else state
+        else -> state
+    }
 }

@@ -38,6 +38,8 @@ sealed interface Screen {
     data object Settings : Screen
     /** SCR-008. sessionId가 null이면 가장 최근 요약 */
     data class DriveSummary(val sessionId: Long? = null) : Screen
+    /** SCR-011 관심 매물 모아보기. SCR-008의 `관심 매물 모아보기`로 연다. */
+    data class InterestCatchUp(val sessionId: Long) : Screen
 }
 
 data class AppState(
@@ -94,8 +96,9 @@ internal fun reduceApp(state: AppState, result: AppResult): AppState = when (res
     is AppResult.Push -> if (state.current == result.screen) state else state.copy(stack = state.stack + result.screen)
     AppResult.Pop -> if (state.canGoBack) state.copy(stack = state.stack.dropLast(1)) else state
     is AppResult.DrivingChanged -> state.copy(drivingState = result.state)
-    // 온보딩 중에는 띄우지 않는다. 이미 요약 화면이면 다시 쌓지 않는다.
-    is AppResult.SummaryReady -> if (!state.onboardingDone || state.current is Screen.DriveSummary) state
+    // 온보딩 중에는 띄우지 않는다. 이미 요약이나 모아보기 화면이면 다시 쌓지 않는다.
+    is AppResult.SummaryReady ->
+        if (!state.onboardingDone || state.current is Screen.DriveSummary || state.current is Screen.InterestCatchUp) state
         else state.copy(stack = state.stack + Screen.DriveSummary(result.sessionId))
     is AppResult.DevTradeStatusChanged -> state.copy(devTradeStatus = result.status)
 }

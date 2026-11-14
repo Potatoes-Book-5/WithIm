@@ -21,6 +21,7 @@ import com.potatoes.book5.realestate.ui.interest.InterestRoute
 import com.potatoes.book5.realestate.ui.mypage.MyPageRoute
 import com.potatoes.book5.realestate.ui.scrap.ScrapListRoute
 import com.potatoes.book5.realestate.ui.summary.DriveSummaryRoute
+import com.potatoes.book5.realestate.ui.summary.InterestCatchUpRoute
 
 @Composable
 fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)) {
@@ -69,6 +70,9 @@ fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)
                 }
                 is Screen.DriveSummary -> ProvideScreenStore(stores, currentKey) {
                     DriveSummaryRoute(sessionId = screen.sessionId, onOpen = open, onClose = onBack)
+                }
+                is Screen.InterestCatchUp -> ProvideScreenStore(stores, currentKey) {
+                    InterestCatchUpRoute(sessionId = screen.sessionId, onOpen = open, onClose = onBack)
                 }
             }
         }

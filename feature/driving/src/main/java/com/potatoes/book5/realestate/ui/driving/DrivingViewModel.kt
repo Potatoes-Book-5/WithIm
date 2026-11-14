@@ -3,13 +3,15 @@ package com.potatoes.book5.realestate.ui.driving
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.potatoes.book5.realestate.domain.error.Outcome
+import com.potatoes.book5.realestate.domain.usecase.ObserveInterestMatchAlertsUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveLeaderChangesUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveNearbyRankingUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetSamsungTradeRankingUseCase
 import com.potatoes.book5.realestate.domain.error.DomainError
-import com.potatoes.book5.realestate.domain.error.Outcome
 import java.time.LocalDate
 import java.time.ZoneId
+import com.potatoes.book5.realestate.domain.usecase.ToggleScrapByIdUseCase
 import com.potatoes.book5.realestate.ui.common.toMapPoint
 import com.potatoes.book5.realestate.ui.common.toRankItem
 import kotlinx.coroutines.delay
@@ -25,7 +27,8 @@ class DrivingViewModel(
     private val observeNearbyRanking: ObserveNearbyRankingUseCase,
     private val observeLeaderChanges: ObserveLeaderChangesUseCase,
     private val getTradeRanking: GetSamsungTradeRankingUseCase,
-    private val alertDurationMillis: Long = ALERT_DURATION_MILLIS,
+    private val observeInterestAlerts: ObserveInterestMatchAlertsUseCase,
+    private val toggleScrapById: ToggleScrapByIdUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -75,20 +78,54 @@ class DrivingViewModel(
         }
         viewModelScope.launch {
             observeLeaderChanges().collect { change ->
-                val alert = LeaderAlertUi(
-                    key = ++alertCount,
-                    previousName = change.previous.name,
-                    currentName = change.current.apartment.name,
-                    priceManwon = change.current.apartment.priceManwon,
-                    distanceKm = change.current.distanceKm,
+                show(
+                    LeaderAlertUi(
+                        key = ++alertCount,
+                        previousName = change.previous.name,
+                        currentName = change.current.apartment.name,
+                        priceManwon = change.current.apartment.priceManwon,
+                        distanceKm = change.current.distanceKm,
+                    )
                 )
-                apply(DrivingResult.AlertShown(alert))
-                // 화면 알림은 자동으로 닫는다(F-006 규칙 3, 제안값 8초). TTS 연동은 이후 작업이다.
-                launch {
-                    delay(alertDurationMillis)
-                    apply(DrivingResult.AlertExpired(alert.key))
-                }
             }
+        }
+        viewModelScope.launch {
+            observeInterestAlerts().collect { event ->
+                val apartment = event.match.apartment
+                show(
+                    InterestAlertUi(
+                        key = ++alertCount,
+                        apartmentId = apartment.id,
+                        name = apartment.name,
+                        priceManwon = apartment.priceManwon,
+                        areaPyeong = apartment.areaPyeong,
+                        distanceKm = event.match.distanceKm,
+                        bearingDeg = event.match.bearingDeg,
+                    )
+                )
+            }
+        }
+    }
+
+    /** 화면 알림은 자동으로 닫는다(F-006 규칙 3). TTS 연동은 이후 작업이다. */
+    private fun show(alert: DrivingAlertUi) {
+        apply(DrivingResult.AlertShown(alert))
+        viewModelScope.launch {
+            delay(durationOf(alert))
+            apply(DrivingResult.AlertExpired(alert.key))
+        }
+    }
+
+    private fun scrap(key: Long) {
+        val alert = _state.value.alert as? InterestAlertUi ?: return
+        if (alert.key != key || alert.scrap != ScrapButtonState.IDLE) return
+        apply(DrivingResult.AlertScrapChanged(key, ScrapButtonState.SAVING))
+        viewModelScope.launch {
+            var outcome = toggleScrapById(alert.apartmentId)
+            // 그사이 다른 화면에서 스크랩해 둔 단지였다면 토글이 해제했으므로 다시 켠다.
+            if (outcome is Outcome.Success && !outcome.value) outcome = toggleScrapById(alert.apartmentId)
+            val next = if (outcome is Outcome.Success && outcome.value) ScrapButtonState.SAVED else ScrapButtonState.IDLE
+            apply(DrivingResult.AlertScrapChanged(key, next))
         }
     }
 
@@ -103,6 +140,7 @@ class DrivingViewModel(
                 savedStateHandle[KEY_MODE] = intent.mode.name
                 apply(DrivingResult.ModeSelected(intent.mode))
             }
+            is DrivingIntent.ScrapAlert -> scrap(intent.key)
         }
     }
 
@@ -111,7 +149,15 @@ class DrivingViewModel(
     }
 
     companion object {
-        const val ALERT_DURATION_MILLIS = 8_000L
+        /** 대장 교체 알림 표시 시간(F-006 규칙 3, 2026-11-14 사용자 결정 10초) */
+        const val LEADER_ALERT_DURATION_MILLIS = 10_000L
+        /** 관심 매물 배너 표시 시간(F-006 규칙 3, 제안값 8초) */
+        const val INTEREST_ALERT_DURATION_MILLIS = 8_000L
+
+        fun durationOf(alert: DrivingAlertUi): Long = when (alert) {
+            is LeaderAlertUi -> LEADER_ALERT_DURATION_MILLIS
+            is InterestAlertUi -> INTEREST_ALERT_DURATION_MILLIS
+        }
         private const val KEY_MODE = "driving_mode"
     }
 }

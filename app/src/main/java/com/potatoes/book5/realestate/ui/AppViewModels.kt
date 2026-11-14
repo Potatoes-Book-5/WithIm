@@ -62,7 +62,10 @@ object AppViewModels {
         }
         initializer {
             val c = container()
-            DrivingViewModel(createSavedStateHandle(), c.observeNearbyRanking, c.observeLeaderChanges, c.getSamsungTradeRanking)
+            DrivingViewModel(
+                createSavedStateHandle(), c.observeNearbyRanking, c.observeLeaderChanges, c.getSamsungTradeRanking,
+                c.observeInterestAlerts, c.toggleScrapById,
+            )
         }
         initializer { MyPageViewModel(container().observeMyPage) }
         initializer {
