@@ -51,6 +51,7 @@ class DriveSummaryViewModel(
             DriveSummaryIntent.Close -> send(DriveSummaryEffect.Close)
             is DriveSummaryIntent.OpenApartment -> send(DriveSummaryEffect.Navigate(Screen.Detail(intent.apartmentId)))
             DriveSummaryIntent.OpenScraps -> send(DriveSummaryEffect.Navigate(Screen.Scraps()))
+            DriveSummaryIntent.OpenInterestCatchUp -> _state.value.summary?.let { send(DriveSummaryEffect.Navigate(Screen.InterestCatchUp(it.id))) }
             is DriveSummaryIntent.ToggleScrap -> toggle(intent.apartmentId)
         }
     }

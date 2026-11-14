@@ -133,6 +133,11 @@
     <string name="summary_no_leader_change">대장 교체 없음</string>
     <string name="summary_passed">지나친 관심 매물 %d</string>
     <string name="summary_open_scraps">스크랩 목록 보기 ›</string>
+    <string name="summary_open_catch_up">관심 매물 모아보기 ›</string>
+    <!-- SCR-011 관심 매물 모아보기 -->
+    <string name="catch_up_title">이번 주행에서 만난 관심 매물</string>
+    <string name="catch_up_meta">%1$d곳 · %2$d월 %3$d일 주행</string>
+    <string name="catch_up_closest">가장 가까이 %s</string>
 
     <!-- SCR-004, SCR-009, SCR-005 주행 중 -->
 
