@@ -75,3 +75,4 @@
 | ADR-010 | decision | Gleo Intent adapter | draft | `decisions/ADR-010-gleo-intent-adapter.md` | T-039 | - |
 | SCR-012 | screen | 관심 지역 목록 | draft | `design/screens/SCR-012-interest-area-list.md` | T-039 | - |
 | SCR-013 | screen | 데일리 브리핑 | draft | `design/screens/SCR-013-daily-briefing.md` | T-039 | - |
+| ADR-011 | decision | 주행 데이터 read model과 음성 조회 분리 | reserved | `decisions/ADR-011-prepared-market-read-model.md` | T-041 | - |
