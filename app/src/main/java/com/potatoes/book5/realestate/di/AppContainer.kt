@@ -55,6 +55,8 @@ import com.potatoes.book5.realestate.vehicle.simulation.SimulatedDrivingStatePro
 import com.potatoes.book5.realestate.vehicle.location.VehicleLocationInput
 import com.potatoes.book5.realestate.domain.usecase.GearDrivingStateProvider
 import com.potatoes.book5.realestate.vehicle.gear.PleosGearSource
+import com.potatoes.book5.realestate.vehicle.restriction.CarUxRestrictionSource
+import com.potatoes.book5.realestate.domain.usecase.ObserveUxRestrictedUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -108,6 +110,8 @@ class AppContainer(context: Context) {
 
     val observeNearbyRanking = ObserveNearbyRankingUseCase(rankingRepository)
     val observeDrivingState = ObserveDrivingStateUseCase(drivingStateProvider)
+    /** 플랫폼 주행 규제(T-035). 규제 중에는 DO 화면만 보여 준다. */
+    val observeUxRestricted = ObserveUxRestrictedUseCase(CarUxRestrictionSource(context))
     val observeLeaderChanges = ObserveLeaderChangesUseCase(rankingRepository, consentRepository)
     val observeInterestAlerts = ObserveInterestMatchAlertsUseCase(rankingRepository, consentRepository, scrapRepository)
 

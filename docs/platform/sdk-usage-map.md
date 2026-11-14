@@ -7,7 +7,7 @@
 | F-001 차량 위치 | FusedLocation SDK 1.1.3(`ai.pleos.playground:FusedLocation`) | `isSupported` | 위치 입력 UNSUPPORTED, 안내 화면 S-006은 미구현 | CP-004 | 사용 중(T-029) |
 | F-006 TTS 알림 | TextToSpeech SDK | 전체 호환 | - | CP-003, AF-001 | 미확정 |
 | 주행 중·주행 완료(F-009, S-005, S-009) | Vehicle SDK 2.3.2 `Gear`(`ai.pleos.playground:Vehicle`) | `checkXXXCapabilities` 없음. 호출 실패로 판단 | 기어를 못 읽으면 주차 유지, 개발 빌드는 수동 전환 | CP-001, CP-006, API-002 | 사용 중(T-034) |
-| 주행 규제 상태 | `CarUxRestrictionsManager` | - | 미확정 | DI-001 | 미확정 |
+| 주행 규제 상태(DO 선언 앱의 화면 제한) | `CarUxRestrictionsManager`(`useLibrary("android.car")`) | `FEATURE_AUTOMOTIVE`, 차량 서비스 연결 | 기어 기준 주행 상태만 사용 | DI-001, DI-002, HW-003 | 사용 중(T-035) |
 | SCR-009 주행 지도 | 네이버 지도 Android SDK(외부, [ADR-004](../decisions/ADR-004-map-sdk.md)) | 클라이언트 ID 유무 | 지도 사용 불가 상태 표시 | API-001 | 사용 중 |
 | 음성 입력 | SpeechToText SDK | 전체 호환 | 프리셋 입력 | CP-003, DD-012 | 미확정 |
 
@@ -55,6 +55,6 @@ T-027은 SDK 위치 획득을 구현하지 않고 [차량 위치 입력](locatio
 
 - `Gear` 도메인과 `VehicleGear` 값, 기어와 `CAR_DRIVE`의 관계(원문 권한 표의 `CAR_DRIVE`는 DrivingMode, Brake, Odometer만 적는다)
 - 기어 지원 여부 확인 방법과 미지원 차량의 오류 코드
-- `registerGearSelection` 직후 현재 값 전달 여부, 콜백 스레드, 서비스 재연결
+- 서비스 재연결. 에뮬레이터(Pleos 이미지 v2.1.0)에서는 `initialize()` 직후 등록해도 연결 뒤 현재 값(`VENDOR_GEAR_SELECTION`, P=4, D=8)이 왔고 콜백은 binder 스레드였다. 원문 근거가 아니라 관찰 결과다
 - API-002는 기어 같은 표준 데이터에 AAOS Car API를 권한다. 사용자 결정으로 Pleos API를 쓴다([T-034 계획](../plans/active/T-034-gear-driving-state.md))
-- Vehicle 서비스(`ai.pleos.playground.vehicle.VEHICLE_START`)가 있는 에뮬레이터 이미지. 2026-11-14 로컬 AVD `Pleos_Connect_v2.1.0`에는 없었다
+- 주행 중(D)에는 플랫폼이 DO 미선언 앱을 `주행 중에는 사용할 수 없습니다` 화면으로 가린다(DR, T-001). 기어 값은 계속 받는다

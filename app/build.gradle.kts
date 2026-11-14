@@ -38,6 +38,8 @@ if (naverMapClientId.isEmpty()) {
 android {
     namespace = "com.potatoes.book5.realestate"
     compileSdk = 35
+    // AAOS 주행 규제(CarUxRestrictionsManager, T-035). 플랫폼 선택 라이브러리를 컴파일에만 쓴다.
+    useLibrary("android.car")
 
     defaultConfig {
         applicationId = "com.potatoes.book5.realestate"

@@ -44,6 +44,7 @@ Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용�
 | 사용 중 (T-013, [ADR-004](decisions/ADR-004-map-sdk.md)) | 네이버 지도 SDK 3.24.1(`com.naver.maps:map-sdk`) | 주행 지도 모드. `:feature:driving`에서만 쓰고 `AndroidView`로 감싼다. 키는 `local.properties`의 `naver.map.clientId` |
 | 사용 중 (T-029) | Pleos FusedLocation 1.1.3(`ai.pleos.playground:FusedLocation`) | 차량 위치. `:app`의 `vehicle/location/PleosFusedLocationBridge`에서만 호출하고 `VehicleLocationInput`(`VehicleLocationProvider` 포트)에 넣는다([location-input.md](platform/location-input.md)) |
 | 사용 중 (T-034) | Pleos Vehicle 2.3.2(`ai.pleos.playground:Vehicle`) | 기어 상태. `:app`의 `vehicle/gear/PleosGearSource`에서만 호출([sdk-usage-map.md](platform/sdk-usage-map.md#기어-상태-t-032)) |
+| 사용 중 (T-035) | 플랫폼 선택 라이브러리 `android.car`(`useLibrary`, 매니페스트 `uses-library required=false`) | `CarUxRestrictionsManager`. compileSdk·minSdk·targetSdk는 그대로 |
 | 사용 시 활성화 | TextToSpeech, SpeechToText | [sdk-usage-map.md](platform/sdk-usage-map.md) 먼저 갱신 |
 | ADR 필요 | 내비게이션, DI 프레임워크, 그 밖의 로컬 DB, DataStore | 도입 전에 ADR 작성. HTTP는 [ADR-006](decisions/ADR-006-molit-retrofit.md)에서 결정 |
 
@@ -147,7 +148,7 @@ sealed interface Outcome<out T> {
 - 호출 전에 지원 여부를 확인하고, 미지원이면 `DomainError.Unsupported`를 반환합니다(CP-001, CP-004).
 - 차량 모델명으로 분기하지 않습니다(CP-006).
 - 주행 중·주행 완료(`DrivingState`)는 Pleos Vehicle SDK 기어로 정합니다. `vehicle/gear/PleosGearSource`가 `GearStateSource` 포트로 기어를 넘기고, domain `GearDrivingStateProvider`가 P는 주차, 그 밖의 기어는 주행 중으로 바꿉니다. 기어를 읽지 못하면 개발용 수동 전환을 따릅니다(T-034).
-- 기능별 주행 제한 플래그는 `CarUxRestrictionsManager`에서 받습니다(DI-001, 미연결).
+- 앱은 `MainActivity`에 DO를 선언합니다. `vehicle/restriction/CarUxRestrictionSource`가 `CarUxRestrictionsManager` 규제 상태를 `UxRestrictionSource` 포트로 넘기고, `AppState`는 기어 주행 중이거나 규제 중이면 주행 화면만, 온보딩 전이면 주차 안내만 보여 줍니다(DI-001, DI-002, T-035).
 - 오디오 포커스 획득과 상실 처리는 `AlertSpeaker` 구현 안에 둡니다(AF-001).
 
 ## MVI
