@@ -6,6 +6,11 @@ import com.potatoes.book5.realestate.data.local.db.DriveLeaderChangeEntity
 import com.potatoes.book5.realestate.data.local.db.DrivePassedInterestEntity
 import com.potatoes.book5.realestate.data.local.db.DriveRankEntity
 import com.potatoes.book5.realestate.data.local.db.DriveSessionEntity
+import com.potatoes.book5.realestate.data.local.db.DriveRegionRoundEntity
+import com.potatoes.book5.realestate.data.local.db.DriveRegionRankEntity
+import com.potatoes.book5.realestate.domain.model.DriveRegionRound
+import com.potatoes.book5.realestate.domain.model.MarketRound
+import com.potatoes.book5.realestate.domain.model.LeaderEventKind
 import com.potatoes.book5.realestate.domain.model.DriveLeaderChange
 import com.potatoes.book5.realestate.domain.model.DriveRank
 import com.potatoes.book5.realestate.domain.model.DriveSummary
@@ -52,16 +57,36 @@ class RoomDriveRecordRepository(
     }
 
     override suspend fun recordLeaderChange(sessionId: Long, change: DriveLeaderChange) {
-        dao.insertLeaderChange(DriveLeaderChangeEntity(sessionId = sessionId, at = change.at.millis(), apartmentId = change.apartmentId, name = change.name))
+        dao.insertLeaderChange(DriveLeaderChangeEntity(sessionId = sessionId, at = change.at.millis(),
+            apartmentId = change.apartmentId, name = change.name, kind = change.kind.name, districtName = change.districtName))
+    }
+
+    override suspend fun recordRound(sessionId: Long, at: LocalDateTime, round: MarketRound, top: List<DriveRank>) {
+        db.withTransaction {
+            dao.closeRounds(sessionId, at.millis(), round.id)
+            if (dao.round(sessionId, round.id) == null) {
+                dao.insertRound(DriveRegionRoundEntity(sessionId, round.id, round.districtCode, round.districtName, at.millis()))
+            }
+            val old = dao.roundRanks(sessionId, round.id).map { DriveRank(it.rank, it.apartmentId, it.name, it.priceManwon) }
+            val best = (old + top).groupBy { it.apartmentId }.values.map { rows -> rows.maxBy { it.priceManwon } }
+                .sortedWith(compareByDescending<DriveRank> { it.priceManwon }.thenBy { it.apartmentId }).take(3)
+            dao.clearRoundRanks(sessionId, round.id)
+            dao.insertRoundRanks(best.mapIndexed { index, rank ->
+                DriveRegionRankEntity(sessionId, round.id, index + 1, rank.apartmentId, rank.name, rank.priceManwon)
+            })
+            dao.touch(sessionId, at.millis())
+        }
     }
 
     override suspend fun finishSession(sessionId: Long, endedAt: LocalDateTime?): Boolean = db.withTransaction {
         val session = dao.session(sessionId) ?: return@withTransaction false
-        if (dao.rankCount(sessionId) == 0) {
+        if (dao.rankCount(sessionId) == 0 && dao.roundRankCount(sessionId) == 0) {
             dao.deleteSession(sessionId)
             return@withTransaction false
         }
-        dao.end(sessionId, endedAt?.millis() ?: session.lastRecordedAt)
+        val end = endedAt?.millis() ?: session.lastRecordedAt
+        dao.closeRounds(sessionId, end)
+        dao.end(sessionId, end)
         true
     }
 
@@ -72,7 +97,8 @@ class RoomDriveRecordRepository(
         dao.observeRanks(id),
         dao.observeLeaderChanges(id),
         dao.observePassed(id),
-    ) { session, ranks, changes, passed ->
+        combine(dao.observeRounds(id), dao.observeRoundRanks(id)) { rounds, ranks -> rounds to ranks },
+    ) { session, ranks, changes, passed, roundData ->
         session ?: return@combine null
         DriveSummary(
             id = session.id,
@@ -81,9 +107,19 @@ class RoomDriveRecordRepository(
             distanceKm = session.distanceKm,
             radiusKm = session.radiusKm,
             finalTop = ranks.map { DriveRank(it.rank, it.apartmentId, it.name, it.priceManwon) },
-            leaderChanges = changes.map { DriveLeaderChange(it.at.dateTime(), it.apartmentId, it.name) },
+            leaderChanges = changes.map { change ->
+                DriveLeaderChange(change.at.dateTime(), change.apartmentId, change.name,
+                    LeaderEventKind.entries.find { it.name == change.kind } ?: LeaderEventKind.REPLACED, change.districtName)
+            },
             passedInterests = passed.map { PassedInterest(it.apartmentId, it.name, it.closestKm, it.priceManwon) },
             seen = session.seen,
+            rounds = roundData.first.map { round ->
+                DriveRegionRound(MarketRound(round.roundId, round.districtCode, round.districtName),
+                    round.startedAt.dateTime(), round.endedAt?.dateTime(),
+                    roundData.second.filter { it.roundId == round.roundId }.map {
+                        DriveRank(it.rank, it.apartmentId, it.name, it.priceManwon)
+                    })
+            },
         )
     }
 

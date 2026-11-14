@@ -25,6 +25,21 @@ internal class VworldDistrictResolver(
     private val service: VworldDistrictService,
     private val apiKey: String,
 ) : MarketDistrictResolver {
+    override suspend fun districtAt(point: GeoPoint): Outcome<MarketDistrict> {
+        if (!point.latitude.isFinite() || !point.longitude.isFinite() ||
+            point.latitude !in -90.0..90.0 || point.longitude !in -180.0..180.0
+        ) return Outcome.Failure(DomainError.Invalid("invalid-district-query"))
+        if (apiKey.isBlank()) return Outcome.Failure(DomainError.MissingApiKey)
+        return withContext(Dispatchers.IO) {
+            val filter = "POINT(" + point.longitude + " " + point.latitude + ")"
+            when (val response = fetchPage(filter, 1)) {
+                is Outcome.Failure -> response
+                is Outcome.Success -> response.value.districts.singleOrNull()
+                    ?.let { Outcome.Success(it) } ?: Outcome.Failure(DomainError.InvalidResponse)
+            }
+        }
+    }
+
     override suspend fun districts(center: GeoPoint, radiusKm: Double): Outcome<List<MarketDistrict>> {
         if (!center.latitude.isFinite() || !center.longitude.isFinite() ||
             center.latitude !in -90.0..90.0 || center.longitude !in -180.0..180.0 ||

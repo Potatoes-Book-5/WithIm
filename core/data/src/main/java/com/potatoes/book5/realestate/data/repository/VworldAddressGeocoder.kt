@@ -1,6 +1,7 @@
 package com.potatoes.book5.realestate.data.repository
 
 import com.potatoes.book5.realestate.data.remote.GeocoderProviderRejected
+import com.potatoes.book5.realestate.data.remote.GeocoderAddressNotFound
 import com.potatoes.book5.realestate.data.remote.InvalidGeocoderResponse
 import com.potatoes.book5.realestate.data.remote.VworldService
 import com.potatoes.book5.realestate.data.remote.VworldXmlParser
@@ -45,6 +46,8 @@ internal class VworldAddressGeocoder(
                 } catch (error: HttpException) {
                     error.response()?.errorBody()?.close()
                     return@withContext Outcome.Failure(DomainError.Http(error.code()))
+                } catch (_: GeocoderAddressNotFound) {
+                    return@withContext Outcome.Failure(DomainError.Invalid("invalid-address"))
                 } catch (_: GeocoderProviderRejected) {
                     return@withContext Outcome.Failure(DomainError.ProviderRejected)
                 } catch (_: InvalidGeocoderResponse) {

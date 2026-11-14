@@ -3,6 +3,7 @@ package com.potatoes.book5.realestate.domain.usecase
 import com.potatoes.book5.realestate.domain.model.Apartment
 import com.potatoes.book5.realestate.domain.model.DrivingState
 import com.potatoes.book5.realestate.domain.model.LeaderChange
+import com.potatoes.book5.realestate.domain.model.LeaderEventKind
 import com.potatoes.book5.realestate.domain.model.RankingSnapshot
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
 import com.potatoes.book5.realestate.domain.port.DrivingStateProvider
@@ -36,18 +37,33 @@ class ObserveLeaderChangesUseCase(
     operator fun invoke(): Flow<LeaderChange> = flow {
         var previousLeader: Apartment? = null
         var lastAlertAt: LocalDateTime? = null
+        var roundId: String? = null
+        var discoveryPending = false
         rankingRepository.observeNearbyRanking().collect { snapshot ->
-            if (snapshot.loading || snapshot.error != null || snapshot.vehicle == null) return@collect
+            if (snapshot.vehicle == null) {
+                return@collect
+            }
+            if (snapshot.loading || snapshot.error != null) return@collect
+            if (roundId != snapshot.round?.id) {
+                roundId = snapshot.round?.id
+                previousLeader = null
+                lastAlertAt = null
+                discoveryPending = snapshot.round != null
+            }
             val leader = snapshot.leader ?: return@collect
             val before = previousLeader
             previousLeader = leader.apartment
-            if (before == null || before.id == leader.apartment.id) return@collect
+            val discovered = discoveryPending
+            discoveryPending = false
+            if (!discovered && (before == null || before.id == leader.apartment.id)) return@collect
             val at = now()
             val tooSoon = lastAlertAt?.let { Duration.between(it, at) < minInterval } ?: false
             val enabled = consentRepository.get()?.leaderAlertEnabled ?: false
-            if (enabled && !tooSoon) {
+            if (enabled && (discovered || !tooSoon)) {
                 lastAlertAt = at
-                emit(LeaderChange(previous = before, current = leader, at = at))
+                emit(LeaderChange(previous = before ?: leader.apartment, current = leader, at = at,
+                    kind = if (discovered) LeaderEventKind.DISCOVERED else LeaderEventKind.REPLACED,
+                    districtName = snapshot.round?.districtName))
             }
         }
     }

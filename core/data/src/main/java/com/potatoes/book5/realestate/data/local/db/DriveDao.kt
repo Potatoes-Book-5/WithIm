@@ -9,6 +9,33 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DriveDao {
+    @Query("SELECT * FROM drive_region_rounds WHERE session_id = :id AND round_id = :roundId")
+    suspend fun round(id: Long, roundId: String): DriveRegionRoundEntity?
+
+    @Insert
+    suspend fun insertRound(round: DriveRegionRoundEntity)
+
+    @Query("UPDATE drive_region_rounds SET ended_at = :at WHERE session_id = :id AND ended_at IS NULL AND round_id != :except")
+    suspend fun closeRounds(id: Long, at: Long, except: String = "")
+
+    @Query("SELECT * FROM drive_region_ranks WHERE session_id = :id AND round_id = :roundId ORDER BY rank")
+    suspend fun roundRanks(id: Long, roundId: String): List<DriveRegionRankEntity>
+
+    @Query("DELETE FROM drive_region_ranks WHERE session_id = :id AND round_id = :roundId")
+    suspend fun clearRoundRanks(id: Long, roundId: String)
+
+    @Insert
+    suspend fun insertRoundRanks(ranks: List<DriveRegionRankEntity>)
+
+    @Query("SELECT * FROM drive_region_rounds WHERE session_id = :id ORDER BY started_at, round_id")
+    fun observeRounds(id: Long): Flow<List<DriveRegionRoundEntity>>
+
+    @Query("SELECT * FROM drive_region_ranks WHERE session_id = :id ORDER BY rank")
+    fun observeRoundRanks(id: Long): Flow<List<DriveRegionRankEntity>>
+
+    @Query("SELECT COUNT(*) FROM drive_region_ranks WHERE session_id = :id")
+    suspend fun roundRankCount(id: Long): Int
+
     @Query("SELECT id FROM drive_sessions WHERE ended_at IS NULL ORDER BY started_at DESC LIMIT 1")
     suspend fun openSessionId(): Long?
 

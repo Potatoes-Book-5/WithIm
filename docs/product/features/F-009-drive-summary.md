@@ -25,7 +25,7 @@ task: T-009
 8. 지나친 관심 매물은 세션 동안 본 단지를 모으고 가장 가까웠던 거리를 남긴다.
 9. 주행 거리는 위치 SDK가 연결될 때까지 기록하지 않고 화면에서 뺀다. 공식 값이 없어 추정하지 않는다.
 
-저장은 Room `drive_sessions`, `drive_ranks`, `drive_leader_changes`, `drive_passed_interests` 테이블(v3)에 한다. 자세한 설계는 [T-018 계획](../../plans/active/T-018-drive-summary.md)에 있다.
+저장은 Room `drive_sessions`, `drive_ranks`, `drive_leader_changes`, `drive_passed_interests` 테이블 및 지역 라운드 테이블(v4)에 한다. 자세한 설계는 [T-018 계획](../../plans/active/T-018-drive-summary.md)에 있다.
 
 ## 입출력 데이터
 
@@ -67,3 +67,12 @@ task: T-009
 - [ ] 주행 거리 출처(위치 SDK, T-013)
 - [ ] 요약 보관 기간
 - [ ] 요약 공유 기능 필요 여부
+
+
+## T-031 지역별 기록과 전체 최고가
+
+확정된 각 지역 방문을 drive_region_rounds에 저장하고, 해당 방문 동안 만난 최고가 Top 3를 drive_region_ranks에 남긴다. 지역을 떠나도 이전 기록은 삭제하지 않는다. 원좌표와 변환 좌표는 저장하지 않고 지역 코드·이름·시각·단지와 가격만 기록한다.
+
+drive_leader_changes는 발견(DISCOVERED)과 같은 지역 교체(REPLACED)를 구분하고 지역 이름을 함께 남긴다. 주행 요약의 기존 순위 카드 영역에는 각 라운드를 통틀어 만난 최고가 Top 3를 표시한다. 기존 최종 순위 필드와 이전 기록은 유지한다. 지역 기록이 없는 이전 버전의 요약은 종전 최종 순위를 표시한다.
+
+Room v3→v4 자동 마이그레이션은 두 테이블과 기본값이 있는 사건 종류·지역명 열만 추가하며 기존 스크랩·주행 기록을 삭제하지 않는다. 데이터가 없는 지역으로 끝나더라도 앞선 지역 기록은 보존한다.

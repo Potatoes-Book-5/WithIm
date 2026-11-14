@@ -9,4 +9,6 @@ data class MarketDistrict(val code: String, val name: String)
 /** Finds every market district whose boundary intersects a radius' bounding box. */
 interface MarketDistrictResolver {
     suspend fun districts(center: GeoPoint, radiusKm: Double): Outcome<List<MarketDistrict>>
+    /** Exactly one containing district. Ambiguous boundaries and missing data are failures. */
+    suspend fun districtAt(point: GeoPoint): Outcome<MarketDistrict>
 }

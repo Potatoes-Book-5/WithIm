@@ -55,8 +55,9 @@ import kotlin.math.ln
 import kotlin.math.min
 import kotlin.math.sin
 
-/** 지도에 담을 반경. 5km 원이 화면 안에 들어오도록 약간 여유를 둔다(SCR-009). */
-private const val VISIBLE_RADIUS_METERS = 5_500.0
+/** Street-level camera. Ranking distance must never zoom the camera out. */
+private const val VISIBLE_RADIUS_METERS = 150.0
+private const val STREET_LEVEL_MIN_ZOOM = 18.5
 
 /** 차량을 화면 아래쪽 약 3/4 지점에 두기 위한 위쪽 콘텐츠 패딩 비율. (패딩 + 높이) / 2 = 0.74 × 높이 */
 private const val TOP_PADDING_RATIO = 0.48f
@@ -156,19 +157,25 @@ private fun NaverDrivingMap(
         val heightPx = constraints.maxHeight
         // 차량에서 위쪽(높이의 0.74)과 좌우(너비의 0.5) 중 짧은 쪽에 반경이 들어오게 한다.
         val visibleDp = with(density) { min(widthPx * 0.5f, heightPx * 0.74f).toDp().value }
-        val visibleRadius = maxOf(VISIBLE_RADIUS_METERS,
-            (ranking.maxOfOrNull { it.distanceKm } ?: 0.0) * 1_000.0 + 500.0)
+        val visibleRadius = VISIBLE_RADIUS_METERS
+        val cameraZoom = maxOf(STREET_LEVEL_MIN_ZOOM,
+            zoomFor(Projection.getMetersPerDp(center.location.latitude, 0.0), visibleDp, visibleRadius))
 
         AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize())
 
         val map = naverMap
         if (map != null) {
-            DisposableEffect(map, center, widthPx, heightPx, visibleRadius) {
+            DisposableEffect(map, center, widthPx, heightPx, cameraZoom) {
                 map.setContentPadding(0, (heightPx * TOP_PADDING_RATIO).toInt(), 0, 0)
                 map.moveCamera(
                     CameraUpdate.toCameraPosition(
-                        CameraPosition(center.location.toLatLng(), zoomFor(Projection.getMetersPerDp(center.location.latitude, 0.0), visibleDp, visibleRadius), 0.0, center.headingDeg ?: 0.0),
-                    ).animate(CameraAnimation.None),
+                        CameraPosition(center.location.toLatLng(), cameraZoom, 0.0, center.headingDeg ?: 0.0),
+                    ).animate(CameraAnimation.None).finishCallback {
+                        if (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
+                            // Verify the applied camera, without logging any coordinates.
+                            android.util.Log.d("DrivingMapCamera", "Applied zoom=" + map.cameraPosition.zoom)
+                        }
+                    },
                 )
                 onDispose { }
             }
@@ -226,10 +233,10 @@ private fun NaverMap.applyDrivingSettings() {
 }
 
 /**
- * [visibleDp] 길이에 [VISIBLE_RADIUS_METERS]가 들어가는 줌. 줌이 1 오를 때마다 dp당 미터가 절반이 된다.
+ * Convert visible length to a zoom. The live map additionally enforces a street-level minimum.
  * @param metersPerDpAtZoom0 차량 위도에서 줌 0의 dp당 미터(`Projection.getMetersPerDp`)
  */
-internal fun zoomFor(metersPerDpAtZoom0: Double, visibleDp: Float, radiusMeters: Double = VISIBLE_RADIUS_METERS): Double {
+internal fun zoomFor(metersPerDpAtZoom0: Double, visibleDp: Float, radiusMeters: Double = 5_500.0): Double {
     val wantedMetersPerDp = radiusMeters / visibleDp
     return ln(metersPerDpAtZoom0 / wantedMetersPerDp) / ln(2.0)
 }
@@ -248,13 +255,13 @@ private fun buildOverlays(
 ): List<Overlay> {
     val center = centerPose.location.toLatLng()
     val circles = listOf(
-        CircleOverlay(center, 2_000.0).apply {
+        CircleOverlay(center, 50.0).apply {
             color = android.graphics.Color.TRANSPARENT
             outlineColor = colors.accent
             outlineWidth = sizes.stroke.toInt()
             zIndex = 0
         },
-        CircleOverlay(center, 5_000.0).apply {
+        CircleOverlay(center, 100.0).apply {
             color = android.graphics.Color.TRANSPARENT
             outlineColor = withAlpha(colors.ink, 0.35f)
             outlineWidth = sizes.stroke.toInt()
@@ -267,6 +274,8 @@ private fun buildOverlays(
     val interests = interestMatches.mapNotNull { point ->
         point.location?.let { marker(it, images.interest, z = 2) }
     }
+    // Keep each pin at its real coordinate. The map viewport reveals it only as the car approaches;
+    // never pan to the leader or fit all 3 km ranking pins into the camera.
     // 1위가 가장 위에 오도록 순위가 높을수록 zIndex를 크게 한다.
     val pins = ranking.mapNotNull { item ->
         item.location?.let { location ->
