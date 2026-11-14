@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 주행 화면 SCR-004, SCR-005, SCR-009 -->
+    <string name="alert_leader_change">%1$s → %2$s</string>
+    <string name="alert_leader_detail">최근 실거래가 %1$s · %2$s</string>
+    <string name="alert_leader_title">대장 아파트가 바뀌었어요</string>
+    <string name="alert_speaking">음성 안내 중</string>
+    <string name="driving_ahead">앞 %s</string>
+    <string name="driving_badge">주행 중</string>
+    <string name="driving_behind">뒤 %s</string>
+    <string name="driving_heading_up">진행 방향 ↑</string>
+    <string name="driving_interest_meta">관심 매물 · %s</string>
+    <string name="driving_leader">대장</string>
+    <string name="driving_list_title">반경 %dkm 순위</string>
+    <string name="driving_map_note">지도를 불러올 수 없어 간이 지도로 표시</string>
+    <string name="driving_mode_map">지도</string>
+    <string name="driving_mode_rank">순위</string>
+    <string name="driving_radius">반경 %dkm</string>
+</resources>

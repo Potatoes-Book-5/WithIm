@@ -27,3 +27,4 @@ dependencyResolutionManagement {
 rootProject.name = "King-of-real-estate"
 include(":app")
 include(":core:domain", ":core:data", ":feature:yeongtong")
+include(":core:designsystem", ":core:ui", ":feature:driving")

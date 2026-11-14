@@ -1,6 +1,6 @@
 # 앱 아키텍처
 
-Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용합니다. 결정 배경은 [ADR-003](decisions/ADR-003-clean-architecture-mvi.md), [ADR-002](decisions/ADR-002-pleos-sdk-boundary.md), [ADR-008](decisions/ADR-008-gradle-module-boundaries.md)에 있습니다.
+Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용합니다. 결정 배경은 [ADR-003](decisions/ADR-003-clean-architecture-mvi.md), [ADR-002](decisions/ADR-002-pleos-sdk-boundary.md), [ADR-008](decisions/ADR-008-gradle-module-boundaries.md), [ADR-009](decisions/ADR-009-ui-module-boundaries.md)에 있습니다.
 
 ## 개발 환경 기준
 
@@ -41,7 +41,7 @@ Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용�
 | 사용 중 (T-014에서 추가) | `lifecycle-viewmodel-compose`, `lifecycle-runtime-compose` | 기존 `lifecycle` 버전 재사용. Compose UI가 1.7.8로 올라감 |
 | 사용 중 (T-014에서 직접 선언) | `kotlinx-coroutines-android`, 테스트용 `kotlinx-coroutines-test` | 1.7.3 고정 |
 | 사용 중 (T-016, [ADR-005](decisions/ADR-005-room-local-db.md)) | Room 2.6.1(`room-runtime`, `room-ktx`, `room-compiler`, 테스트용 `room-testing`), KSP 2.0.0-1.0.24 | 스크랩 저장. 스키마는 `core/data/schemas/`에 내보내 커밋하고, 버전을 올리면 마이그레이션 기기 테스트를 추가 |
-| 사용 중 (T-013, [ADR-004](decisions/ADR-004-map-sdk.md)) | 네이버 지도 SDK 3.24.1(`com.naver.maps:map-sdk`) | 주행 지도 모드. `ui/driving`에서만 쓰고 `AndroidView`로 감싼다. 키는 `local.properties`의 `naver.map.clientId` |
+| 사용 중 (T-013, [ADR-004](decisions/ADR-004-map-sdk.md)) | 네이버 지도 SDK 3.24.1(`com.naver.maps:map-sdk`) | 주행 지도 모드. `:feature:driving`에서만 쓰고 `AndroidView`로 감싼다. 키는 `local.properties`의 `naver.map.clientId` |
 | 사용 시 활성화 | Pleos Vehicle, TextToSpeech, SpeechToText, FusedLocation | [sdk-usage-map.md](platform/sdk-usage-map.md) 먼저 갱신 |
 | ADR 필요 | 내비게이션, DI 프레임워크, 그 밖의 로컬 DB, DataStore | 도입 전에 ADR 작성. HTTP는 [ADR-006](decisions/ADR-006-molit-retrofit.md)에서 결정 |
 
@@ -67,21 +67,42 @@ flowchart LR
 | `vehicle` | Pleos SDK, AAOS API 어댑터 | `domain`, SDK | `ui`, `data` |
 | `di` | 구현체 조립 | 전체 | 비즈니스 로직 |
 
-Gradle 모듈도 계층 경계를 따릅니다. `:core:domain`은 독립적이고, `:core:data`와 `:feature:yeongtong`은 `:core:domain`에만 의존합니다. `:app`은 세 모듈을 조립합니다. 화면·MVI·차량 어댑터는 `:app`에 둡니다.
+Gradle 모듈도 계층 경계를 따릅니다(Now in Android 구조, ADR-008·ADR-009).
+
+```mermaid
+flowchart TD
+    App[":app<br/>화면 전환, DI, 차량 어댑터, 미분리 화면"] --> FeatureDriving[":feature:driving"]
+    App --> CoreUi[":core:ui"]
+    App --> Data[":core:data"]
+    App --> Yeongtong[":feature:yeongtong"]
+    FeatureDriving --> CoreUi
+    CoreUi --> DesignSystem[":core:designsystem"]
+    CoreUi --> Domain[":core:domain"]
+    Data --> Domain
+    Yeongtong --> Domain
+```
+
+- `:core:domain`은 독립적입니다. `:core:data`와 `:feature:yeongtong`은 `:core:domain`에만 의존합니다.
+- `:core:designsystem`은 테마와 도메인을 모르는 공용 컴포넌트, `:core:ui`는 여러 화면이 쓰는 표시 모델·포맷·라벨입니다.
+- 화면 feature 모듈(`:feature:driving`)은 `:core:ui`까지만 의존하고 다른 feature를 참조하지 않습니다. Route는 ViewModel과 앱 설정 값을 인자로 받습니다.
+- `:app`은 모듈을 조립하고 화면 전환, ViewModel 생성, 키 주입을 맡습니다. 아직 분리하지 않은 화면과 차량 어댑터도 `:app`에 둡니다.
 
 ## 모듈과 패키지 구조
 
 ```
 King-of-real-estate/
-├── app/                 # MainActivity, Application, AppContainer, Compose UI, MVI, vehicle/
+├── app/                 # MainActivity, Application, AppContainer, 화면 전환, 미분리 화면, vehicle/
 ├── core/
+│   ├── designsystem/    # ui/theme, ui/common의 도메인 무관 컴포넌트·아이콘
+│   ├── ui/              # ui/common의 표시 모델, 포맷, 조건·스크랩 라벨과 공용 문자열
 │   ├── domain/          # domain/model, policy, error, port, usecase
 │   └── data/            # data/local, sample, remote, mapper, repository; Room schemas/
 └── feature/
+    ├── driving/         # 주행 화면 SCR-004·SCR-005·SCR-009, 네이버 지도
     └── yeongtong/       # 영통구 거래, 주소 좌표, 삼성전자 임시 기준점 UseCase
 ```
 
-`app/ui/`에는 홈·주행·스크랩·상세·마이 페이지·주행 요약·설정 화면을 둡니다. `app/vehicle/`에는 차량 SDK 어댑터와 시뮬레이션을 둡니다. 패키지명 `com.potatoes.book5.realestate`는 유지합니다. `AppContainer`가 데이터 구현과 영통구 UseCase를 조립합니다. 홈의 샘플 순위와 영통구 실거래 조회는 현재 별개 데이터 흐름입니다.
+`app/ui/`에는 아직 분리하지 않은 홈·스크랩·상세·마이 페이지·주행 요약·설정 화면을 둡니다. 화면을 feature 모듈로 옮길 때도 패키지명은 유지합니다. `app/vehicle/`에는 차량 SDK 어댑터와 시뮬레이션을 둡니다. 패키지명 `com.potatoes.book5.realestate`는 유지합니다. `AppContainer`가 데이터 구현과 영통구 UseCase를 조립합니다. 홈의 샘플 순위와 영통구 실거래 조회는 현재 별개 데이터 흐름입니다.
 
 ## 계층별 규칙
 
@@ -256,7 +277,7 @@ flowchart LR
 
 ## 의존성 주입
 
-DI 프레임워크 없이 `AppContainer`로 구현체를 수동 조립합니다. `RealEstateApplication`이 컨테이너를 보유하고 ViewModel Factory에서 사용합니다. 프레임워크가 필요해지면 ADR을 작성합니다.
+DI 프레임워크 없이 `AppContainer`로 구현체를 수동 조립합니다. `RealEstateApplication`이 컨테이너를 보유하고 ViewModel Factory(`AppViewModels`)에서 사용합니다. feature 모듈의 ViewModel도 이 Factory가 만들어 Route에 넘깁니다(ADR-009). 프레임워크가 필요해지면 ADR을 작성합니다.
 
 ## 테스트
 
@@ -288,11 +309,14 @@ King-of-real-estate/
 ├── .claude/          # 공용 스킬, 에이전트, 권한
 ├── .github/          # PR·이슈 템플릿, CODEOWNERS
 ├── harness/          # 검증, ID 발급, git 훅
-├── app/              # Android 앱, UI·MVI·차량 어댑터·DI
+├── app/              # Android 앱, 화면 전환·DI·차량 어댑터·미분리 화면
 ├── core/
+│   ├── designsystem/ # 테마·공용 컴포넌트
+│   ├── ui/           # 공용 표시 모델·포맷·문구
 │   ├── domain/       # 모델·포트·UseCase·순수 정책
 │   └── data/         # Retrofit·Room·저장소 구현
 ├── feature/
+│   ├── driving/      # 주행 화면과 지도
 │   └── yeongtong/    # 영통구 거래·좌표 기능
 ├── gradle/libs.versions.toml
 └── docs/

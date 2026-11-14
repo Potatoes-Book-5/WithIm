@@ -44,8 +44,7 @@ import com.naver.maps.map.overlay.CircleOverlay
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.Overlay
 import com.naver.maps.map.overlay.OverlayImage
-import com.potatoes.book5.realestate.BuildConfig
-import com.potatoes.book5.realestate.R
+import com.potatoes.book5.realestate.feature.driving.R
 import com.potatoes.book5.realestate.domain.model.GeoPoint
 import com.potatoes.book5.realestate.domain.model.VehiclePose
 import com.potatoes.book5.realestate.ui.common.MapPointUi
@@ -68,9 +67,9 @@ private val OtherDot = Color(0xFFA9AFBA)
  * SCR-009 주행 지도. 네이버 지도 클라이언트 ID와 차량 위치가 있으면 네이버 지도를, 없으면 간이 지도를 그린다(ADR-004).
  */
 @Composable
-fun DrivingMap(state: DrivingScreenState, modifier: Modifier = Modifier) {
+fun DrivingMap(state: DrivingScreenState, naverMapAvailable: Boolean, modifier: Modifier = Modifier) {
     val vehicle = state.vehicle
-    if (vehicle != null && BuildConfig.NAVER_MAP_CLIENT_ID.isNotBlank()) {
+    if (vehicle != null && naverMapAvailable) {
         NaverDrivingMap(vehicle, state.ranking, state.interestMatches, state.others, modifier)
     } else {
         SchematicMap(state.ranking, state.interestMatches, state.others, modifier)

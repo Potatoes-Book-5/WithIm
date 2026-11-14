@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import com.potatoes.book5.realestate.R
+import com.potatoes.book5.realestate.feature.driving.R
 import com.potatoes.book5.realestate.ui.common.CrownIcon
 import com.potatoes.book5.realestate.ui.common.MapPointUi
 import com.potatoes.book5.realestate.ui.common.RankBadge

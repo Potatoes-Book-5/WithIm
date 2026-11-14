@@ -31,7 +31,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import com.potatoes.book5.realestate.R
+import com.potatoes.book5.realestate.core.ui.R
 import com.potatoes.book5.realestate.domain.model.ScrapChangeKind
 import com.potatoes.book5.realestate.ui.theme.wpx
 import kotlin.math.abs

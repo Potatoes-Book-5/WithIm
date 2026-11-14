@@ -24,7 +24,7 @@ Pleos Connect가 제공하는 SDK는 Vehicle, NaviHelper, TextToSpeech, SpeechTo
 
 - 버전: `com.naver.maps:map-sdk` 3.24.1. 저장소는 `https://repository.map.naver.com/archive/maven`
 - 인증: 네이버 클라우드 플랫폼 Maps Application의 Client ID(Dynamic Map 선택). `local.properties`의 `naver.map.clientId` → `BuildConfig.NAVER_MAP_CLIENT_ID`로 전달하고 `Application`에서 설정한다. Client Secret은 지도 표시에 쓰지 않으므로 앱에 넣지 않는다.
-- 위치: `ui/driving/NaverDrivingMap.kt`. 지도 SDK 타입은 UI 계층 밖으로 나가지 않고, domain에는 `GeoPoint`, `VehiclePose`만 둔다.
+- 위치: `:feature:driving` 모듈의 `ui/driving/NaverDrivingMap.kt`(ADR-009). 지도 SDK 타입은 UI 계층 밖으로 나가지 않고, domain에는 `GeoPoint`, `VehiclePose`만 둔다.
 - 위치 소스: SDK의 `FusedLocationSource`(Google Play 서비스 필요)를 쓰지 않는다. 차량 위치는 도메인 데이터로 받아 직접 표시한다. 실제 위치는 Pleos FusedLocation SDK로 연결한다(F-001).
 - Compose 래퍼 라이브러리는 쓰지 않고 `AndroidView`로 `MapView`를 감싼다.
 - 클라이언트 ID가 없거나 차량 위치가 없으면 간이 지도로 대체한다.

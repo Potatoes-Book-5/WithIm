@@ -95,10 +95,12 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
     implementation(project(":feature:yeongtong"))
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:ui"))
+    implementation(project(":feature:driving"))
     // Pleos Connect SDK — 요구사항 확정 후 주석 해제
     // implementation(libs.pleos.vehicle)
 
-    implementation(libs.naver.map.sdk)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)

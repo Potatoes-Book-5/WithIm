@@ -1,11 +1,7 @@
-package com.potatoes.book5.realestate.ui
+package com.potatoes.book5.realestate.ui.driving
 
 import com.potatoes.book5.realestate.domain.model.GeoPoint
 import com.potatoes.book5.realestate.domain.model.VehiclePose
-import com.potatoes.book5.realestate.ui.driving.DrivingResult
-import com.potatoes.book5.realestate.ui.driving.DrivingScreenState
-import com.potatoes.book5.realestate.ui.driving.reduceDriving
-import com.potatoes.book5.realestate.ui.driving.zoomFor
 import kotlin.math.pow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

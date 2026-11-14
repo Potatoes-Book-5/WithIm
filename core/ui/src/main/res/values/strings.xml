@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 여러 화면이 쓰는 문구(ADR-009) -->
+    <string name="area_20s">20평대</string>
+    <string name="area_30s">30평대</string>
+    <string name="area_over_40">40평 이상</string>
+    <string name="area_under_20">20평 미만</string>
+    <string name="back">뒤로</string>
+    <string name="building_age_10">10년 이내</string>
+    <string name="building_age_10_short">준공 10년 이내</string>
+    <string name="building_age_15">15년 이내</string>
+    <string name="building_age_15_short">준공 15년 이내</string>
+    <string name="building_age_5">5년 이내</string>
+    <string name="building_age_5_short">준공 5년 이내</string>
+    <string name="detail_scrap">스크랩</string>
+    <string name="detail_scrapped">스크랩됨</string>
+    <string name="households_1000">1,000세대 이상</string>
+    <string name="households_1000_short">1,000세대+</string>
+    <string name="households_300">300세대 이상</string>
+    <string name="households_300_short">300세대+</string>
+    <string name="households_500">500세대 이상</string>
+    <string name="households_500_short">500세대+</string>
+    <string name="price_10_15">10~15억</string>
+    <string name="price_15_20">15~20억</string>
+    <string name="price_5_10">5~10억</string>
+    <string name="price_over_20">20억 이상</string>
+    <string name="price_under_5">5억 이하</string>
+    <string name="rank_n">%d위</string>
+    <string name="scrap_badge_new_deal">새 실거래</string>
+    <string name="scrap_badge_price_down">가격 ▼ %s</string>
+    <string name="scrap_badge_price_up">가격 ▲ %s</string>
+    <string name="scrap_badge_rank_change">순위 변동</string>
+</resources>
