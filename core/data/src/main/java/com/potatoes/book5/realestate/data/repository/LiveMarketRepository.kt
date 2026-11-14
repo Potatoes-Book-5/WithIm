@@ -49,6 +49,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -80,6 +81,7 @@ class LiveMarketRepository(
         val center: GeoPoint,
         val districts: List<MarketDistrict>,
         val roundId: String,
+        val dataAsOf: LocalDateTime,
     )
 
     private val mutex = Mutex()
@@ -171,12 +173,22 @@ class LiveMarketRepository(
             }
         }
         val selectedRound = round
-        if (previous != null && last != null && coverage?.from == from && coverage.to == today &&
+        val months = buildList {
+            var month = YearMonth.from(from)
+            while (month <= YearMonth.from(today)) { add(month); month = month.plusMonths(1) }
+        }
+        val keys = months.map { selectedRound.districtCode to it }
+        if (previous is Outcome.Failure && last != null && coverage?.from == from && coverage.to == today &&
             coverage.districts.singleOrNull()?.code == selectedRound.districtCode &&
             coverage.roundId == selectedRound.id &&
-            GeoMath.distanceKm(coverage.center, pose.location) < RERANK_DISTANCE_KM && Duration.between(last, now) <
-            if (previous is Outcome.Success) SUCCESS_TTL else FAILURE_TTL
-        ) return@withLock previous
+            GeoMath.distanceKm(coverage.center, pose.location) < RERANK_DISTANCE_KM &&
+            Duration.between(last, now) < FAILURE_TTL
+        ) {
+            if (generation == requestGeneration) {
+                state.value = state.value.copy(snapshot = state.value.snapshot.copy(loading = false, error = previous.error))
+            }
+            return@withLock previous // Keep the original failure time so retries cannot extend the throttle.
+        }
 
         state.value = state.value.copy(snapshot = state.value.snapshot.copy(loading = true, error = null))
         try {
@@ -185,25 +197,25 @@ class LiveMarketRepository(
                 return@withLock fail(DomainError.InvalidResponse, generation)
             }
             districtNamesByCode = districtNamesByCode + districts.associate { it.code to it.name }
-            val months = buildList {
-                var month = YearMonth.from(from)
-                while (month <= YearMonth.from(today)) { add(month); month = month.plusMonths(1) }
-            }
-            val keys = districts.flatMap { district -> months.map { district.code to it } }
-            val currentMonth = YearMonth.from(today)
-            val toFetch = keys.filter { key ->
-                val fetchedAt = monthFetchedAt[key]
-                val ttl = if (key.second == currentMonth) SUCCESS_TTL else RECENT_MONTH_TTL
-                monthRecords[key] == null || fetchedAt == null || Duration.between(fetchedAt, now) >= ttl
-            }
+            val toFetch = keys.filterNot { monthIsFresh(it, now) }
+            traceLookup("trade-cache months=${keys.size} fetch=${toFetch.size}")
             val semaphore = Semaphore(MAX_CONCURRENT_REGIONS)
             val responses = coroutineScope {
-                toFetch.map { key -> async { key to semaphore.withPermit { fetchMonth(key.first, key.second) } } }.awaitAll()
+                toFetch.map { key -> async {
+                    semaphore.withPermit {
+                        val response = fetchMonth(key.first, key.second)
+                        Triple(key, response, clock.instant())
+                    }
+                } }.awaitAll()
             }
             val fetched = mutableMapOf<Pair<String, YearMonth>, List<ApartmentTrade>>()
-            for ((key, response) in responses) when (response) {
+            val fetchedTimes = mutableMapOf<Pair<String, YearMonth>, Instant>()
+            for ((key, response, fetchedAt) in responses) when (response) {
                 is Outcome.Failure -> return@withLock fail(response.error, generation)
-                is Outcome.Success -> fetched[key] = response.value
+                is Outcome.Success -> {
+                    fetched[key] = response.value
+                    fetchedTimes[key] = fetchedAt
+                }
             }
             val window = keys.flatMap { fetched[it] ?: monthRecords.getValue(it) }
                 .filter { !it.hasCancellationNotice && it.contractDate in from..today }
@@ -214,10 +226,12 @@ class LiveMarketRepository(
                 .thenByDescending { it.second.contractDate })
 
             monthRecords.putAll(fetched)
-            fetched.keys.forEach { monthFetchedAt[it] = clock.instant() }
+            monthFetchedAt.putAll(fetchedTimes)
             recentRecords = window
             representativeById = representatives.toMap()
-            loadedCoverage = LoadedCoverage(from, today, pose.location, districts, selectedRound.id)
+            val dataAt = keys.mapNotNull { monthFetchedAt[it] }.minOrNull() ?: now
+            loadedCoverage = LoadedCoverage(from, today, pose.location, districts, selectedRound.id,
+                LocalDateTime.ofInstant(dataAt, clock.zone))
             when (val ranked = rankAtPose(pose, representatives, from, today, selectedRound, generation)) {
                 is Outcome.Failure -> return@withLock fail(ranked.error, generation)
                 is Outcome.Success -> Unit
@@ -245,34 +259,88 @@ class LiveMarketRepository(
         return Outcome.Failure(error).also { lastOutcome = it }
     }
 
-    /** Recenter on every fix; spatially throttle and cancel only superseded geocoding scans. */
+    private fun monthIsFresh(key: Pair<String, YearMonth>, at: Instant): Boolean {
+        val fetchedAt = monthFetchedAt[key] ?: return false
+        val age = Duration.between(fetchedAt, at)
+        return monthRecords.containsKey(key) && !age.isNegative && age < SUCCESS_TTL
+    }
+
+    /** Opt-in diagnostics contain only sequence numbers and counts, never locations or request URLs. */
+    private fun traceLookup(message: String) {
+        if (android.util.Log.isLoggable("LiveMarketRequest", android.util.Log.DEBUG)) {
+            android.util.Log.d("LiveMarketRequest", message)
+        }
+    }
+
+    /** Finish the active scan; retain only the newest pending spatial request. */
     override suspend fun run() = coroutineScope {
         var rankJob: Job? = null
         var districtJob: Job? = null
-        var lastDistrictCheck: Instant? = null
-        combine(locationProvider.locations, rounds) { fix, round -> fix to round }.collect { (fix, _) ->
-            val livePose = fix.usablePose()
-            val pose = livePose ?: SAMSUNG_REFERENCE_POSE
-            val sourceChanged = currentLocationSource != fix.source || usingReference != (livePose == null)
-            if (sourceChanged) {
-                locationEpoch++
-                roundTracker.interrupt()
-                districtJob?.cancel()
-                lastDistrictCheck = null
+        var locationAccessBlocked = false
+        var lastDistrictRequest: Pair<VehicleLocationState, Long>? = null
+        val rankRequests = Channel<Unit>(Channel.CONFLATED)
+        val districtRequests = Channel<Pair<VehicleLocationState, Long>>(Channel.CONFLATED)
+        launch {
+            var lastFinishedGeneration: Long? = null
+            for (request in rankRequests) {
+                rankJob = launch scan@ {
+                    delay(RERANK_DEBOUNCE_MILLIS)
+                    val pose = currentPose
+                    val generation = requestGeneration
+                    if (generation == lastFinishedGeneration) return@scan
+                    traceLookup("scan-start generation=$generation")
+                    val today = LocalDate.now(clock)
+                    val coverage = loadedCoverage
+                    if (coverage == null || coverage.from != today.minusMonths(1) || coverage.to != today ||
+                        coverage.districts.singleOrNull()?.code != currentRound()?.districtCode ||
+                        coverage.roundId != currentRound()?.id ||
+                        GeoMath.distanceKm(coverage.center, pose.location) >= RERANK_DISTANCE_KM ||
+                        Duration.between(coverage.dataAsOf, LocalDateTime.now(clock)) >= SUCCESS_TTL) {
+                        refresh()
+                    } else {
+                        mutex.withLock {
+                            val from = today.minusMonths(1)
+                            val representatives = representativeById.entries.map { it.key to it.value }
+                                .sortedWith(compareByDescending<Pair<String, ApartmentTrade>> { it.second.priceManwon }
+                                    .thenByDescending { it.second.contractDate })
+                            val selectedRound = currentRound() ?: return@withLock
+                            when (val ranked = rankAtPose(pose, representatives, from, today, selectedRound, generation)) {
+                                is Outcome.Failure -> fail(ranked.error, generation)
+                                is Outcome.Success -> Unit
+                            }
+                        }
+                    }
+                    lastFinishedGeneration = generation
+                    traceLookup("scan-end generation=$generation")
+                }
+                rankJob?.join()
             }
-            currentLocationSource = fix.source
-            usingReference = livePose == null
-            currentPose = pose
-            if (livePose == null) {
-                roundTracker.interrupt()
-                districtJob?.cancel()
-            } else if (districtJob?.isActive != true &&
-                (lastDistrictCheck == null || Duration.between(lastDistrictCheck, clock.instant()) >= DISTRICT_CHECK_INTERVAL)) {
-                lastDistrictCheck = clock.instant()
-                val epoch = locationEpoch
+        }
+        launch {
+            var lastCheck: Instant? = null
+            var lastEpoch: Long? = null
+            for (pending in districtRequests) {
+                if (lastEpoch == pending.second) {
+                    val elapsed = lastCheck?.let { Duration.between(it, clock.instant()) } ?: DISTRICT_CHECK_INTERVAL
+                    val wait = DISTRICT_CHECK_INTERVAL.minus(elapsed).toMillis()
+                    if (wait > 0) delay(wait)
+                }
+                var latest = pending
+                while (true) latest = districtRequests.tryReceive().getOrNull() ?: break
+                val (fix, epoch) = latest
+                if (epoch != locationEpoch || usingReference) continue
+                val livePose = fix.usablePose()
+                if (livePose == null) {
+                    roundTracker.interrupt()
+                    continue
+                }
+                lastCheck = clock.instant()
+                lastEpoch = epoch
                 val districtGeneration = requestGeneration
                 districtJob = launch {
+                    traceLookup("district-start generation=$districtGeneration")
                     val resolved = districtResolver.districtAt(livePose.location)
+                    traceLookup("district-end generation=$districtGeneration")
                     if (epoch != locationEpoch) return@launch
                     when (resolved) {
                         is Outcome.Failure -> {
@@ -280,7 +348,7 @@ class LiveMarketRepository(
                             if (rounds.value == null) fail(resolved.error, districtGeneration)
                         }
                         is Outcome.Success -> {
-                            if (epoch == locationEpoch && !usingReference &&
+                            if (!usingReference &&
                                 GeoMath.distanceKm(currentPose.location, livePose.location) < RERANK_DISTANCE_KM &&
                                 Duration.between(fix.observedAt, clock.instant()) <= MAX_FIX_AGE) {
                                 val district = resolved.value
@@ -289,6 +357,34 @@ class LiveMarketRepository(
                             } else roundTracker.interrupt()
                         }
                     }
+                }
+                districtJob?.join()
+            }
+        }
+        combine(locationProvider.locations, rounds) { fix, round -> fix to round }.collect { (fix, _) ->
+            val livePose = fix.usablePose()
+            val pose = livePose ?: SAMSUNG_REFERENCE_POSE
+            val accessBlocked = fix.status == LocationStatus.CONSENT_REQUIRED || fix.status == LocationStatus.PERMISSION_REQUIRED
+            if (accessBlocked && !locationAccessBlocked) {
+                rankJob?.cancel()
+                districtJob?.cancel()
+            }
+            locationAccessBlocked = accessBlocked
+            val sourceChanged = currentLocationSource != fix.source || usingReference != (livePose == null)
+            if (sourceChanged) {
+                locationEpoch++
+                roundTracker.interrupt()
+            }
+            currentLocationSource = fix.source
+            usingReference = livePose == null
+            currentPose = pose
+            if (livePose == null) {
+                roundTracker.interrupt()
+            } else {
+                val request = fix to locationEpoch
+                if (request != lastDistrictRequest) {
+                    lastDistrictRequest = request
+                    districtRequests.trySend(request)
                 }
             }
             val round = currentRound()
@@ -308,7 +404,6 @@ class LiveMarketRepository(
             }
             val shouldRank = moved || boundaryCrossed || roundChanged || sourceChanged
             if (shouldRank) requestGeneration++
-            val generation = requestGeneration
             val previousSnapshot = previousMarket.snapshot
             val previousError = previousSnapshot.error
             state.compareAndSet(previousMarket, MarketState(
@@ -317,7 +412,7 @@ class LiveMarketRepository(
                     neighborhoodName = areaLabel(),
                     vehicle = livePose,
                     mapCenter = pose,
-                    loading = shouldRank || rankJob?.isActive == true || previousSnapshot.loading,
+                    loading = shouldRank || previousSnapshot.loading,
                     error = if (shouldRank) null else previousError,
                     referenceLabel = referenceLabel(fix.source),
                     round = round.takeUnless { usingReference },
@@ -326,32 +421,8 @@ class LiveMarketRepository(
             ))
             if (shouldRank) {
                 lastRequestedPose = pose
-                rankJob?.cancel()
-                rankJob = launch {
-                    delay(RERANK_DEBOUNCE_MILLIS)
-                    val today = LocalDate.now(clock)
-                    val coverage = loadedCoverage
-                    if (coverage == null || coverage.from != today.minusMonths(1) || coverage.to != today ||
-                        coverage.districts.singleOrNull()?.code != currentRound()?.districtCode ||
-                        coverage.roundId != currentRound()?.id ||
-                        GeoMath.distanceKm(coverage.center, pose.location) >= RERANK_DISTANCE_KM) {
-                        when (refresh()) {
-                            is Outcome.Failure -> return@launch
-                            is Outcome.Success -> return@launch // refresh already ranked at the current pose.
-                        }
-                    }
-                    mutex.withLock {
-                        val from = today.minusMonths(1)
-                        val representatives = representativeById.entries.map { it.key to it.value }
-                            .sortedWith(compareByDescending<Pair<String, ApartmentTrade>> { it.second.priceManwon }
-                                .thenByDescending { it.second.contractDate })
-                        val selectedRound = currentRound() ?: return@withLock
-                        when (val ranked = rankAtPose(pose, representatives, from, today, selectedRound, generation)) {
-                            is Outcome.Failure -> fail(ranked.error, generation)
-                            is Outcome.Success -> Unit
-                        }
-                    }
-                }
+                traceLookup("queued generation=$requestGeneration")
+                rankRequests.trySend(Unit)
             }
         }
     }
@@ -432,6 +503,8 @@ class LiveMarketRepository(
                 vehicle = displayPose.takeUnless { usingReference }, loading = false, error = null,
                 mapCenter = displayPose,
                 periodStart = from, periodEnd = to, referenceLabel = referenceLabel(currentLocationSource),
+                dataAsOf = loadedCoverage?.takeIf { it.roundId == round.id && it.from == from && it.to == to }
+                    ?.dataAsOf ?: state.value.snapshot.dataAsOf,
                 round = round.takeUnless { usingReference },
             ),
             displayed.take(MAX_MAP_PINS),
@@ -667,8 +740,7 @@ class LiveMarketRepository(
         const val RERANK_DEBOUNCE_MILLIS = 400L
         val MAX_FIX_AGE: Duration = Duration.ofSeconds(30)
         val MAX_FUTURE_FIX_OFFSET: Duration = Duration.ofSeconds(-5)
-        val SUCCESS_TTL: Duration = Duration.ofSeconds(60)
-        val RECENT_MONTH_TTL: Duration = Duration.ofMinutes(5)
+        val SUCCESS_TTL: Duration = Duration.ofMinutes(5)
         val FAILURE_TTL: Duration = Duration.ofSeconds(10)
         val DISTRICT_CHECK_INTERVAL: Duration = Duration.ofSeconds(5)
     }
