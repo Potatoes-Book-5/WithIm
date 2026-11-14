@@ -56,6 +56,7 @@ class DrivingViewModel(
                         interestMatches = snapshot.interestMatches.map { it.toMapPoint() },
                         others = snapshot.others.map { it.toMapPoint() },
                         vehicle = snapshot.vehicle,
+                        mapCenter = snapshot.mapCenter,
                         referenceLabel = snapshot.referenceLabel,
                     )
                 )

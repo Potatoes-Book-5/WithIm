@@ -8,6 +8,7 @@ internal fun reduceDriving(state: DrivingScreenState, result: DrivingResult): Dr
         interestMatches = result.interestMatches,
         others = result.others,
         vehicle = result.vehicle,
+        mapCenter = result.mapCenter,
         referenceLabel = result.referenceLabel,
     )
     is DrivingResult.ModeSelected -> state.copy(mode = result.mode)

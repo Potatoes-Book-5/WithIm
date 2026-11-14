@@ -64,16 +64,18 @@ private const val TOP_PADDING_RATIO = 0.48f
 private val OtherDot = Color(0xFFA9AFBA)
 
 /**
- * SCR-009 주행 지도. 위치 또는 네이버 지도를 쓸 수 없으면 상태를 표시한다.
+ * SCR-009 주행 지도. 차량 위치가 없으면 임시 조회 기준을 중심으로 표시한다.
  */
 @Composable
 fun DrivingMap(state: DrivingScreenState, naverMapAvailable: Boolean, modifier: Modifier = Modifier) {
     val vehicle = state.vehicle
-    if (vehicle == null || !naverMapAvailable) {
+    val center = state.mapCenter ?: vehicle
+    if (center == null || !naverMapAvailable) {
         Surface(modifier = modifier, shape = RoundedCornerShape(28.wpx), color = MaterialTheme.colorScheme.surfaceVariant) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
-                    text = stringResource(if (vehicle == null) R.string.driving_location_waiting else R.string.driving_map_unavailable),
+                    text = if (center == null) state.referenceLabel ?: stringResource(R.string.driving_location_waiting)
+                        else stringResource(R.string.driving_map_unavailable),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -81,16 +83,18 @@ fun DrivingMap(state: DrivingScreenState, naverMapAvailable: Boolean, modifier: 
         }
         return
     }
-    NaverDrivingMap(vehicle, state.ranking, state.interestMatches, state.others, modifier)
+    NaverDrivingMap(center, vehicle, state.ranking, state.interestMatches, state.others, modifier)
 }
 
 /**
- * 네이버 지도 위에 차량, 순위 핀, 관심 매물, 그 밖의 단지, 거리 원을 그린다.
+ * 네이버 지도 위에 순위 핀, 관심 매물, 그 밖의 단지, 거리 원을 그린다.
+ * 차량 마커는 확인된 차량 위치가 있을 때만 그린다.
  * 진행 방향이 확인되면 그 방향을 위로, 없으면 북쪽을 위로 둔다. 주행 중 조작을 막기 위해 모든 제스처와 컨트롤을 끈다. 카메라는 애니메이션 없이 바꾼다(DD-005).
  */
 @Composable
 private fun NaverDrivingMap(
-    vehicle: VehiclePose,
+    center: VehiclePose,
+    vehicle: VehiclePose?,
     ranking: List<RankItemUi>,
     interestMatches: List<MapPointUi>,
     others: List<MapPointUi>,
@@ -159,17 +163,17 @@ private fun NaverDrivingMap(
 
         val map = naverMap
         if (map != null) {
-            DisposableEffect(map, vehicle, widthPx, heightPx, visibleRadius) {
+            DisposableEffect(map, center, widthPx, heightPx, visibleRadius) {
                 map.setContentPadding(0, (heightPx * TOP_PADDING_RATIO).toInt(), 0, 0)
                 map.moveCamera(
                     CameraUpdate.toCameraPosition(
-                        CameraPosition(vehicle.location.toLatLng(), zoomFor(Projection.getMetersPerDp(vehicle.location.latitude, 0.0), visibleDp, visibleRadius), 0.0, vehicle.headingDeg ?: 0.0),
+                        CameraPosition(center.location.toLatLng(), zoomFor(Projection.getMetersPerDp(center.location.latitude, 0.0), visibleDp, visibleRadius), 0.0, center.headingDeg ?: 0.0),
                     ).animate(CameraAnimation.None),
                 )
                 onDispose { }
             }
-            DisposableEffect(map, vehicle, ranking, interestMatches, others, images) {
-                val overlays = buildOverlays(vehicle, ranking, interestMatches, others, images, colors, sizes)
+            DisposableEffect(map, center, vehicle, ranking, interestMatches, others, images) {
+                val overlays = buildOverlays(center, vehicle, ranking, interestMatches, others, images, colors, sizes)
                 overlays.forEach { it.map = map }
                 onDispose { overlays.forEach { it.map = null } }
             }
@@ -182,7 +186,7 @@ private fun NaverDrivingMap(
             color = MaterialTheme.colorScheme.background.copy(alpha = 0.9f),
         ) {
             Text(
-                text = stringResource(if (vehicle.headingDeg == null) R.string.driving_north_up else R.string.driving_heading_up),
+                text = stringResource(if (center.headingDeg == null) R.string.driving_north_up else R.string.driving_heading_up),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.wpx, vertical = 8.wpx),
@@ -233,7 +237,8 @@ internal fun zoomFor(metersPerDpAtZoom0: Double, visibleDp: Float, radiusMeters:
 private fun GeoPoint.toLatLng() = LatLng(latitude, longitude)
 
 private fun buildOverlays(
-    vehicle: VehiclePose,
+    centerPose: VehiclePose,
+    vehicle: VehiclePose?,
     ranking: List<RankItemUi>,
     interestMatches: List<MapPointUi>,
     others: List<MapPointUi>,
@@ -241,7 +246,7 @@ private fun buildOverlays(
     colors: MarkerColors,
     sizes: MarkerSizes,
 ): List<Overlay> {
-    val center = vehicle.location.toLatLng()
+    val center = centerPose.location.toLatLng()
     val circles = listOf(
         CircleOverlay(center, 2_000.0).apply {
             color = android.graphics.Color.TRANSPARENT
@@ -272,8 +277,8 @@ private fun buildOverlays(
             }
         }
     }
-    val car = marker(vehicle.location, if (vehicle.headingDeg == null) images.vehiclePosition else images.vehicle, z = 20)
-    return circles + dots + interests + pins + car
+    val car = vehicle?.let { marker(it.location, if (it.headingDeg == null) images.vehiclePosition else images.vehicle, z = 20) }
+    return circles + dots + interests + pins + listOfNotNull(car)
 }
 
 private fun marker(location: GeoPoint, image: OverlayImage, z: Int) = Marker().apply {

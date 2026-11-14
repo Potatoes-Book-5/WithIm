@@ -78,10 +78,9 @@ class LiveMarketRepository(
 
     private val mutex = Mutex()
     private val todayAtStart = LocalDate.now(clock)
-    @Volatile private var currentPose: VehiclePose? = null
+    @Volatile private var currentPose: VehiclePose = SAMSUNG_REFERENCE_POSE
     @Volatile private var currentLocationSource: LocationSource = LocationSource.VEHICLE
-    @Volatile private var locationIssue: DomainError? = DomainError.Invalid("location-searching")
-    @Volatile private var locationIssueLabel: String = LOCATION_PENDING_LABEL
+    @Volatile private var usingReference = true
     @Volatile private var lastRankedPose: VehiclePose? = null
     @Volatile private var lastRequestedPose: VehiclePose? = null
     @Volatile private var verifiedCandidates: List<VerifiedCandidate> = emptyList()
@@ -89,17 +88,18 @@ class LiveMarketRepository(
     private val state = MutableStateFlow(
         MarketState(
             RankingSnapshot(
-                neighborhoodName = RADIUS_AREA_LABEL,
+                neighborhoodName = SAMSUNG_AREA_LABEL,
                 radiusKm = RADIUS_KM,
                 top = emptyList(),
                 interestMatches = emptyList(),
                 others = emptyList(),
                 dataAsOf = LocalDateTime.now(clock),
                 vehicle = null,
+                mapCenter = SAMSUNG_REFERENCE_POSE,
                 loading = true,
                 periodStart = todayAtStart.minusMonths(1),
                 periodEnd = todayAtStart,
-                referenceLabel = LOCATION_PENDING_LABEL,
+                referenceLabel = SAMSUNG_REFERENCE_LABEL,
             ),
             emptyList(),
         )
@@ -131,7 +131,7 @@ class LiveMarketRepository(
         val now = clock.instant()
         val today = LocalDate.now(clock)
         val from = today.minusMonths(1)
-        val pose = currentPose ?: return@withLock fail(locationIssue ?: DomainError.Invalid("location-unavailable"))
+        val pose = currentPose
         val previous = lastOutcome
         val last = lastAttempt
         val coverage = loadedCoverage
@@ -207,31 +207,10 @@ class LiveMarketRepository(
         var rankJob: Job? = null
         locationProvider.locations.collect { fix ->
             currentLocationSource = fix.source
-            val pose = fix.usablePose()
-            if (pose == null) {
-                rankJob?.cancel()
-                currentPose = null
-                lastRankedPose = null
-                lastRequestedPose = null
-                locationIssue = DomainError.Invalid(if (fix.status == LocationStatus.AVAILABLE)
-                    "location-inaccurate-or-stale" else "location-${fix.status.name.lowercase()}")
-                locationIssueLabel = if (fix.source == LocationSource.EMULATOR_ROUTE)
-                    "테스트 위치 확인 필요 · 실거래 데이터 보관 중"
-                else "차량 위치 확인 필요 · 실거래 데이터 보관 중"
-                state.value = MarketState(
-                    state.value.snapshot.copy(
-                        top = emptyList(), interestMatches = emptyList(), others = emptyList(),
-                        vehicle = null, loading = false,
-                        error = locationIssue,
-                        referenceLabel = locationIssueLabel,
-                    ),
-                    emptyList(),
-                )
-                return@collect
-            }
+            val livePose = fix.usablePose()
+            val pose = livePose ?: SAMSUNG_REFERENCE_POSE
+            usingReference = livePose == null
             currentPose = pose
-            locationIssue = null
-            locationIssueLabel = referenceLabel(fix.source)
             val known = verifiedCandidates.map { nearby(it.id, it.trade, it.point, pose) }
                 .filter { it.distanceKm <= RADIUS_KM }
                 .sortedWith(compareByDescending<NearbyApartment> { it.apartment.priceManwon }
@@ -245,13 +224,14 @@ class LiveMarketRepository(
             val shouldRank = moved || boundaryCrossed
             val previousSnapshot = state.value.snapshot
             val previousError = previousSnapshot.error
-            val locationError = previousError is DomainError.Invalid && previousError.reason.startsWith("location-")
             state.value = MarketState(
                 previousSnapshot.copy(
                     top = known.take(TOP_LIMIT), interestMatches = emptyList(), others = emptyList(),
-                    vehicle = pose,
+                    neighborhoodName = if (usingReference) SAMSUNG_AREA_LABEL else RADIUS_AREA_LABEL,
+                    vehicle = livePose,
+                    mapCenter = pose,
                     loading = shouldRank || rankJob?.isActive == true || previousSnapshot.loading,
-                    error = if (shouldRank || locationError) null else previousError,
+                    error = if (shouldRank) null else previousError,
                     referenceLabel = referenceLabel(fix.source),
                 ),
                 known.take(MAX_MAP_PINS),
@@ -338,7 +318,7 @@ class LiveMarketRepository(
             val address = trade.addressRequest() ?: return@mapNotNull null
             coordinateCache["${address.first}:${address.second}"]?.let { VerifiedCandidate(id, trade, it) }
         }
-        val displayPose = currentPose ?: return Outcome.Success(Unit)
+        val displayPose = currentPose
         if (GeoMath.distanceKm(pose.location, displayPose.location) >= RERANK_DISTANCE_KM) {
             return Outcome.Success(Unit) // A newer significant move has its own scan.
         }
@@ -350,9 +330,11 @@ class LiveMarketRepository(
         lastRequestedPose = displayPose
         state.value = MarketState(
             state.value.snapshot.copy(
-                neighborhoodName = RADIUS_AREA_LABEL, radiusKm = RADIUS_KM,
+                neighborhoodName = if (usingReference) SAMSUNG_AREA_LABEL else RADIUS_AREA_LABEL,
+                radiusKm = RADIUS_KM,
                 top = displayed.take(TOP_LIMIT), interestMatches = emptyList(), others = emptyList(),
-                vehicle = displayPose, loading = false, error = null,
+                vehicle = displayPose.takeUnless { usingReference }, loading = false, error = null,
+                mapCenter = displayPose,
                 periodStart = from, periodEnd = to, referenceLabel = referenceLabel(currentLocationSource),
             ),
             displayed.take(MAX_MAP_PINS),
@@ -553,16 +535,19 @@ class LiveMarketRepository(
         return (degrees - (pose.headingDeg ?: 0.0) + 540.0) % 360.0 - 180.0
     }
 
-    private fun referenceLabel(source: LocationSource): String = when (source) {
+    private fun referenceLabel(source: LocationSource): String = if (usingReference) SAMSUNG_REFERENCE_LABEL else when (source) {
         LocationSource.VEHICLE -> VEHICLE_REFERENCE_LABEL
         LocationSource.EMULATOR_ROUTE -> EMULATOR_REFERENCE_LABEL
     }
 
     private companion object {
         const val RADIUS_AREA_LABEL = "현재 위치 반경 10km"
-        const val LOCATION_PENDING_LABEL = "현재 위치 확인 중"
+        const val SAMSUNG_AREA_LABEL = "삼성전자 수원 본사 반경 10km"
+        const val SAMSUNG_REFERENCE_LABEL = "삼성전자 수원 본사 기준 · 차량 위치 대기 중"
         const val VEHICLE_REFERENCE_LABEL = "현재 차량 위치 · 반경 10km 실거래"
         const val EMULATOR_REFERENCE_LABEL = "테스트 위치 · 반경 10km 실거래"
+        // ADR-007: Vworld에서 삼성전자 수원 본사 주소를 변환한 WGS84 좌표.
+        val SAMSUNG_REFERENCE_POSE = VehiclePose(GeoPoint(37.253841010127545, 127.0454691833884))
         const val RADIUS_KM = 10
         const val TOP_LIMIT = 3
         const val MAX_MAP_PINS = 12

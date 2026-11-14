@@ -92,7 +92,7 @@ fun DrivingScreen(state: DrivingScreenState, onIntent: (DrivingIntent) -> Unit, 
                         }
                     }
                 }
-                DrivingTradeTable(state.actualTrades, Modifier.weight(0.43f).fillMaxHeight())
+                DrivingTradeTable(state.actualTrades, state.vehicle != null, Modifier.weight(0.43f).fillMaxHeight())
             }
         }
         when (val alert = state.alert) {
