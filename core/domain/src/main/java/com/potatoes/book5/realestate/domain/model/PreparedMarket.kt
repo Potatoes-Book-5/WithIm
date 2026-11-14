@@ -1,6 +1,5 @@
 package com.potatoes.book5.realestate.domain.model
 
-import com.potatoes.book5.realestate.domain.error.Outcome
 import java.time.Instant
 import java.time.LocalDate
 
@@ -32,8 +31,3 @@ data class PreparedDistrictPrices(
     val areaMaxExclusiveM2: Int = 90,
     val scope: String = "DISTRICT",
 )
-
-/** Synchronous memory-only read. Implementations must never initiate IO or wait on a writer. */
-fun interface PreparedScrapReader {
-    fun readScrapCandidate(apartmentId: String): Outcome<PreparedScrapCandidate>
-}

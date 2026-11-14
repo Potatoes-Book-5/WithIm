@@ -74,6 +74,7 @@ class LiveMarketRepository(
     private val clock: Clock = Clock.system(ZoneId.of("Asia/Seoul")),
     private val householdRepository: ApartmentHouseholdRepository? = null,
     private val preparedMarket: InMemoryPreparedMarket = InMemoryPreparedMarket(clock),
+    private val traceSink: ((String) -> Unit)? = null,
 ) : MarketRepository {
     private data class MarketState(val snapshot: RankingSnapshot, val located: List<NearbyApartment>)
     private data class VerifiedCandidate(val id: String, val trade: ApartmentTrade, val point: GeoPoint)
@@ -276,6 +277,7 @@ class LiveMarketRepository(
     // Both calls use the same literal; AGP 8.8 lint reports a false positive here.
     @android.annotation.SuppressLint("LogTagMismatch")
     private fun traceLookup(message: String) {
+        traceSink?.let { it(message); return }
         if (android.util.Log.isLoggable("LiveMarketRequest", android.util.Log.DEBUG)) {
             android.util.Log.d("LiveMarketRequest", message)
         }
@@ -561,6 +563,7 @@ class LiveMarketRepository(
                 is Outcome.Success -> response.value.also {
                     monthRecords[cacheKey] = it
                     monthFetchedAt[cacheKey] = clock.instant()
+                    trimMonthCache((0L..11L).mapTo(mutableSetOf()) { districtCode to end.minusMonths(it) })
                 }
             }
             records += monthTrades

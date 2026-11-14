@@ -2,6 +2,7 @@ package com.potatoes.book5.realestate.data.repository
 
 import com.potatoes.book5.realestate.domain.error.*
 import com.potatoes.book5.realestate.domain.model.*
+import com.potatoes.book5.realestate.domain.port.PreparedScrapReader
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
