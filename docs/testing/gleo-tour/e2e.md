@@ -56,3 +56,7 @@ Broadcast completed는 수신 완료일 뿐 비동기 API 성공 증거가 아�
 실제 음성 확인은 관심 매물 배너가 표시 중인 상태에서 ‘스크랩해 줘’를 말해 SCRAP_APARTMENT 선택, persisted=true callback, 배너 ‘스크랩함’, 주차 후 목록을 확인한다. P 전환·앱 background·배너 만료 뒤에는 숨겨진 Nudge를 저장하지 않아야 한다. 배너 탭과 음성을 연속 실행해도 해제되지 않아야 한다. 현재 schema의 세 함수 중 지역 저장은 단지 스크랩으로 교체됐다.
 
 T-040 최종 기록: headless emulator-5556에서 verify --device 통과(Android 16개). 별도 Gleo E2E는 9개 통과. JVM 141개 통과, release 빌드·테스트 컴파일 통과. 실제 Gleo 서비스의 자연어 해석/음성 출력·승인은 미검증이다.
+
+## 실제 기기 사전 확인 갱신
+
+[2026-11-15 실제 Gleo 확인 기록](voice-e2e-20261115.md). 현재 Gleo는 ai.umos.ambientai로 확인됐다. 이전 단순 패키지명 검색 결과를 Gleo 부재로 해석하지 않는다. 실제 발화·스키마 승인·Nudge 스크랩은 여전히 미검증이다.
