@@ -60,11 +60,11 @@
 | SCR-009 | screen | 주행 중 지도 모드 | draft | `design/screens/SCR-009-driving-map-mode.md` | T-011 | F-003, F-005, S-005, S-010 |
 | ADR-004 | decision | 지도 SDK 선정 | reserved | `decisions/ADR-004-map-sdk.md` | T-013 | - |
 | SCR-010 | screen | 마이 페이지 | draft | `design/screens/SCR-010-my-page.md` | T-011 | F-004, F-008, S-002, S-008 |
-| F-010 | feature | Gleo 대화형 앱 제어 | reserved | `product/features/F-010-gleo-app-control.md` | T-014 | - |
-| F-011 | feature | 관심 지역 저장과 진입 알림 | reserved | `product/features/F-011-interest-area-booking.md` | T-014 | - |
-| F-012 | feature | 단지 방문 내비게이션 | reserved | `product/features/F-012-apartment-navigation.md` | T-014 | - |
-| F-013 | feature | 관심 지역 데일리 브리핑 | reserved | `product/features/F-013-area-daily-briefing.md` | T-014 | - |
-| F-014 | feature | 차량 카메라 현장 스캔 | reserved | `product/features/F-014-camera-site-scan.md` | T-014 | - |
-| S-011 | scenario | 신혼부부 대화형 모빌리티 임장 | reserved | `product/scenarios/S-011-conversational-property-tour.md` | T-014 | - |
-| SCR-011 | screen | 관심 지역 목록 | reserved | `design/screens/SCR-011-interest-area-list.md` | T-014 | - |
-| SCR-012 | screen | 데일리 브리핑 | reserved | `design/screens/SCR-012-daily-briefing.md` | T-014 | - |
+| F-010 | feature | Gleo 대화형 앱 제어 | draft | `product/features/F-010-gleo-app-control.md` | T-014 | F-002, F-011, F-013, S-011 |
+| F-011 | feature | 관심 지역 저장과 진입 알림 | draft | `product/features/F-011-interest-area-booking.md` | T-014 | F-001, F-007, F-010, F-013, S-011, SCR-011, SCR-005 |
+| F-012 | feature | 단지 방문 내비게이션 | draft | `product/features/F-012-apartment-navigation.md` | T-014 | S-011, SCR-002 |
+| F-013 | feature | 관심 지역 데일리 브리핑 | draft | `product/features/F-013-area-daily-briefing.md` | T-014 | F-007, F-010, F-011, S-011, SCR-012 |
+| F-014 | feature | 차량 카메라 현장 스캔 | draft | `product/features/F-014-camera-site-scan.md` | T-014 | S-011 |
+| S-011 | scenario | 신혼부부 대화형 모빌리티 임장 | draft | `product/scenarios/S-011-conversational-property-tour.md` | T-014 | F-002, F-003, F-004, F-010, F-011, F-012, F-013, F-014, SCR-002, SCR-011, SCR-012 |
+| SCR-011 | screen | 관심 지역 목록 | draft | `design/screens/SCR-011-interest-area-list.md` | T-014 | F-007, F-011, S-011, SCR-002, SCR-012 |
+| SCR-012 | screen | 데일리 브리핑 | draft | `design/screens/SCR-012-daily-briefing.md` | T-014 | F-007, F-013, S-011, SCR-011 |

@@ -54,3 +54,7 @@ cp local.properties.example local.properties   # Pleos 키 입력 (git 제외 �
 ## 앱 정보
 
 - Package: `com.potatoes.book5.realestate`
+
+## 대화형 임장 명세
+
+기능 구현 전 검토할 문서의 진입점은 [S-011 신혼부부 6단계 임장](docs/product/scenarios/S-011-conversational-property-tour.md)입니다. 기능별 명세·플랫폼 지원 미결·화면·[82개 테스트 설계](docs/testing/gleo-tour/README.md)를 연결합니다. 문서의 제안값/확장 기능이 구현·승인되었다는 뜻은 아닙니다.

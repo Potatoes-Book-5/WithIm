@@ -1,0 +1,7 @@
+{
+  "functionName": "GET_AREA_PRICE_SUMMARY",
+  "status": "success",
+  "message": "The area price summary is available for the specified transaction filters.",
+  "mode": "voice",
+  "data": "[{\"areaName\":\"가상마을 A\",\"transactionType\":\"SALE\",\"areaMinM2\":80,\"areaMaxExclusiveM2\":90,\"sampleCount\":5,\"averagePriceKrw\":1200000000,\"highestPriceKrw\":1550000000,\"sourceAsOf\":\"2026-11-14\",\"synthetic\":true,\"areaId\":\"synthetic-area-a\",\"periodStart\":\"2026-08-17\",\"periodEndExclusive\":\"2026-11-15\",\"sourceId\":\"synthetic-sale-provider\",\"highestComplexId\":\"C\",\"highestComplexName\":\"가상 푸른아파트\"}]"
+}

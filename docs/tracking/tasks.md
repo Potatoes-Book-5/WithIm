@@ -17,4 +17,4 @@
 | T-011 | design | SCR 화면 명세 작성과 Figma 프레임 구성 | review | - | P1 | - | T-002, T-010 |
 | T-012 | docs | Clean Architecture + MVI 아키텍처 문서 작성 | review | - | P1 | ADR-003 | - |
 | T-013 | research | 지도 SDK와 지도 데이터 선정 | todo | - | P1 | - | - |
-| T-014 | docs | Gleo 대화형 임장 명세와 테스트 통합 | todo | - | P1 | - | - |
+| T-014 | docs | Gleo 대화형 임장 명세와 테스트 통합 | review | geonu | P1 | F-010~F-014, S-011, SCR-011, SCR-012 | T-001, T-005, T-013 |
