@@ -17,6 +17,7 @@ import com.potatoes.book5.realestate.ui.detail.DetailViewModel
 import com.potatoes.book5.realestate.ui.driving.DrivingViewModel
 import com.potatoes.book5.realestate.ui.home.HomeViewModel
 import com.potatoes.book5.realestate.ui.interest.InterestViewModel
+import com.potatoes.book5.realestate.ui.mypage.MyPageViewModel
 import com.potatoes.book5.realestate.ui.scrap.ScrapFilter
 import com.potatoes.book5.realestate.ui.scrap.ScrapListViewModel
 
@@ -25,6 +26,7 @@ object AppViewModels {
     /** 화면 인자. 내비게이션 라이브러리 도입 전까지 CreationExtras로 넘긴다. */
     val APARTMENT_ID_KEY = object : CreationExtras.Key<String> {}
     val SCRAP_FILTER_KEY = object : CreationExtras.Key<ScrapFilter> {}
+    val INTEREST_EDITING_KEY = object : CreationExtras.Key<Boolean> {}
 
     val Factory: ViewModelProvider.Factory = viewModelFactory {
         initializer {
@@ -40,16 +42,18 @@ object AppViewModels {
                 getInterestCondition = c.getInterestCondition,
                 saveInterestCondition = c.saveInterestCondition,
                 skipInterestCondition = c.skipInterestCondition,
+                editing = this[INTEREST_EDITING_KEY] ?: false,
             )
         }
         initializer {
             val c = container()
-            HomeViewModel(c.observeNearbyRanking, c.observeScrapSummary, c.getInterestCondition)
+            HomeViewModel(c.observeNearbyRanking, c.observeScrapSummary, c.observeInterestCondition)
         }
         initializer {
             val c = container()
             DrivingViewModel(createSavedStateHandle(), c.observeNearbyRanking, c.observeLeaderChanges)
         }
+        initializer { MyPageViewModel(container().observeMyPage) }
         initializer {
             ScrapListViewModel(this[SCRAP_FILTER_KEY] ?: ScrapFilter.ALL, container().observeScraps)
         }

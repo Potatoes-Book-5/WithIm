@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.potatoes.book5.realestate.domain.error.Outcome
 import com.potatoes.book5.realestate.domain.model.AreaRange
+import com.potatoes.book5.realestate.domain.model.BuildingAge
+import com.potatoes.book5.realestate.domain.model.HouseholdMin
 import com.potatoes.book5.realestate.domain.model.InterestCondition
 import com.potatoes.book5.realestate.domain.model.Neighborhood
 import com.potatoes.book5.realestate.domain.model.PriceRange
@@ -27,9 +29,11 @@ class InterestViewModel(
     private val getInterestCondition: GetInterestConditionUseCase,
     private val saveInterestCondition: SaveInterestConditionUseCase,
     private val skipInterestCondition: SkipInterestConditionUseCase,
+    /** 온보딩 이후 고치는 중인지. 이때 건너뛰기는 저장 없이 돌아가기만 한다. */
+    private val editing: Boolean = false,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(InterestState())
+    private val _state = MutableStateFlow(InterestState(editing = editing))
     val state: StateFlow<InterestState> = _state.asStateFlow()
 
     private val _effect = Channel<InterestEffect>(Channel.BUFFERED)
@@ -44,6 +48,8 @@ class InterestViewModel(
             is InterestIntent.ToggleNeighborhood -> apply(InterestResult.NeighborhoodToggled(intent.neighborhood))
             is InterestIntent.TogglePrice -> apply(InterestResult.PriceToggled(intent.range))
             is InterestIntent.ToggleArea -> apply(InterestResult.AreaToggled(intent.range))
+            is InterestIntent.SelectHouseholds -> apply(InterestResult.HouseholdsSelected(intent.min))
+            is InterestIntent.SelectBuildingAge -> apply(InterestResult.BuildingAgeSelected(intent.age))
             InterestIntent.VoiceSearch -> send(InterestEffect.ShowMessage(InterestMessage.VOICE_UNAVAILABLE))
             InterestIntent.Save -> save()
             InterestIntent.Skip -> skip()
@@ -70,6 +76,8 @@ class InterestViewModel(
                 neighborhoods = current.selectedNeighborhoods.map { Neighborhood(it.code, it.name) }.toSet(),
                 priceRanges = current.selectedPrices,
                 areaRanges = current.selectedAreas,
+                minHouseholds = current.selectedHouseholds,
+                maxBuildingAge = current.selectedBuildingAge,
             )
             when (saveInterestCondition(condition)) {
                 is Outcome.Success -> {
@@ -87,7 +95,8 @@ class InterestViewModel(
     private fun skip() {
         if (_state.value.isSaving) return
         viewModelScope.launch {
-            skipInterestCondition()
+            // 수정 중 취소는 저장된 조건과 알림 설정을 건드리지 않는다.
+            if (!editing) skipInterestCondition()
             send(InterestEffect.OpenHome)
         }
     }
@@ -106,6 +115,8 @@ class InterestViewModel(
         savedStateHandle[KEY_NEIGHBORHOODS] = ArrayList(state.selectedNeighborhoods.map { "${it.code}$SEP${it.name}" })
         savedStateHandle[KEY_PRICES] = ArrayList(state.selectedPrices.map { it.name })
         savedStateHandle[KEY_AREAS] = ArrayList(state.selectedAreas.map { it.name })
+        savedStateHandle[KEY_HOUSEHOLDS] = state.selectedHouseholds?.name
+        savedStateHandle[KEY_BUILDING_AGE] = state.selectedBuildingAge?.name
     }
 
     private fun restoreSelection(): InterestSelection? {
@@ -118,6 +129,10 @@ class InterestViewModel(
                 .mapNotNull { name -> PriceRange.entries.firstOrNull { it.name == name } }.toSet(),
             areas = savedStateHandle.get<ArrayList<String>>(KEY_AREAS).orEmpty()
                 .mapNotNull { name -> AreaRange.entries.firstOrNull { it.name == name } }.toSet(),
+            households = savedStateHandle.get<String>(KEY_HOUSEHOLDS)
+                ?.let { name -> HouseholdMin.entries.firstOrNull { it.name == name } },
+            buildingAge = savedStateHandle.get<String>(KEY_BUILDING_AGE)
+                ?.let { name -> BuildingAge.entries.firstOrNull { it.name == name } },
         )
     }
 
@@ -127,6 +142,8 @@ class InterestViewModel(
         neighborhoods = neighborhoods.map { it.toUi() }.toSet(),
         prices = priceRanges,
         areas = areaRanges,
+        households = minHouseholds,
+        buildingAge = maxBuildingAge,
     )
 
     private companion object {
@@ -134,5 +151,7 @@ class InterestViewModel(
         const val KEY_NEIGHBORHOODS = "interest_neighborhoods"
         const val KEY_PRICES = "interest_prices"
         const val KEY_AREAS = "interest_areas"
+        const val KEY_HOUSEHOLDS = "interest_households"
+        const val KEY_BUILDING_AGE = "interest_building_age"
     }
 }

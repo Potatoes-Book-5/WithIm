@@ -33,10 +33,15 @@ class FakeConsentRepository(var stored: ConsentSettings? = null) : ConsentReposi
 }
 
 class FakeInterestRepository(
-    var stored: InterestCondition? = null,
-    var decided: Boolean = stored != null,
+    initial: InterestCondition? = null,
+    var decided: Boolean = initial != null,
 ) : InterestRepository {
+    val flow = MutableStateFlow(initial)
+    var stored: InterestCondition?
+        get() = flow.value
+        set(value) { flow.value = value }
     override suspend fun get(): InterestCondition? = stored
+    override fun observe(): Flow<InterestCondition?> = flow
     override suspend fun save(condition: InterestCondition) {
         stored = condition
         decided = true

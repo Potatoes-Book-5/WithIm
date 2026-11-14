@@ -25,6 +25,10 @@
     <string name="interest_price">가격대</string>
     <string name="interest_area">평수</string>
     <string name="interest_multi_hint">여러 개 선택</string>
+    <string name="interest_single_hint">하나 선택</string>
+    <string name="interest_households">세대수</string>
+    <string name="interest_building_age">준공</string>
+    <string name="interest_cancel">취소</string>
     <string name="interest_voice">음성으로 동네 찾기</string>
     <string name="interest_save">이 조건으로 시작</string>
     <string name="interest_summary_empty">조건을 하나 이상 골라 주세요</string>
@@ -41,6 +45,18 @@
     <string name="area_20s">20평대</string>
     <string name="area_30s">30평대</string>
     <string name="area_over_40">40평 이상</string>
+    <string name="households_300">300세대 이상</string>
+    <string name="households_500">500세대 이상</string>
+    <string name="households_1000">1,000세대 이상</string>
+    <string name="households_300_short">300세대+</string>
+    <string name="households_500_short">500세대+</string>
+    <string name="households_1000_short">1,000세대+</string>
+    <string name="building_age_5">5년 이내</string>
+    <string name="building_age_10">10년 이내</string>
+    <string name="building_age_15">15년 이내</string>
+    <string name="building_age_5_short">준공 5년 이내</string>
+    <string name="building_age_10_short">준공 10년 이내</string>
+    <string name="building_age_15_short">준공 15년 이내</string>
 
     <!-- SCR-001 홈 -->
     <string name="home_title">임과 함께</string>
@@ -65,7 +81,6 @@
     <string name="scrap_price_up">가격 상승</string>
     <string name="scrap_price_down">가격 하락</string>
     <string name="scrap_rank_change">순위 변동</string>
-    <string name="coming_soon_my_page">마이 페이지는 준비 중이에요</string>
     <string name="coming_soon_settings">설정은 준비 중이에요</string>
     <string name="coming_soon_drive_summary">주행 요약은 준비 중이에요</string>
 
@@ -110,6 +125,27 @@
     <string name="detail_failed">단지 정보를 불러오지 못했어요</string>
     <string name="detail_retry">다시 시도</string>
     <string name="detail_scrap_failed">스크랩을 저장하지 못했어요. 다시 시도해 주세요</string>
+
+    <!-- SCR-010 마이 페이지 -->
+    <string name="my_page_title">마이 페이지</string>
+    <string name="my_page_subtitle">스크랩한 단지를 내 조건과 비교</string>
+    <string name="my_page_conditions">내 조건</string>
+    <string name="axis_price">가격대</string>
+    <string name="axis_area">평수</string>
+    <string name="axis_neighborhood">동네</string>
+    <string name="axis_households">세대수</string>
+    <string name="axis_newness">신축</string>
+    <string name="my_page_edit">조건 수정</string>
+    <string name="my_page_set_conditions">조건 정하기</string>
+    <string name="my_page_no_conditions">아직 정한 조건이 없어요</string>
+    <string name="my_page_top_title">스크랩 상위 %d곳 · 일치율 순</string>
+    <string name="my_page_match">조건 일치 %d%%</string>
+    <string name="my_page_legend">점선: 내 조건  ·  채움: 단지</string>
+    <string name="my_page_all_scraps">스크랩 전체 %d곳 보기</string>
+    <string name="my_page_changes">변동 %d건</string>
+    <string name="my_page_no_changes">새 변동 없음</string>
+    <string name="my_page_needs_condition">조건을 정하면 스크랩한 단지가 얼마나 맞는지 비교해 드려요</string>
+    <string name="my_page_no_scraps">아직 스크랩한 단지가 없어요. 단지 상세에서 스크랩하면 여기서 비교해 드려요</string>
 
     <!-- SCR-004, SCR-009, SCR-005 주행 중 -->
     <string name="driving_mode_rank">순위</string>

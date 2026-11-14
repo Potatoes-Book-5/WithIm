@@ -8,6 +8,8 @@ internal fun reduceInterest(state: InterestState, result: InterestResult): Inter
         selectedNeighborhoods = result.selection.neighborhoods,
         selectedPrices = result.selection.prices,
         selectedAreas = result.selection.areas,
+        selectedHouseholds = result.selection.households,
+        selectedBuildingAge = result.selection.buildingAge,
     )
     is InterestResult.LoadFailed -> state.copy(
         isLoading = false,
@@ -15,10 +17,14 @@ internal fun reduceInterest(state: InterestState, result: InterestResult): Inter
         selectedNeighborhoods = result.selection.neighborhoods,
         selectedPrices = result.selection.prices,
         selectedAreas = result.selection.areas,
+        selectedHouseholds = result.selection.households,
+        selectedBuildingAge = result.selection.buildingAge,
     )
     is InterestResult.NeighborhoodToggled -> state.copy(selectedNeighborhoods = state.selectedNeighborhoods.toggle(result.neighborhood))
     is InterestResult.PriceToggled -> state.copy(selectedPrices = state.selectedPrices.toggle(result.range))
     is InterestResult.AreaToggled -> state.copy(selectedAreas = state.selectedAreas.toggle(result.range))
+    is InterestResult.HouseholdsSelected -> state.copy(selectedHouseholds = result.min.takeUnless { it == state.selectedHouseholds })
+    is InterestResult.BuildingAgeSelected -> state.copy(selectedBuildingAge = result.age.takeUnless { it == state.selectedBuildingAge })
     InterestResult.Saving -> state.copy(isSaving = true)
     InterestResult.SaveFailed -> state.copy(isSaving = false)
     InterestResult.Saved -> state.copy(isSaving = false)

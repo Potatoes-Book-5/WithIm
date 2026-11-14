@@ -2,7 +2,7 @@ package com.potatoes.book5.realestate.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.potatoes.book5.realestate.domain.usecase.GetInterestConditionUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveInterestConditionUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveNearbyRankingUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveScrapSummaryUseCase
 import com.potatoes.book5.realestate.ui.Screen
@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 class HomeViewModel(
     private val observeNearbyRanking: ObserveNearbyRankingUseCase,
     private val observeScrapSummary: ObserveScrapSummaryUseCase,
-    private val getInterestCondition: GetInterestConditionUseCase,
+    private val observeInterestCondition: ObserveInterestConditionUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -29,17 +29,19 @@ class HomeViewModel(
     val effect: Flow<HomeEffect> = _effect.receiveAsFlow()
 
     init {
+        // 조건은 관찰해 마이 페이지에서 고친 내용이 홈에 바로 반영된다.
         viewModelScope.launch {
-            val condition = getInterestCondition()
-            apply(
-                HomeResult.InterestLoaded(
-                    InterestCardUi(
-                        neighborhoods = condition?.neighborhoods?.map { it.name }?.sorted().orEmpty(),
-                        prices = condition?.priceRanges.orEmpty(),
-                        areas = condition?.areaRanges.orEmpty(),
+            observeInterestCondition().collect { condition ->
+                apply(
+                    HomeResult.InterestLoaded(
+                        InterestCardUi(
+                            neighborhoods = condition?.neighborhoods?.map { it.name }?.sorted().orEmpty(),
+                            prices = condition?.priceRanges.orEmpty(),
+                            areas = condition?.areaRanges.orEmpty(),
+                        )
                     )
                 )
-            )
+            }
         }
         // 스크랩은 DB를 관찰해 상세 화면에서 바꾼 내용이 바로 반영된다.
         viewModelScope.launch {
@@ -68,11 +70,11 @@ class HomeViewModel(
 
     fun onIntent(intent: HomeIntent) {
         val effect = when (intent) {
-            HomeIntent.OpenInterest -> HomeEffect.Navigate(Screen.Interest)
+            // SCR-010: 관심 조건 카드도 마이 페이지로 연다.
+            HomeIntent.OpenInterest, HomeIntent.OpenMyPage -> HomeEffect.Navigate(Screen.MyPage)
             HomeIntent.OpenScrapChanges -> HomeEffect.Navigate(Screen.Scraps(changedOnly = (_state.value.scrap?.changedCount ?: 0) > 0))
             HomeIntent.OpenScraps -> HomeEffect.Navigate(Screen.Scraps())
             is HomeIntent.OpenApartment -> HomeEffect.Navigate(Screen.Detail(intent.id))
-            HomeIntent.OpenMyPage -> HomeEffect.ShowComingSoon(HomeDestination.MY_PAGE)
             HomeIntent.OpenSettings -> HomeEffect.ShowComingSoon(HomeDestination.SETTINGS)
             HomeIntent.OpenDriveSummary -> HomeEffect.ShowComingSoon(HomeDestination.DRIVE_SUMMARY)
         }

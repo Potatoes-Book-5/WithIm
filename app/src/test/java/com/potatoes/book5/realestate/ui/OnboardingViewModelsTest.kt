@@ -2,6 +2,8 @@ package com.potatoes.book5.realestate.ui
 
 import androidx.lifecycle.SavedStateHandle
 import com.potatoes.book5.realestate.domain.model.AreaRange
+import com.potatoes.book5.realestate.domain.model.BuildingAge
+import com.potatoes.book5.realestate.domain.model.HouseholdMin
 import com.potatoes.book5.realestate.domain.model.ConsentSettings
 import com.potatoes.book5.realestate.domain.model.InterestCondition
 import com.potatoes.book5.realestate.domain.model.Neighborhood
@@ -53,12 +55,14 @@ class OnboardingViewModelsTest {
         interest: FakeInterestRepository = FakeInterestRepository(),
         handle: SavedStateHandle = SavedStateHandle(),
         failSuggestions: Boolean = false,
+        editing: Boolean = false,
     ) = InterestViewModel(
         savedStateHandle = handle,
         getSuggestions = GetNeighborhoodSuggestionsUseCase(FakeNeighborhoodRepository(fail = failSuggestions)),
         getInterestCondition = GetInterestConditionUseCase(interest),
         saveInterestCondition = SaveInterestConditionUseCase(interest),
         skipInterestCondition = SkipInterestConditionUseCase(interest, consent),
+        editing = editing,
     )
 
     @Test
@@ -112,6 +116,38 @@ class OnboardingViewModelsTest {
     }
 
     @Test
+    fun `세대수와 준공은 하나만 고르고 다시 누르면 해제하며 함께 저장한다`() = runTest {
+        val interest = FakeInterestRepository()
+        val vm = interestViewModel(interest)
+        vm.onIntent(InterestIntent.SelectHouseholds(HouseholdMin.OVER_300))
+        vm.onIntent(InterestIntent.SelectHouseholds(HouseholdMin.OVER_1000))
+        assertEquals(HouseholdMin.OVER_1000, vm.state.value.selectedHouseholds)
+        vm.onIntent(InterestIntent.SelectBuildingAge(BuildingAge.WITHIN_5))
+        vm.onIntent(InterestIntent.SelectBuildingAge(BuildingAge.WITHIN_5))
+        assertEquals(null, vm.state.value.selectedBuildingAge)
+        vm.onIntent(InterestIntent.SelectBuildingAge(BuildingAge.WITHIN_10))
+        // 두 조건만 골라도 저장할 수 있다.
+        assertTrue(vm.state.value.canSave)
+        vm.onIntent(InterestIntent.Save)
+        assertEquals(InterestEffect.OpenHome, vm.effect.first())
+        assertEquals(HouseholdMin.OVER_1000, interest.stored!!.minHouseholds)
+        assertEquals(BuildingAge.WITHIN_10, interest.stored!!.maxBuildingAge)
+    }
+
+    @Test
+    fun `수정 중 취소는 저장된 조건과 알림을 건드리지 않는다`() = runTest {
+        val stored = InterestCondition(areaRanges = setOf(AreaRange.PY_30S))
+        val interest = FakeInterestRepository(stored)
+        val vm = interestViewModel(interest, editing = true)
+        assertTrue(vm.state.value.editing)
+        vm.onIntent(InterestIntent.ToggleArea(AreaRange.OVER_40))
+        vm.onIntent(InterestIntent.Skip)
+        assertEquals(InterestEffect.OpenHome, vm.effect.first())
+        assertEquals(stored, interest.stored)
+        assertEquals(true, consent.stored!!.interestAlertEnabled)
+    }
+
+    @Test
     fun `음성 검색은 준비 중 안내를 보여 준다`() = runTest {
         val vm = interestViewModel()
         vm.onIntent(InterestIntent.VoiceSearch)
@@ -132,10 +168,12 @@ class OnboardingViewModelsTest {
         val first = interestViewModel(handle = handle)
         first.onIntent(InterestIntent.ToggleNeighborhood(NeighborhoodUi("code-수내동", "수내동")))
         first.onIntent(InterestIntent.ToggleArea(AreaRange.OVER_40))
+        first.onIntent(InterestIntent.SelectHouseholds(HouseholdMin.OVER_500))
 
         val restored = interestViewModel(handle = handle)
         assertEquals(setOf(NeighborhoodUi("code-수내동", "수내동")), restored.state.value.selectedNeighborhoods)
         assertEquals(setOf(AreaRange.OVER_40), restored.state.value.selectedAreas)
+        assertEquals(HouseholdMin.OVER_500, restored.state.value.selectedHouseholds)
     }
 
     @Test

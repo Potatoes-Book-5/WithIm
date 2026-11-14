@@ -24,4 +24,7 @@ data class ScrapEntity(
     @ColumnInfo(name = "change_delta_manwon") val changeDeltaManwon: Long?,
     @ColumnInfo(name = "change_detected_at") val changeDetectedAt: Long?,
     @ColumnInfo(name = "change_seen") val changeSeen: Boolean,
+    /** v2(T-017). 모르면 null */
+    @ColumnInfo(name = "households") val households: Int? = null,
+    @ColumnInfo(name = "built_year") val builtYear: Int? = null,
 )

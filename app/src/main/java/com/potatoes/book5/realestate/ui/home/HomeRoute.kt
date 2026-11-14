@@ -34,7 +34,6 @@ fun HomeRoute(
                 is HomeEffect.Navigate -> onOpen(effect.screen)
                 is HomeEffect.ShowComingSoon -> {
                     val text = when (effect.destination) {
-                        HomeDestination.MY_PAGE -> R.string.coming_soon_my_page
                         HomeDestination.SETTINGS -> R.string.coming_soon_settings
                         HomeDestination.DRIVE_SUMMARY -> R.string.coming_soon_drive_summary
                     }

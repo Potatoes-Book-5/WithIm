@@ -20,6 +20,8 @@ interface ConsentRepository {
 interface InterestRepository {
     /** 저장된 관심 조건. 없거나 건너뛰었으면 null. */
     suspend fun get(): InterestCondition?
+    /** 저장된 관심 조건을 관찰한다. 저장할 때마다 새 값을 낸다. */
+    fun observe(): Flow<InterestCondition?>
     suspend fun save(condition: InterestCondition)
     suspend fun markSkipped()
     /** 저장했거나 건너뛰어 관심 조건 단계를 마쳤는지. */

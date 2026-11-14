@@ -39,7 +39,7 @@ data class HomeState(
 }
 
 /** 아직 구현하지 않은 화면 */
-enum class HomeDestination { MY_PAGE, SETTINGS, DRIVE_SUMMARY }
+enum class HomeDestination { SETTINGS, DRIVE_SUMMARY }
 
 sealed interface HomeIntent {
     data object OpenMyPage : HomeIntent

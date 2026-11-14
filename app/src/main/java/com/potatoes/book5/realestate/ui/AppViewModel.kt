@@ -26,6 +26,8 @@ sealed interface Screen {
     data class Scraps(val changedOnly: Boolean = false) : Screen
     /** SCR-002 */
     data class Detail(val apartmentId: String) : Screen
+    /** SCR-010 */
+    data object MyPage : Screen
 }
 
 data class AppState(

@@ -23,5 +23,8 @@ class ScrapMappingTest {
             change = PriceChange(ScrapChangeKind.PRICE_DOWN, -2_000, LocalDateTime.of(2026, 11, 14, 10, 30), seen = false),
         )
         assertEquals(changed, changed.toEntity(zone).toDomain(zone))
+
+        val withComplex = plain.copy(households = 1_240, builtYear = 2009)
+        assertEquals(withComplex, withComplex.toEntity(zone).toDomain(zone))
     }
 }

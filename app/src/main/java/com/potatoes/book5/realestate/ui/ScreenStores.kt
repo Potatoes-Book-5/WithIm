@@ -7,8 +7,10 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.HasDefaultViewModelProviderFactory
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.VIEW_MODEL_STORE_OWNER_KEY
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.MutableCreationExtras
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 
 /**
@@ -31,8 +33,11 @@ class ScreenStores(private val parent: ViewModelStoreOwner) {
         private val defaults = parent as? HasDefaultViewModelProviderFactory
         override val defaultViewModelProviderFactory: ViewModelProvider.Factory
             get() = defaults?.defaultViewModelProviderFactory ?: ViewModelProvider.NewInstanceFactory()
+        // SavedStateHandle도 이 항목의 저장소에 두어 스택에서 빠지면 함께 정리되게 한다.
         override val defaultViewModelCreationExtras: CreationExtras
-            get() = defaults?.defaultViewModelCreationExtras ?: CreationExtras.Empty
+            get() = MutableCreationExtras(defaults?.defaultViewModelCreationExtras ?: CreationExtras.Empty).apply {
+                set(VIEW_MODEL_STORE_OWNER_KEY, this@ScreenOwner)
+            }
     }
 }
 

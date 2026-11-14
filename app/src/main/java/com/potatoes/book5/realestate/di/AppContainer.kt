@@ -19,7 +19,9 @@ import com.potatoes.book5.realestate.domain.usecase.GetOnboardingStepUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetApartmentDetailUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetScrapUseCase
 import com.potatoes.book5.realestate.domain.usecase.MarkScrapChangeSeenUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveInterestConditionUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveIsScrappedUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveMyPageUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveScrapSummaryUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveScrapsUseCase
 import com.potatoes.book5.realestate.domain.usecase.RefreshScrapChangesUseCase
@@ -80,4 +82,7 @@ class AppContainer(context: Context) {
     val markScrapChangeSeen = MarkScrapChangeSeenUseCase(scrapRepository)
     val refreshScrapChanges = RefreshScrapChangesUseCase(scrapRepository, apartmentRepository)
     val simulateNewDeals = SimulateNewDealsUseCase(apartmentRepository, refreshScrapChanges)
+
+    val observeInterestCondition = ObserveInterestConditionUseCase(interestRepository)
+    val observeMyPage = ObserveMyPageUseCase(interestRepository, scrapRepository)
 }

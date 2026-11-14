@@ -18,6 +18,7 @@ import com.potatoes.book5.realestate.ui.dev.DevControls
 import com.potatoes.book5.realestate.ui.driving.DrivingRoute
 import com.potatoes.book5.realestate.ui.home.HomeRoute
 import com.potatoes.book5.realestate.ui.interest.InterestRoute
+import com.potatoes.book5.realestate.ui.mypage.MyPageRoute
 import com.potatoes.book5.realestate.ui.scrap.ScrapListRoute
 
 @Composable
@@ -39,7 +40,12 @@ fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)
                     onOpenInterestConditions = { viewModel.onIntent(AppIntent.ConsentFinishedWithLocation) },
                     onOpenHome = { viewModel.onIntent(AppIntent.OnboardingFinished) },
                 )
-                Screen.Interest -> InterestRoute(onOpenHome = { viewModel.onIntent(AppIntent.OnboardingFinished) })
+                Screen.Interest -> if (state.onboardingDone) {
+                    // 온보딩 뒤 조건 수정: 저장하거나 취소하면 연 화면으로 돌아간다.
+                    ProvideScreenStore(stores, currentKey) { InterestRoute(onOpenHome = onBack, editing = true) }
+                } else {
+                    InterestRoute(onOpenHome = { viewModel.onIntent(AppIntent.OnboardingFinished) })
+                }
                 Screen.Home -> HomeRoute(onOpen = open)
                 is Screen.Scraps -> ProvideScreenStore(stores, currentKey) {
                     ScrapListRoute(
@@ -50,6 +56,9 @@ fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)
                 }
                 is Screen.Detail -> ProvideScreenStore(stores, currentKey) {
                     DetailRoute(apartmentId = screen.apartmentId, onBack = onBack)
+                }
+                Screen.MyPage -> ProvideScreenStore(stores, currentKey) {
+                    MyPageRoute(onOpen = open, onBack = onBack)
                 }
             }
         }
