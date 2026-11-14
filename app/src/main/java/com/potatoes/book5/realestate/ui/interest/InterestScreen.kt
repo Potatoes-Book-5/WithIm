@@ -31,6 +31,7 @@ import com.potatoes.book5.realestate.ui.common.MicIcon
 import com.potatoes.book5.realestate.ui.common.PillButton
 import com.potatoes.book5.realestate.ui.common.PillStyle
 import com.potatoes.book5.realestate.ui.common.SelectChip
+import com.potatoes.book5.realestate.ui.common.labelRes
 import com.potatoes.book5.realestate.ui.theme.KingOfRealEstateTheme
 import com.potatoes.book5.realestate.ui.theme.wpx
 
@@ -226,21 +227,6 @@ private fun summaryText(state: InterestState): String {
         }
     }
     return parts.joinToString(" · ")
-}
-
-private fun PriceRange.labelRes(): Int = when (this) {
-    PriceRange.UNDER_5 -> R.string.price_under_5
-    PriceRange.FROM_5_TO_10 -> R.string.price_5_10
-    PriceRange.FROM_10_TO_15 -> R.string.price_10_15
-    PriceRange.FROM_15_TO_20 -> R.string.price_15_20
-    PriceRange.OVER_20 -> R.string.price_over_20
-}
-
-private fun AreaRange.labelRes(): Int = when (this) {
-    AreaRange.UNDER_20 -> R.string.area_under_20
-    AreaRange.PY_20S -> R.string.area_20s
-    AreaRange.PY_30S -> R.string.area_30s
-    AreaRange.OVER_40 -> R.string.area_over_40
 }
 
 private val previewState = InterestState(

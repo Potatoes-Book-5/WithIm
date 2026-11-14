@@ -9,12 +9,17 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.potatoes.book5.realestate.RealEstateApplication
 import com.potatoes.book5.realestate.di.AppContainer
 import com.potatoes.book5.realestate.ui.consent.ConsentViewModel
+import com.potatoes.book5.realestate.ui.driving.DrivingViewModel
+import com.potatoes.book5.realestate.ui.home.HomeViewModel
 import com.potatoes.book5.realestate.ui.interest.InterestViewModel
 
 /** AppContainer에서 ViewModel을 만든다. */
 object AppViewModels {
     val Factory: ViewModelProvider.Factory = viewModelFactory {
-        initializer { AppViewModel(container().getOnboardingStep) }
+        initializer {
+            val c = container()
+            AppViewModel(c.getOnboardingStep, c.observeDrivingState, c.simulateDriving, c.simulateAreaChange)
+        }
         initializer { ConsentViewModel(container().saveConsent) }
         initializer {
             val c = container()
@@ -25,6 +30,14 @@ object AppViewModels {
                 saveInterestCondition = c.saveInterestCondition,
                 skipInterestCondition = c.skipInterestCondition,
             )
+        }
+        initializer {
+            val c = container()
+            HomeViewModel(c.observeNearbyRanking, c.getScrapSummary, c.getInterestCondition)
+        }
+        initializer {
+            val c = container()
+            DrivingViewModel(createSavedStateHandle(), c.observeNearbyRanking, c.observeLeaderChanges)
         }
     }
 

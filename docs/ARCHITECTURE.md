@@ -75,37 +75,35 @@ com.potatoes.book5.realestate/
 ├── RealEstateApplication.kt     # AppContainer 보유
 ├── di/AppContainer.kt
 ├── ui/
-│   ├── theme/
-│   ├── common/
-│   ├── ranking/                 # SCR-001
-│   │   ├── RankingContract.kt   # State, Intent, Result, Effect
-│   │   ├── RankingReducer.kt
-│   │   ├── RankingViewModel.kt
-│   │   ├── RankingRoute.kt      # ViewModel 연결
-│   │   └── RankingScreen.kt     # 상태 없는 UI
-│   ├── detail/                  # SCR-002
+│   ├── AppRoot.kt, AppViewModel.kt  # 화면 전환, 주행 상태
+│   ├── theme/                   # 색상, 글꼴, wpx·wsp 단위
+│   ├── common/                  # 공통 컴포넌트, 형식, 아이콘
+│   ├── home/                    # SCR-001
+│   │   ├── HomeContract.kt      # State, Intent, Result, Effect
+│   │   ├── HomeReducer.kt
+│   │   ├── HomeViewModel.kt
+│   │   ├── HomeRoute.kt         # ViewModel 연결
+│   │   └── HomeScreen.kt        # 상태 없는 UI
+│   ├── consent/                 # SCR-006
 │   ├── interest/                # SCR-003
-│   ├── driving/                 # SCR-004
-│   ├── alert/                   # SCR-005
-│   └── settings/                # SCR-006
+│   ├── driving/                 # SCR-004, SCR-009, SCR-005
+│   ├── dev/                     # 개발 빌드 전용 시뮬레이션 버튼
+│   └── (예정) detail/, scrap/, mypage/, summary/
 ├── domain/
-│   ├── model/                   # Apartment, Price, InterestCondition, DrivingState
+│   ├── model/                   # Apartment, RankingSnapshot, InterestCondition, DrivingState
 │   ├── error/                   # DomainError, Outcome
-│   ├── policy/                  # RankingPolicy, MatchingPolicy, AlertPolicy
 │   ├── port/                    # 외부 의존 인터페이스
-│   └── usecase/
+│   └── usecase/                 # 대장 교체 감지 등 비즈니스 규칙 포함
 ├── data/
-│   ├── repository/
-│   ├── remote/
-│   ├── local/
-│   └── mapper/
+│   ├── local/                   # SharedPreferences 저장소
+│   ├── sample/                  # 실거래가 API(T-005) 연결 전 샘플 순위·스크랩
+│   └── (예정) remote/, mapper/
 └── vehicle/
-    ├── location/                # F-001, FusedLocation
-    ├── restriction/             # CarUxRestrictions
-    └── speech/                  # TextToSpeech, 오디오 포커스
+    ├── simulation/              # 주행 규제 연동(DI-001) 전 개발용 주행 상태
+    └── (예정) location/, restriction/, speech/
 ```
 
-현재는 `MainActivity`와 `ui/theme`만 있습니다. 패키지는 기능을 구현할 때 추가합니다.
+샘플·시뮬레이션 구현은 `di/AppContainer.kt`에서만 연결되므로, 실제 API와 SDK가 정해지면 해당 구현만 교체합니다.
 
 ## 계층별 규칙
 
