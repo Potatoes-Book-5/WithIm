@@ -25,3 +25,4 @@
 | T-019 | feature | 설정 수정 모드 구현(SCR-006) | review | - | P1 | SCR-006 | T-014 |
 | T-020 | feature | 국토부 아파트 실거래가 Retrofit 조회 | todo | - | P1 | ADR-006 | - |
 | T-021 | feature | 수원 영통구 실거래와 주소 좌표 연결 | review | - | P1 | ADR-007 | T-020 |
+| T-022 | debt | 앱 코드를 도메인 데이터 영통구 기능 모듈로 분리 | review | - | P1 | ADR-008 | T-021 |

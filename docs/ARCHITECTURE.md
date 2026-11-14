@@ -1,6 +1,6 @@
 # 앱 아키텍처
 
-Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용합니다. 결정 배경은 [ADR-003](decisions/ADR-003-clean-architecture-mvi.md)과 [ADR-002](decisions/ADR-002-pleos-sdk-boundary.md)에 있습니다.
+Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용합니다. 결정 배경은 [ADR-003](decisions/ADR-003-clean-architecture-mvi.md), [ADR-002](decisions/ADR-002-pleos-sdk-boundary.md), [ADR-008](decisions/ADR-008-gradle-module-boundaries.md)에 있습니다.
 
 ## 개발 환경 기준
 
@@ -40,9 +40,9 @@ Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용�
 | 사용 가능 | Compose UI, Material3, `lifecycle-viewmodel`, `lifecycle-viewmodel-savedstate`, `lifecycle-runtime-ktx` | 그대로 사용 |
 | 사용 중 (T-014에서 추가) | `lifecycle-viewmodel-compose`, `lifecycle-runtime-compose` | 기존 `lifecycle` 버전 재사용. Compose UI가 1.7.8로 올라감 |
 | 사용 중 (T-014에서 직접 선언) | `kotlinx-coroutines-android`, 테스트용 `kotlinx-coroutines-test` | 1.7.3 고정 |
-| 사용 중 (T-016, [ADR-005](decisions/ADR-005-room-local-db.md)) | Room 2.6.1(`room-runtime`, `room-ktx`, `room-compiler`, 테스트용 `room-testing`), KSP 2.0.0-1.0.24 | 스크랩 저장. 스키마는 `app/schemas/`에 내보내 커밋하고, 버전을 올리면 마이그레이션 기기 테스트를 추가 |
+| 사용 중 (T-016, [ADR-005](decisions/ADR-005-room-local-db.md)) | Room 2.6.1(`room-runtime`, `room-ktx`, `room-compiler`, 테스트용 `room-testing`), KSP 2.0.0-1.0.24 | 스크랩 저장. 스키마는 `core/data/schemas/`에 내보내 커밋하고, 버전을 올리면 마이그레이션 기기 테스트를 추가 |
 | 사용 시 활성화 | Pleos Vehicle, TextToSpeech, SpeechToText, FusedLocation | [sdk-usage-map.md](platform/sdk-usage-map.md) 먼저 갱신 |
-| ADR 필요 | 내비게이션, DI 프레임워크, HTTP, 그 밖의 로컬 DB, DataStore | 도입 전에 ADR 작성 |
+| ADR 필요 | 내비게이션, DI 프레임워크, 그 밖의 로컬 DB, DataStore | 도입 전에 ADR 작성. HTTP는 [ADR-006](decisions/ADR-006-molit-retrofit.md)에서 결정 |
 
 ## 계층과 의존 방향
 
@@ -66,52 +66,21 @@ flowchart LR
 | `vehicle` | Pleos SDK, AAOS API 어댑터 | `domain`, SDK | `ui`, `data` |
 | `di` | 구현체 조립 | 전체 | 비즈니스 로직 |
 
-Gradle 모듈은 단일 `app`을 유지하고 계층은 패키지로 구분합니다.
+Gradle 모듈도 계층 경계를 따릅니다. `:core:domain`은 독립적이고, `:core:data`와 `:feature:yeongtong`은 `:core:domain`에만 의존합니다. `:app`은 세 모듈을 조립합니다. 화면·MVI·차량 어댑터는 `:app`에 둡니다.
 
-## 패키지 구조
+## 모듈과 패키지 구조
 
 ```
-com.potatoes.book5.realestate/
-├── MainActivity.kt
-├── RealEstateApplication.kt     # AppContainer 보유, 주행 기록기 실행(앱 프로세스 범위)
-├── di/AppContainer.kt
-├── ui/
-│   ├── AppRoot.kt, AppViewModel.kt  # 화면 스택, 주행 상태
-│   ├── AppViewModels.kt         # ViewModel 팩토리, 화면 인자(CreationExtras)
-│   ├── ScreenStores.kt          # 스택 항목별 ViewModelStore
-│   ├── theme/                   # 색상, 글꼴, wpx·wsp 단위
-│   ├── common/                  # 공통 컴포넌트, 형식, 아이콘
-│   ├── home/                    # SCR-001
-│   │   ├── HomeContract.kt      # State, Intent, Result, Effect
-│   │   ├── HomeReducer.kt
-│   │   ├── HomeViewModel.kt
-│   │   ├── HomeRoute.kt         # ViewModel 연결
-│   │   └── HomeScreen.kt        # 상태 없는 UI
-│   ├── consent/                 # SCR-006
-│   ├── interest/                # SCR-003
-│   ├── driving/                 # SCR-004, SCR-009, SCR-005
-│   ├── dev/                     # 개발 빌드 전용 시뮬레이션 버튼
-│   ├── scrap/                   # SCR-007
-│   ├── detail/                  # SCR-002
-│   ├── mypage/                  # SCR-010
-│   └── summary/                 # SCR-008
-├── domain/
-│   ├── model/                   # Apartment, RankingSnapshot, InterestCondition, DrivingState, Scrap, ApartmentDetail
-│   ├── policy/                  # 스크랩 변동 판단, 조건 일치율 등 순수 규칙
-│   ├── error/                   # DomainError, Outcome
-│   ├── port/                    # 외부 의존 인터페이스
-│   └── usecase/                 # 대장 교체 감지 등 비즈니스 규칙 포함
-├── data/
-│   ├── local/                   # SharedPreferences 저장소, Room 스크랩 저장소
-│   │   └── db/                  # Room Entity, DAO, AppDatabase
-│   ├── sample/                  # 실거래가 API(T-005) 연결 전 샘플 순위·단지 상세·실거래
-│   └── (예정) remote/, mapper/
-└── vehicle/
-    ├── simulation/              # 주행 규제 연동(DI-001) 전 개발용 주행 상태
-    └── (예정) location/, restriction/, speech/
+King-of-real-estate/
+├── app/                 # MainActivity, Application, AppContainer, Compose UI, MVI, vehicle/
+├── core/
+│   ├── domain/          # domain/model, policy, error, port, usecase
+│   └── data/            # data/local, sample, remote, mapper, repository; Room schemas/
+└── feature/
+    └── yeongtong/       # 영통구 거래, 주소 좌표, 삼성전자 임시 기준점 UseCase
 ```
 
-샘플·시뮬레이션 구현은 `di/AppContainer.kt`에서만 연결되므로, 실제 API와 SDK가 정해지면 해당 구현만 교체합니다.
+`app/ui/`에는 홈·주행·스크랩·상세·마이 페이지·주행 요약·설정 화면을 둡니다. `app/vehicle/`에는 차량 SDK 어댑터와 시뮬레이션을 둡니다. 패키지명 `com.potatoes.book5.realestate`는 유지합니다. `AppContainer`가 데이터 구현과 영통구 UseCase를 조립합니다. 홈의 샘플 순위와 영통구 실거래 조회는 현재 별개 데이터 흐름입니다.
 
 ## 계층별 규칙
 
@@ -318,7 +287,12 @@ King-of-real-estate/
 ├── .claude/          # 공용 스킬, 에이전트, 권한
 ├── .github/          # PR·이슈 템플릿, CODEOWNERS
 ├── harness/          # 검증, ID 발급, git 훅
-├── app/              # Android 앱
+├── app/              # Android 앱, UI·MVI·차량 어댑터·DI
+├── core/
+│   ├── domain/       # 모델·포트·UseCase·순수 정책
+│   └── data/         # Retrofit·Room·저장소 구현
+├── feature/
+│   └── yeongtong/    # 영통구 거래·좌표 기능
 ├── gradle/libs.versions.toml
 └── docs/
     ├── tracking/     # 작업과 ID 색인

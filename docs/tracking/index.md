@@ -63,3 +63,4 @@
 | ADR-005 | decision | 로컬 DB로 Room 채택 | approved | `decisions/ADR-005-room-local-db.md` | T-016 | - |
 | ADR-006 | decision | 국토부 실거래가 HTTP 연동 | draft | `decisions/ADR-006-molit-retrofit.md` | T-020 | - |
 | ADR-007 | decision | 주소 좌표 변환과 임시 기준 위치 | draft | `decisions/ADR-007-geocoding-reference.md` | T-021 | - |
+| ADR-008 | decision | Gradle 모듈 경계와 의존 방향 | draft | `decisions/ADR-008-gradle-module-boundaries.md` | T-022 | - |

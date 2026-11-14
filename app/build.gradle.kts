@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.ksp)
 }
 
 // Pleos Playground 키는 git에 올라가지 않는 local.properties에서 읽습니다.
@@ -75,18 +74,14 @@ android {
     }
     // Room 마이그레이션 테스트가 내보낸 스키마를 읽는다.
     sourceSets {
-        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+        getByName("androidTest").assets.srcDir(rootProject.file("core/data/schemas"))
     }
 }
 
-// Room 스키마를 app/schemas에 내보내 버전 관리한다(ADR-005).
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
-}
-
 dependencies {
-    implementation(libs.retrofit)
-    implementation(libs.okhttp)
+    implementation(project(":core:domain"))
+    implementation(project(":core:data"))
+    implementation(project(":feature:yeongtong"))
     // Pleos Connect SDK — 요구사항 확정 후 주석 해제
     // implementation(libs.pleos.vehicle)
 
@@ -95,9 +90,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
