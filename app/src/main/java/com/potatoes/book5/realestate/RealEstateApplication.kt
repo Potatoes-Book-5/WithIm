@@ -21,5 +21,6 @@ class RealEstateApplication : Application() {
             launch { container.refreshScrapChanges() }
             container.driveSessionRecorder.run()
         }
+        container.fusedLocationBridge.start(appScope)
     }
 }

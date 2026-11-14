@@ -268,10 +268,11 @@ class LiveMarketRepository(
     private fun VehicleLocationState.usablePose(): VehiclePose? {
         if (status != LocationStatus.AVAILABLE) return null
         val current = pose ?: return null
-        val accuracy = accuracyMeters ?: return null
+        // FusedLocation은 정확도 단위가 문서에 없어 null(미제공)로 온다. 미제공이면 정확도 기준을 적용하지 않는다(T-029).
+        val accuracy = accuracyMeters
         val observed = observedAt ?: return null
         val age = Duration.between(observed, clock.instant())
-        if (!accuracy.isFinite() || accuracy !in 0.0..MAX_ACCURACY_METERS ||
+        if ((accuracy != null && (!accuracy.isFinite() || accuracy !in 0.0..MAX_ACCURACY_METERS)) ||
             age > MAX_FIX_AGE || age < MAX_FUTURE_FIX_OFFSET) return null
         val point = current.location
         if (!point.latitude.isFinite() || !point.longitude.isFinite() ||

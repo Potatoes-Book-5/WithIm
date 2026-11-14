@@ -42,7 +42,8 @@ Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용�
 | 사용 중 (T-014에서 직접 선언) | `kotlinx-coroutines-android`, 테스트용 `kotlinx-coroutines-test` | 1.7.3 고정 |
 | 사용 중 (T-016, [ADR-005](decisions/ADR-005-room-local-db.md)) | Room 2.6.1(`room-runtime`, `room-ktx`, `room-compiler`, 테스트용 `room-testing`), KSP 2.0.0-1.0.24 | 스크랩 저장. 스키마는 `core/data/schemas/`에 내보내 커밋하고, 버전을 올리면 마이그레이션 기기 테스트를 추가 |
 | 사용 중 (T-013, [ADR-004](decisions/ADR-004-map-sdk.md)) | 네이버 지도 SDK 3.24.1(`com.naver.maps:map-sdk`) | 주행 지도 모드. `:feature:driving`에서만 쓰고 `AndroidView`로 감싼다. 키는 `local.properties`의 `naver.map.clientId` |
-| 사용 시 활성화 | Pleos Vehicle, TextToSpeech, SpeechToText, FusedLocation | [sdk-usage-map.md](platform/sdk-usage-map.md) 먼저 갱신 |
+| 사용 중 (T-029) | Pleos FusedLocation 1.1.3(`ai.pleos.playground:FusedLocation`) | 차량 위치. `:app`의 `vehicle/location/PleosFusedLocationBridge`에서만 호출하고 `VehicleLocationInput`(`VehicleLocationProvider` 포트)에 넣는다([location-input.md](platform/location-input.md)) |
+| 사용 시 활성화 | Pleos Vehicle, TextToSpeech, SpeechToText | [sdk-usage-map.md](platform/sdk-usage-map.md) 먼저 갱신 |
 | ADR 필요 | 내비게이션, DI 프레임워크, 그 밖의 로컬 DB, DataStore | 도입 전에 ADR 작성. HTTP는 [ADR-006](decisions/ADR-006-molit-retrofit.md)에서 결정 |
 
 ## 계층과 의존 방향

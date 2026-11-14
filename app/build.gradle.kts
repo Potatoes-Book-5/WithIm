@@ -100,6 +100,8 @@ dependencies {
     implementation(project(":feature:driving"))
     // Pleos Connect SDK — 요구사항 확정 후 주석 해제
     // implementation(libs.pleos.vehicle)
+    // 차량 위치(F-001, T-029). 호출은 vehicle/ 패키지에만 둔다.
+    implementation(libs.pleos.fused.location)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

@@ -49,6 +49,7 @@ import com.potatoes.book5.realestate.domain.usecase.SaveConsentUseCase
 import com.potatoes.book5.realestate.domain.usecase.SaveInterestConditionUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateDrivingUseCase
 import com.potatoes.book5.realestate.domain.usecase.SkipInterestConditionUseCase
+import com.potatoes.book5.realestate.vehicle.location.PleosFusedLocationBridge
 import com.potatoes.book5.realestate.vehicle.simulation.SimulatedDrivingStateProvider
 import com.potatoes.book5.realestate.vehicle.location.VehicleLocationInput
 import kotlinx.coroutines.Dispatchers
@@ -67,6 +68,8 @@ class AppContainer(context: Context) {
     val consentChanges get() = consentRepository.observe()
     private val interestRepository: InterestRepository = PreferenceInterestRepository(prefs, Dispatchers.IO)
     val vehicleLocationProvider by lazy { VehicleLocationInput(consentRepository) }
+    /** Pleos FusedLocation → [vehicleLocationProvider](T-029). RealEstateApplication이 시작한다. */
+    val fusedLocationBridge by lazy { PleosFusedLocationBridge(context, vehicleLocationProvider, consentRepository) }
     val marketRepository by lazy {
         LiveMarketRepository(MolitRepositoryFactory.create(BuildConfig.MOLIT_API_KEY),
             VworldGeocoderFactory.create(BuildConfig.VWORLD_API_KEY), interestRepository, vehicleLocationProvider,
