@@ -22,6 +22,7 @@ import com.potatoes.book5.realestate.domain.policy.GeoMath
 import com.potatoes.book5.realestate.domain.policy.MarketRoundTracker
 import com.potatoes.book5.realestate.domain.port.AddressGeocoder
 import com.potatoes.book5.realestate.domain.port.ApartmentTradeRepository
+import com.potatoes.book5.realestate.domain.port.ApartmentHouseholdRepository
 import com.potatoes.book5.realestate.domain.port.InterestRepository
 import com.potatoes.book5.realestate.domain.port.MarketRepository
 import com.potatoes.book5.realestate.domain.port.MarketDistrict
@@ -59,6 +60,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** Real MOLIT transactions shared by ranking, neighborhood suggestions and apartment detail. */
 class LiveMarketRepository(
@@ -68,6 +70,7 @@ class LiveMarketRepository(
     private val locationProvider: VehicleLocationProvider,
     private val districtResolver: MarketDistrictResolver,
     private val clock: Clock = Clock.system(ZoneId.of("Asia/Seoul")),
+    private val householdRepository: ApartmentHouseholdRepository? = null,
 ) : MarketRepository {
     private data class MarketState(val snapshot: RankingSnapshot, val located: List<NearbyApartment>)
     private data class VerifiedCandidate(val id: String, val trade: ApartmentTrade, val point: GeoPoint)
@@ -479,7 +482,12 @@ class LiveMarketRepository(
                 name = newest.apartmentName ?: "이름 미제공",
                 district = districtNamesByCode[districtCode] ?: "법정동 코드 $districtCode",
                 neighborhood = newest.legalDong ?: "동 정보 없음",
-                households = null,
+                households = withTimeoutOrNull(8_000) {
+                    when (val count = householdRepository?.households(newest)) {
+                        is Outcome.Success -> count.value
+                        else -> null
+                    }
+                },
                 builtYear = trades.firstNotNullOfOrNull { it.builtYear },
                 minPyeong = deals.minOfOrNull { it.areaPyeong },
                 maxPyeong = deals.maxOfOrNull { it.areaPyeong },

@@ -22,6 +22,8 @@ naver.map.clientId=
 # 공공데이터포털 국토교통부 아파트 매매 실거래가 서비스 키(docs/platform/molit-api.md)
 # 포털이 주는 인코딩 키(%2B 등 포함)와 디코딩 키 모두 받는다. 백슬래시(\)는 쓰지 않는다
 MOLIT_API_KEY=
+# 공동주택 단지 목록(V4) 및 기본정보(V5) 모두 활용신청한 공공데이터포털 키. 상세 세대수 조회에 사용
+KAPT_API_KEY=
 # 브이월드 오픈 API 인증키(docs/platform/vworld-api.md). 주소 좌표 변환에 사용
 VWORLD_API_KEY=
 
