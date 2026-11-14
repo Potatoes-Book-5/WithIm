@@ -3,7 +3,11 @@ package com.potatoes.book5.realestate.di
 import android.content.Context
 import com.potatoes.book5.realestate.BuildConfig
 import com.potatoes.book5.realestate.data.remote.MolitRepositoryFactory
+import com.potatoes.book5.realestate.data.remote.VworldGeocoderFactory
 import com.potatoes.book5.realestate.domain.usecase.GetApartmentTradesUseCase
+import com.potatoes.book5.realestate.domain.usecase.GetYeongtongTradeFeedUseCase
+import com.potatoes.book5.realestate.domain.usecase.GeocodeYeongtongTradeUseCase
+import com.potatoes.book5.realestate.domain.usecase.GetSamsungReferenceTradesUseCase
 import com.potatoes.book5.realestate.data.local.PreferenceConsentRepository
 import com.potatoes.book5.realestate.data.local.PreferenceInterestRepository
 import com.potatoes.book5.realestate.data.local.SampleNeighborhoodRepository
@@ -58,6 +62,13 @@ import kotlinx.coroutines.Dispatchers
 class AppContainer(context: Context) {
     val getApartmentTrades: GetApartmentTradesUseCase by lazy {
         GetApartmentTradesUseCase(MolitRepositoryFactory.create(BuildConfig.MOLIT_API_KEY))
+    }
+    val getYeongtongTradeFeed by lazy { GetYeongtongTradeFeedUseCase(MolitRepositoryFactory.create(BuildConfig.MOLIT_API_KEY)) }
+    val geocodeYeongtongTrade by lazy {
+        GeocodeYeongtongTradeUseCase(VworldGeocoderFactory.create(BuildConfig.VWORLD_API_KEY))
+    }
+    val getSamsungReferenceTrades by lazy {
+        GetSamsungReferenceTradesUseCase(getYeongtongTradeFeed, geocodeYeongtongTrade)
     }
     private val prefs = context.getSharedPreferences("im_with_you", Context.MODE_PRIVATE)
 

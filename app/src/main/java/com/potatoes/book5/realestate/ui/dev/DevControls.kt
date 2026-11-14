@@ -1,6 +1,7 @@
 package com.potatoes.book5.realestate.ui.dev
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,6 +29,8 @@ fun DevControls(
     onNextArea: () -> Unit,
     onPublishNewDeals: () -> Unit,
     onEndDrive: () -> Unit,
+    onLookupTrades: () -> Unit,
+    tradeStatus: String?,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -36,8 +39,8 @@ fun DevControls(
         color = Color(0xCC111318),
         contentColor = Color.White,
     ) {
+        Column(modifier = Modifier.padding(horizontal = 20.wpx, vertical = 8.wpx)) {
         Row(
-            modifier = Modifier.padding(horizontal = 20.wpx, vertical = 8.wpx),
             horizontalArrangement = Arrangement.spacedBy(8.wpx),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -59,6 +62,11 @@ fun DevControls(
             TextButton(onClick = onEndDrive) {
                 Text(stringResource(R.string.dev_end_drive), style = MaterialTheme.typography.labelSmall, color = Color.White)
             }
+            if (!driving) TextButton(onClick = onLookupTrades) {
+                Text(stringResource(R.string.dev_lookup_yeongtong), style = MaterialTheme.typography.labelSmall, color = Color.White)
+            }
+        }
+        if (!driving) tradeStatus?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = Color.White) }
         }
     }
 }

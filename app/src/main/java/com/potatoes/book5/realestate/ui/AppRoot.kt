@@ -77,6 +77,8 @@ fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)
                 onNextArea = { viewModel.onIntent(AppIntent.DevMoveToNextArea) },
                 onPublishNewDeals = { viewModel.onIntent(AppIntent.DevPublishNewDeals) },
                 onEndDrive = { viewModel.onIntent(AppIntent.DevEndDrive) },
+                onLookupTrades = { viewModel.onIntent(AppIntent.DevLookupYeongtongTrades) },
+                tradeStatus = state.devTradeStatus,
                 modifier = Modifier.align(Alignment.TopCenter),
             )
         }

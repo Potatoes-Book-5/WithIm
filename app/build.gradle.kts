@@ -21,6 +21,10 @@ val molitApiKeyLiteral = providers.gradleProperty("MOLIT_API_KEY").orNull?.trim(
     .ifBlank { providers.environmentVariable("MOLIT_API_KEY").orNull?.trim().orEmpty() }
     .let { value -> "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"")
         .replace("\n", "\\n").replace("\r", "\\r") + "\"" }
+val vworldApiKeyLiteral = providers.gradleProperty("VWORLD_API_KEY").orNull?.trim().orEmpty()
+    .ifBlank { providers.environmentVariable("VWORLD_API_KEY").orNull?.trim().orEmpty() }
+    .let { value -> "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"")
+        .replace("\n", "\\n").replace("\r", "\\r") + "\"" }
 
 android {
     namespace = "com.potatoes.book5.realestate"
@@ -34,6 +38,7 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         buildConfigField("String", "MOLIT_API_KEY", molitApiKeyLiteral)
+        buildConfigField("String", "VWORLD_API_KEY", vworldApiKeyLiteral)
 
         buildConfigField("String", "PLEOS_PROJECT_ID", "\"${localProp("pleos.projectId")}\"")
         buildConfigField("String", "PLEOS_CLIENT_ID", "\"${localProp("pleos.clientId")}\"")

@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.potatoes.book5.realestate.domain.model.DrivingState
 import com.potatoes.book5.realestate.domain.model.OnboardingStep
+import com.potatoes.book5.realestate.domain.error.Outcome
+import com.potatoes.book5.realestate.domain.usecase.GetSamsungReferenceTradesUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetOnboardingStepUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveDrivingStateUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveUnseenDriveSummaryUseCase
@@ -12,6 +14,8 @@ import com.potatoes.book5.realestate.domain.usecase.SimulateAreaChangeUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateDriveEndUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateDrivingUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateNewDealsUseCase
+import java.time.YearMonth
+import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,6 +43,7 @@ sealed interface Screen {
 data class AppState(
     val stack: List<Screen> = listOf(Screen.Loading),
     val drivingState: DrivingState = DrivingState.PARKED,
+    val devTradeStatus: String? = null,
 ) {
     val current: Screen get() = stack.last()
     val canGoBack: Boolean get() = stack.size > 1
@@ -60,6 +65,7 @@ sealed interface AppIntent {
     data object DevMoveToNextArea : AppIntent
     data object DevPublishNewDeals : AppIntent
     data object DevEndDrive : AppIntent
+    data object DevLookupYeongtongTrades : AppIntent
 }
 
 sealed interface AppResult {
@@ -70,6 +76,7 @@ sealed interface AppResult {
     data class DrivingChanged(val state: DrivingState) : AppResult
     /** 확인하지 않은 주행 요약이 생겼다(F-009 규칙 3). */
     data class SummaryReady(val sessionId: Long) : AppResult
+    data class DevTradeStatusChanged(val status: String) : AppResult
 }
 
 internal fun reduceApp(state: AppState, result: AppResult): AppState = when (result) {
@@ -90,6 +97,7 @@ internal fun reduceApp(state: AppState, result: AppResult): AppState = when (res
     // 온보딩 중에는 띄우지 않는다. 이미 요약 화면이면 다시 쌓지 않는다.
     is AppResult.SummaryReady -> if (!state.onboardingDone || state.current is Screen.DriveSummary) state
         else state.copy(stack = state.stack + Screen.DriveSummary(result.sessionId))
+    is AppResult.DevTradeStatusChanged -> state.copy(devTradeStatus = result.status)
 }
 
 class AppViewModel(
@@ -101,6 +109,7 @@ class AppViewModel(
     private val simulateNewDeals: SimulateNewDealsUseCase,
     private val observeUnseenDriveSummary: ObserveUnseenDriveSummaryUseCase,
     private val simulateDriveEnd: SimulateDriveEndUseCase,
+    private val getSamsungReferenceTrades: GetSamsungReferenceTradesUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AppState())
@@ -127,6 +136,19 @@ class AppViewModel(
             AppIntent.DevMoveToNextArea -> simulateAreaChange()
             AppIntent.DevPublishNewDeals -> viewModelScope.launch { simulateNewDeals() }
             AppIntent.DevEndDrive -> simulateDriveEnd()
+            AppIntent.DevLookupYeongtongTrades -> viewModelScope.launch {
+                apply(AppResult.DevTradeStatusChanged("영통구 2026.09 실거래 조회 중"))
+                val status = when (val result = getSamsungReferenceTrades(YearMonth.of(2026, 9))) {
+                    is Outcome.Failure -> "영통구 조회 실패: ${result.error.javaClass.simpleName}"
+                    is Outcome.Success -> {
+                        val first = result.value.firstOrNull()
+                        if (first == null) "영통구 2026.09: 좌표 확인 거래 없음"
+                        else String.format(Locale.KOREA, "영통구 2026.09 실제 거래 %d건 · 첫 거래 삼성전자 기준 %.1fkm",
+                            result.value.size, first.distanceKm)
+                    }
+                }
+                apply(AppResult.DevTradeStatusChanged(status))
+            }
         }
     }
 

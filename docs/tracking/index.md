@@ -62,3 +62,4 @@
 | SCR-010 | screen | 마이 페이지 | draft | `design/screens/SCR-010-my-page.md` | T-011 | F-004, F-008, S-002, S-008 |
 | ADR-005 | decision | 로컬 DB로 Room 채택 | approved | `decisions/ADR-005-room-local-db.md` | T-016 | - |
 | ADR-006 | decision | 국토부 실거래가 HTTP 연동 | draft | `decisions/ADR-006-molit-retrofit.md` | T-020 | - |
+| ADR-007 | decision | 주소 좌표 변환과 임시 기준 위치 | draft | `decisions/ADR-007-geocoding-reference.md` | T-021 | - |
