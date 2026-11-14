@@ -78,7 +78,8 @@ fun DrivingScreen(state: DrivingScreenState, onIntent: (DrivingIntent) -> Unit, 
             Header(state = state, onSelect = { onIntent(DrivingIntent.SelectMode(it)) })
             Row(Modifier.weight(1f).fillMaxWidth().padding(top = 24.wpx, bottom = 48.wpx), horizontalArrangement = Arrangement.spacedBy(32.wpx)) {
                 Column(Modifier.weight(0.57f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(16.wpx)) {
-                    Text(stringResource(R.string.driving_sample_label), style = MaterialTheme.typography.labelMedium,
+                    Text(state.referenceLabel?.let { stringResource(R.string.driving_live_label, it) }
+                        ?: stringResource(R.string.driving_location_waiting), style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
                     BoxWithConstraints(Modifier.weight(1f)) {
                         when (state.mode) {
@@ -206,7 +207,7 @@ private fun RankListRow(item: RankItemUi) {
             Column(Modifier.weight(1f).padding(start = 24.wpx)) {
                 Text(item.name, style = MaterialTheme.typography.titleSmall.copy(fontWeight = MaterialTheme.typography.titleLarge.fontWeight), maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
-                    text = directionText(item.isAhead, item.distanceKm),
+                    text = directionText(item),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -221,8 +222,16 @@ private fun RankListRow(item: RankItemUi) {
 }
 
 @Composable
-private fun directionText(ahead: Boolean, km: Double): String =
-    stringResource(if (ahead) R.string.driving_ahead else R.string.driving_behind, formatDistance(km))
+private fun directionText(item: RankItemUi): String =
+    directionText(item.isAhead, item.distanceKm, item.directionKnown)
+
+@Composable
+private fun directionText(isAhead: Boolean, distanceKm: Double, directionKnown: Boolean): String =
+    if (directionKnown) {
+        stringResource(if (isAhead) R.string.driving_ahead else R.string.driving_behind, formatDistance(distanceKm))
+    } else {
+        formatDistance(distanceKm)
+    }
 
 /** 알림이 닫힐 때까지 남은 비율(1 → 0). 화면을 움직이지 않고 막대 길이만 줄인다(DD-005). */
 @Composable
@@ -269,7 +278,7 @@ private fun InterestAlertBanner(alert: InterestAlertUi, onScrap: () -> Unit) {
                 Spacer(Modifier.width(36.wpx))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        stringResource(R.string.alert_interest_title, directionText(alert.isAhead, alert.distanceKm)),
+                        stringResource(R.string.alert_interest_title, directionText(alert.isAhead, alert.distanceKm, alert.directionKnown)),
                         style = MaterialTheme.typography.labelMedium,
                     )
                     Text(alert.name, style = MaterialTheme.typography.headlineLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)

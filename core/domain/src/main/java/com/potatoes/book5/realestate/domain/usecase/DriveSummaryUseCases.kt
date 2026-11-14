@@ -57,7 +57,7 @@ class DriveSessionRecorder(
                     var sessionId = repository.openSessionId()
                     if (sessionId == null) lastLeaderId = null
                     rankingRepository.observeNearbyRanking().collect { snapshot ->
-                        if (snapshot.top.isEmpty()) return@collect
+                        if (snapshot.top.isEmpty() || snapshot.loading || snapshot.error != null) return@collect
                         val at = now()
                         val id = sessionId ?: repository.startSession(at, snapshot.radiusKm).also { sessionId = it }
                         repository.recordSnapshot(

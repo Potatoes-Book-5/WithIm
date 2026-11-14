@@ -20,6 +20,7 @@ class HomeViewModel(
     private val observeNearbyRanking: ObserveNearbyRankingUseCase,
     private val observeScrapSummary: ObserveScrapSummaryUseCase,
     private val observeInterestCondition: ObserveInterestConditionUseCase,
+    private val onRefresh: suspend () -> Unit = {},
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeState())
@@ -62,6 +63,11 @@ class HomeViewModel(
                         dataAsOf = snapshot.dataAsOf,
                         ranking = snapshot.top.mapIndexed { i, item -> item.toRankItem(i + 1) },
                         todayMatches = snapshot.interestMatches.size,
+                        loading = snapshot.loading,
+                        error = snapshot.error,
+                        periodStart = snapshot.periodStart,
+                        periodEnd = snapshot.periodEnd,
+                        referenceLabel = snapshot.referenceLabel,
                     )
                 )
             }
@@ -69,7 +75,13 @@ class HomeViewModel(
     }
 
     fun onIntent(intent: HomeIntent) {
+        if (intent == HomeIntent.Refresh) {
+            apply(HomeResult.RefreshRequested)
+            viewModelScope.launch { onRefresh() }
+            return
+        }
         val effect = when (intent) {
+            HomeIntent.Refresh -> return
             // SCR-010: 관심 조건 카드도 마이 페이지로 연다.
             HomeIntent.OpenInterest, HomeIntent.OpenMyPage -> HomeEffect.Navigate(Screen.MyPage)
             HomeIntent.OpenScrapChanges -> HomeEffect.Navigate(Screen.Scraps(changedOnly = (_state.value.scrap?.changedCount ?: 0) > 0))

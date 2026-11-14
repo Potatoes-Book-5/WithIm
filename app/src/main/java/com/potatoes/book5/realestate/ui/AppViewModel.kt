@@ -5,17 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.potatoes.book5.realestate.domain.model.DrivingState
 import com.potatoes.book5.realestate.domain.model.OnboardingStep
 import com.potatoes.book5.realestate.domain.error.Outcome
-import com.potatoes.book5.realestate.domain.usecase.GetSamsungReferenceTradesUseCase
+import com.potatoes.book5.realestate.domain.usecase.RefreshMarketUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetOnboardingStepUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveDrivingStateUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveUnseenDriveSummaryUseCase
 import com.potatoes.book5.realestate.domain.usecase.RefreshScrapChangesUseCase
-import com.potatoes.book5.realestate.domain.usecase.SimulateAreaChangeUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateDriveEndUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateDrivingUseCase
-import com.potatoes.book5.realestate.domain.usecase.SimulateNewDealsUseCase
-import java.time.YearMonth
-import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,8 +60,6 @@ sealed interface AppIntent {
     data object Back : AppIntent
     /** 개발 빌드 전용 시뮬레이션 */
     data class DevSetDriving(val driving: Boolean) : AppIntent
-    data object DevMoveToNextArea : AppIntent
-    data object DevPublishNewDeals : AppIntent
     data object DevEndDrive : AppIntent
     data object DevLookupYeongtongTrades : AppIntent
 }
@@ -108,11 +102,9 @@ class AppViewModel(
     private val observeDrivingState: ObserveDrivingStateUseCase,
     private val refreshScrapChanges: RefreshScrapChangesUseCase,
     private val simulateDriving: SimulateDrivingUseCase,
-    private val simulateAreaChange: SimulateAreaChangeUseCase,
-    private val simulateNewDeals: SimulateNewDealsUseCase,
     private val observeUnseenDriveSummary: ObserveUnseenDriveSummaryUseCase,
     private val simulateDriveEnd: SimulateDriveEndUseCase,
-    private val getSamsungReferenceTrades: GetSamsungReferenceTradesUseCase,
+    private val refreshMarket: RefreshMarketUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AppState())
@@ -122,7 +114,6 @@ class AppViewModel(
         viewModelScope.launch { apply(AppResult.StartAt(getOnboardingStep())) }
         viewModelScope.launch { observeDrivingState().collect { apply(AppResult.DrivingChanged(it)) } }
         // 앱을 실행할 때 스크랩 단지의 변동을 확인한다(F-008 규칙 4).
-        viewModelScope.launch { refreshScrapChanges() }
         // 주행 요약이 생기면 주차 중 화면 위에 띄운다. 앱이 꺼져 있었다면 다음 실행 때 띄운다(S-009).
         viewModelScope.launch {
             observeUnseenDriveSummary().collect { id -> if (id != null) apply(AppResult.SummaryReady(id)) }
@@ -136,18 +127,14 @@ class AppViewModel(
             is AppIntent.Open -> apply(AppResult.Push(intent.screen))
             AppIntent.Back -> apply(AppResult.Pop)
             is AppIntent.DevSetDriving -> simulateDriving(intent.driving)
-            AppIntent.DevMoveToNextArea -> simulateAreaChange()
-            AppIntent.DevPublishNewDeals -> viewModelScope.launch { simulateNewDeals() }
             AppIntent.DevEndDrive -> simulateDriveEnd()
             AppIntent.DevLookupYeongtongTrades -> viewModelScope.launch {
-                apply(AppResult.DevTradeStatusChanged("영통구 2026.09 실거래 조회 중"))
-                val status = when (val result = getSamsungReferenceTrades(YearMonth.of(2026, 9))) {
-                    is Outcome.Failure -> "영통구 조회 실패: ${result.error.javaClass.simpleName}"
+                apply(AppResult.DevTradeStatusChanged("최근 1개월 실거래 갱신 중"))
+                val status = when (val result = refreshMarket()) {
+                    is Outcome.Failure -> "갱신하지 못했어요. 위치와 네트워크 상태를 확인해 주세요"
                     is Outcome.Success -> {
-                        val first = result.value.firstOrNull()
-                        if (first == null) "영통구 2026.09: 좌표 확인 거래 없음"
-                        else String.format(Locale.KOREA, "영통구 2026.09 실제 거래 %d건 · 첫 거래 삼성전자 기준 %.1fkm",
-                            result.value.size, first.distanceKm)
+                        refreshScrapChanges()
+                        "최근 1개월 실거래 반영 완료"
                     }
                 }
                 apply(AppResult.DevTradeStatusChanged(status))

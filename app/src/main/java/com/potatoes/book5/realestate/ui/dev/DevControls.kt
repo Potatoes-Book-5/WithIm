@@ -26,8 +26,6 @@ import com.potatoes.book5.realestate.ui.theme.wpx
 fun DevControls(
     driving: Boolean,
     onSetDriving: (Boolean) -> Unit,
-    onNextArea: () -> Unit,
-    onPublishNewDeals: () -> Unit,
     onEndDrive: () -> Unit,
     onLookupTrades: () -> Unit,
     tradeStatus: String?,
@@ -51,12 +49,6 @@ fun DevControls(
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White,
                 )
-            }
-            TextButton(onClick = onNextArea) {
-                Text(stringResource(R.string.dev_next_area), style = MaterialTheme.typography.labelSmall, color = Color.White)
-            }
-            TextButton(onClick = onPublishNewDeals) {
-                Text(stringResource(R.string.dev_new_deals), style = MaterialTheme.typography.labelSmall, color = Color.White)
             }
             // 주차 후 3분을 기다리지 않고 세션을 닫아 요약을 만든다.
             TextButton(onClick = onEndDrive) {

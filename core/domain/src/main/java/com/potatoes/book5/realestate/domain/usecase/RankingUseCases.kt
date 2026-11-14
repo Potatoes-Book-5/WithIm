@@ -37,6 +37,7 @@ class ObserveLeaderChangesUseCase(
         var previousLeader: Apartment? = null
         var lastAlertAt: LocalDateTime? = null
         rankingRepository.observeNearbyRanking().collect { snapshot ->
+            if (snapshot.loading || snapshot.error != null) return@collect
             val leader = snapshot.leader ?: return@collect
             val before = previousLeader
             previousLeader = leader.apartment

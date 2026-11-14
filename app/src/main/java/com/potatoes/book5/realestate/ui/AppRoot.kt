@@ -81,8 +81,6 @@ fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)
             DevControls(
                 driving = state.showDriving,
                 onSetDriving = { viewModel.onIntent(AppIntent.DevSetDriving(it)) },
-                onNextArea = { viewModel.onIntent(AppIntent.DevMoveToNextArea) },
-                onPublishNewDeals = { viewModel.onIntent(AppIntent.DevPublishNewDeals) },
                 onEndDrive = { viewModel.onIntent(AppIntent.DevEndDrive) },
                 onLookupTrades = { viewModel.onIntent(AppIntent.DevLookupYeongtongTrades) },
                 tradeStatus = state.devTradeStatus,

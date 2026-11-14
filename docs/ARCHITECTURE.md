@@ -51,7 +51,7 @@ Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용�
 flowchart LR
     UI[ui<br/>Compose + MVI] --> Domain[domain<br/>UseCase, Model, Policy, Port]
     Data[data<br/>Repository 구현] --> Domain
-    Vehicle[vehicle<br/>Pleos SDK, AAOS 어댑터] --> Domain
+    Vehicle[vehicle<br/>VehicleLocationInput, 향후 Pleos 어댑터] --> Domain
     DI[di<br/>AppContainer] --> UI
     DI --> Data
     DI --> Vehicle
@@ -64,7 +64,7 @@ flowchart LR
 | `ui` | 화면, MVI 상태 관리 | `domain` | `data`, `vehicle`, SDK, DTO |
 | `domain` | 비즈니스 규칙, UseCase, 포트 | Kotlin 표준, coroutines core | `android.*`, `androidx.*`, SDK, 다른 계층 |
 | `data` | 시세 API, 캐시, 저장소 | `domain` | `ui`, `vehicle`, SDK |
-| `vehicle` | Pleos SDK, AAOS API 어댑터 | `domain`, SDK | `ui`, `data` |
+| `vehicle` | 외부 Pleos 콜백을 받을 위치 입력 포트, 향후 SDK·AAOS 어댑터 | `domain`, SDK | `ui`, `data` |
 | `di` | 구현체 조립 | 전체 | 비즈니스 로직 |
 
 Gradle 모듈도 계층 경계를 따릅니다(Now in Android 구조, ADR-008·ADR-009).
@@ -87,6 +87,12 @@ flowchart TD
 - 화면 feature 모듈(`:feature:driving`)은 `:core:ui`까지만 의존하고 다른 feature를 참조하지 않습니다. Route는 ViewModel과 앱 설정 값을 인자로 받습니다.
 - `:app`은 모듈을 조립하고 화면 전환, ViewModel 생성, 키 주입을 맡습니다. 아직 분리하지 않은 화면과 차량 어댑터도 `:app`에 둡니다.
 
+### 현재 실거래 데이터 흐름 (T-027)
+
+`app/vehicle/location/VehicleLocationInput`은 친구가 연결할 Pleos 위치 콜백의 입력 브리지다. `updateLocation(pose, accuracyMeters, observedAt, source)`로 받은 좌표를 `VehicleLocationProvider` 포트에 전달한다. 이 앱은 GPS 센서를 직접 읽거나 위치 권한을 요청하지 않는다. 브리지는 위치 동의, 정확도 100m 이하, 관측 시각 30초 이내를 확인한다. 개발 빌드의 경로 주입은 `EMULATOR_ROUTE` 출처로 구분한다. `app`이 `LiveMarketRepository.run`을 시작하고, 데이터 계층은 현재 위치 10km 경계 상자와 교차하는 시군구를 Vworld `LT_C_ADSIGG_INFO`에서 조회한 뒤 각 시군구의 최근 1개월 국토부 거래와 Vworld 주소 좌표를 조합한다. 실제 거래 좌표로 10km를 다시 거른다. 조회기간·시군구별 월별 원본은 메모리에서 재사용하며 Vworld 좌표를 DB에 저장하지 않는다. 유효 위치 갱신마다 현재 위치·지도 중심을 반영하고, 500m 이상 이동하거나 10km 포함 경계가 바뀌면 순위를 다시 평가한다.
+
+홈, `:feature:driving`의 지도·순위, 상세, 관심 동네, 스크랩, 주행 기록은 같은 실제 단지 ID와 거래 흐름을 사용한다. 국토부 응답에 없는 세대수 등은 `null`과 `정보 없음`으로 유지한다. 전달 위치에 진행 방향이 없으면 지도는 북쪽을 위로 표시하고 앞·뒤를 추정하지 않는다. Pleos 차량 위치 SDK 콜백은 아직 연결되지 않았으며, 수동 주행 상태 전환은 개발용이다. 조회 범위는 전달 위치 주변의 시군구로 동적으로 정한다.
+
 ## 모듈과 패키지 구조
 
 ```
@@ -99,10 +105,10 @@ King-of-real-estate/
 │   └── data/            # data/local, sample, remote, mapper, repository; Room schemas/
 └── feature/
     ├── driving/         # 주행 화면 SCR-004·SCR-005·SCR-009, 네이버 지도
-    └── yeongtong/       # 영통구 거래, 주소 좌표, 삼성전자 임시 기준점 UseCase
+    └── yeongtong/       # 영통구 거래, 주소 좌표 조회 UseCase
 ```
 
-`app/ui/`에는 아직 분리하지 않은 홈·스크랩·상세·마이 페이지·주행 요약·설정 화면을 둡니다. 화면을 feature 모듈로 옮길 때도 패키지명은 유지합니다. `app/vehicle/`에는 차량 SDK 어댑터와 시뮬레이션을 둡니다. 패키지명 `com.potatoes.book5.realestate`는 유지합니다. `AppContainer`가 데이터 구현과 영통구 UseCase를 조립합니다. 홈의 샘플 순위와 영통구 실거래 조회는 현재 별개 데이터 흐름입니다.
+`app/ui/`에는 아직 분리하지 않은 홈·스크랩·상세·마이 페이지·주행 요약·설정 화면을 둡니다. 화면을 feature 모듈로 옮길 때도 패키지명은 유지합니다. `app/vehicle/location/`에는 외부 차량 위치 콜백 입력 브리지를 둡니다. 패키지명 `com.potatoes.book5.realestate`는 유지합니다. `AppContainer`가 위치 입력과 데이터 구현을 조립합니다. 친구의 SDK 콜백 연결 방법은 [location-input.md](platform/location-input.md)를 봅니다.
 
 ## 계층별 규칙
 

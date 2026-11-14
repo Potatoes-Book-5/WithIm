@@ -3,8 +3,10 @@ package com.potatoes.book5.realestate.ui.home
 import com.potatoes.book5.realestate.domain.model.AreaRange
 import com.potatoes.book5.realestate.domain.model.PriceRange
 import com.potatoes.book5.realestate.domain.model.ScrapChangeKind
+import com.potatoes.book5.realestate.domain.error.DomainError
 import com.potatoes.book5.realestate.ui.Screen
 import com.potatoes.book5.realestate.ui.common.RankItemUi
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 data class ScrapCardUi(
@@ -27,6 +29,10 @@ data class HomeState(
     val neighborhoodName: String = "",
     val radiusKm: Int = 10,
     val dataAsOf: LocalDateTime? = null,
+    val periodStart: LocalDate? = null,
+    val periodEnd: LocalDate? = null,
+    val referenceLabel: String? = null,
+    val error: DomainError? = null,
     /** 1~3위. 첫 항목이 대장 아파트 */
     val ranking: List<RankItemUi> = emptyList(),
     val scrap: ScrapCardUi? = null,
@@ -39,6 +45,7 @@ data class HomeState(
 }
 
 sealed interface HomeIntent {
+    data object Refresh : HomeIntent
     data object OpenMyPage : HomeIntent
     data object OpenSettings : HomeIntent
     data object OpenInterest : HomeIntent
@@ -55,7 +62,13 @@ sealed interface HomeResult {
         val dataAsOf: LocalDateTime,
         val ranking: List<RankItemUi>,
         val todayMatches: Int,
+        val loading: Boolean = false,
+        val error: DomainError? = null,
+        val periodStart: LocalDate? = null,
+        val periodEnd: LocalDate? = null,
+        val referenceLabel: String? = null,
     ) : HomeResult
+    data object RefreshRequested : HomeResult
     data class ScrapLoaded(val scrap: ScrapCardUi) : HomeResult
     data class InterestLoaded(val interest: InterestCardUi) : HomeResult
 }

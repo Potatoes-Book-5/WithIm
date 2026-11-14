@@ -42,6 +42,7 @@ data class InterestAlertUi(
     val distanceKm: Double,
     val bearingDeg: Double,
     val scrap: ScrapButtonState = ScrapButtonState.IDLE,
+    val directionKnown: Boolean = true,
 ) : DrivingAlertUi {
     val isAhead: Boolean get() = bearingDeg in -90.0..90.0
 }
@@ -58,6 +59,7 @@ data class DrivingScreenState(
     val vehicle: VehiclePose? = null,
     val alert: DrivingAlertUi? = null,
     val actualTrades: DrivingTradeRankingUi? = null,
+    val referenceLabel: String? = null,
 )
 
 sealed interface DrivingIntent {
@@ -76,6 +78,7 @@ sealed interface DrivingResult {
         val interestMatches: List<MapPointUi>,
         val others: List<MapPointUi>,
         val vehicle: VehiclePose? = null,
+        val referenceLabel: String? = null,
     ) : DrivingResult
     data class ModeSelected(val mode: DrivingMode) : DrivingResult
     data class AlertShown(val alert: DrivingAlertUi) : DrivingResult

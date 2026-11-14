@@ -8,6 +8,7 @@ internal fun reduceDriving(state: DrivingScreenState, result: DrivingResult): Dr
         interestMatches = result.interestMatches,
         others = result.others,
         vehicle = result.vehicle,
+        referenceLabel = result.referenceLabel,
     )
     is DrivingResult.ModeSelected -> state.copy(mode = result.mode)
     // 알림이 겹치면 최신 1건만 보여 준다(F-006 규칙 5).

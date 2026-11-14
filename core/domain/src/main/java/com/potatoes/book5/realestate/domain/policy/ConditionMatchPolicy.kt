@@ -43,7 +43,7 @@ object ConditionMatchPolicy {
         mapOf(
             MatchAxis.PRICE to priceScore(condition.priceRanges, scrap.last.priceManwon),
             MatchAxis.AREA to areaScore(condition.areaRanges, scrap.areaPyeong),
-            MatchAxis.NEIGHBORHOOD to neighborhoodScore(condition, scrap.neighborhood),
+            MatchAxis.NEIGHBORHOOD to neighborhoodScore(condition, scrap),
             MatchAxis.HOUSEHOLDS to householdScore(condition, scrap.households),
             MatchAxis.NEWNESS to newnessScore(condition, scrap.builtYear, currentYear),
         )
@@ -75,9 +75,14 @@ object ConditionMatchPolicy {
         return clamp(MAX_SCORE - penalty)
     }
 
-    private fun neighborhoodScore(condition: InterestCondition, neighborhood: String): Double = when {
+    private fun neighborhoodScore(condition: InterestCondition, scrap: Scrap): Double = when {
         condition.neighborhoods.isEmpty() -> MAX_SCORE
-        condition.neighborhoods.any { it.name == neighborhood } -> MAX_SCORE
+        condition.neighborhoods.any {
+            if (scrap.apartmentId.startsWith("molit:")) {
+                val districtCode = scrap.apartmentId.split(':').getOrNull(1)
+                it.code == "molit:$districtCode:dong:${scrap.neighborhood}"
+            } else it.name == scrap.neighborhood
+        } -> MAX_SCORE
         else -> 0.0
     }
 
