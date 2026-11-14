@@ -37,7 +37,7 @@ task: T-011
 | 프레임 | 상태 | 와이어프레임 |
 |---|---|---|
 | SCR-007/landscape/parked | 전체 필터, 변동 단지 우선 | [SCR-007_landscape_parked.svg](../wireframes/SCR-007_landscape_parked.svg) |
-| SCR-007/landscape/empty | 스크랩 없음 | 작성 필요 |
+| SCR-007/landscape/empty | 스크랩 없음, 변동 없음 필터 | 빈 화면(디자인 불필요, 2026-11-14 결정) |
 
 해당 없는 상태는 위 표에서 제외했습니다. 모든 프레임은 light, dark 테마를 각각 만듭니다.
 

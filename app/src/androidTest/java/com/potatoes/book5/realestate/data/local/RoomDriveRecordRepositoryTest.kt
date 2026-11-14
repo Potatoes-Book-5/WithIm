@@ -62,6 +62,22 @@ class RoomDriveRecordRepositoryTest {
     }
 
     @Test
+    fun deleteAllRemovesSessionsAndChildRows() = runTest {
+        val id = repo.startSession(t, 10)
+        repo.recordSnapshot(id, t, listOf(DriveRank(1, "a", "A", 1)), listOf(PassedInterest("h", "H", 1.0, 1)))
+        repo.recordLeaderChange(id, DriveLeaderChange(t, "a", "A"))
+        repo.finishSession(id, null)
+        repo.deleteAll()
+        assertNull(repo.observeLatestId().first())
+        listOf("drive_ranks", "drive_leader_changes", "drive_passed_interests").forEach { table ->
+            db.openHelper.readableDatabase.query("SELECT COUNT(*) FROM $table").use { c ->
+                assertTrue(c.moveToFirst())
+                assertEquals(0, c.getInt(0))
+            }
+        }
+    }
+
+    @Test
     fun emptySessionIsDeletedAndTrimKeepsRecent() = runTest {
         val empty = repo.startSession(t, 10)
         assertFalse(repo.finishSession(empty, null))

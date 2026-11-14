@@ -40,7 +40,7 @@ task: T-011
 | 프레임 | 상태 | 와이어프레임 |
 |---|---|---|
 | SCR-008/landscape/parked | 기본 | [SCR-008_landscape_parked.svg](../wireframes/SCR-008_landscape_parked.svg) |
-| SCR-008/landscape/empty | 기록 없음. 안내 문구와 닫기로 구현 | 작성 필요 |
+| SCR-008/landscape/empty | 기록 없음(제목과 닫기만), 지나친 관심 매물 없음 | 빈 화면(디자인 불필요, 2026-11-14 결정) |
 
 해당 없는 상태는 위 표에서 제외했습니다. 모든 프레임은 light, dark 테마를 각각 만듭니다.
 

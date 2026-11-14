@@ -41,7 +41,7 @@ task: T-011
 |---|---|---|
 | SCR-001/landscape/parked | 기본, 스크랩 변동 있음 | [SCR-001_landscape_parked.svg](../wireframes/SCR-001_landscape_parked.svg) |
 | SCR-001/landscape/offline | 마지막 캐시와 기준 시각 | 작성 필요 |
-| SCR-001/landscape/empty | 반경 안 단지 없음 | 작성 필요 |
+| SCR-001/landscape/empty | 반경 안 단지 없음, 불러오는 중 | 빈 화면(디자인 불필요, 2026-11-14 결정) |
 | SCR-001/portrait/parked | 2분할 창 | 작성 필요 |
 
 해당 없는 상태는 위 표에서 제외했습니다. 모든 프레임은 light, dark 테마를 각각 만듭니다.

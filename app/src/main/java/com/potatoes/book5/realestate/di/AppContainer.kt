@@ -17,7 +17,9 @@ import com.potatoes.book5.realestate.domain.port.VehicleSimulation
 import com.potatoes.book5.realestate.domain.usecase.GetInterestConditionUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetNeighborhoodSuggestionsUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetOnboardingStepUseCase
+import com.potatoes.book5.realestate.domain.usecase.DeleteUserDataUseCase
 import com.potatoes.book5.realestate.domain.usecase.DriveSessionRecorder
+import com.potatoes.book5.realestate.domain.usecase.GetConsentUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetApartmentDetailUseCase
 import com.potatoes.book5.realestate.domain.usecase.MarkDriveSummarySeenUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveDriveSummaryUseCase
@@ -103,4 +105,7 @@ class AppContainer(context: Context) {
     val observeScrappedIds = ObserveScrappedIdsUseCase(scrapRepository)
     val toggleScrapById = ToggleScrapByIdUseCase(apartmentRepository, toggleScrap)
     val simulateDriveEnd = SimulateDriveEndUseCase(vehicleSimulation, driveSessionRecorder)
+
+    val getConsent = GetConsentUseCase(consentRepository)
+    val deleteUserData = DeleteUserDataUseCase(interestRepository, scrapRepository, driveRecordRepository)
 }

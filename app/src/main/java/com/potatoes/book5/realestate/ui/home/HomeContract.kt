@@ -38,9 +38,6 @@ data class HomeState(
     val followers: List<RankItemUi> get() = ranking.drop(1)
 }
 
-/** 아직 구현하지 않은 화면 */
-enum class HomeDestination { SETTINGS }
-
 sealed interface HomeIntent {
     data object OpenMyPage : HomeIntent
     data object OpenSettings : HomeIntent
@@ -65,5 +62,4 @@ sealed interface HomeResult {
 
 sealed interface HomeEffect {
     data class Navigate(val screen: Screen) : HomeEffect
-    data class ShowComingSoon(val destination: HomeDestination) : HomeEffect
 }

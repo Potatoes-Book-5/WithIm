@@ -30,6 +30,8 @@ sealed interface Screen {
     data class Detail(val apartmentId: String) : Screen
     /** SCR-010 */
     data object MyPage : Screen
+    /** SCR-006 설정(수정 모드) */
+    data object Settings : Screen
     /** SCR-008. sessionId가 null이면 가장 최근 요약 */
     data class DriveSummary(val sessionId: Long? = null) : Screen
 }

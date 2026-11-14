@@ -46,6 +46,9 @@ class FakeInterestRepository(
         stored = condition
         decided = true
     }
+    override suspend fun clear() {
+        stored = null
+    }
     override suspend fun markSkipped() {
         decided = true
     }
@@ -66,6 +69,7 @@ class FakeScrapRepository(initial: List<Scrap> = emptyList()) : ScrapRepository 
     override suspend fun get(apartmentId: String): Scrap? = scraps.value[apartmentId]
     override suspend fun upsert(scrap: Scrap) = scraps.update { it + (scrap.apartmentId to scrap) }
     override suspend fun delete(apartmentId: String) = scraps.update { it - apartmentId }
+    override suspend fun deleteAll() = scraps.update { emptyMap() }
     override suspend fun markChangeSeen(apartmentId: String) = scraps.update { map ->
         val s = map[apartmentId]
         val change = s?.change ?: return@update map

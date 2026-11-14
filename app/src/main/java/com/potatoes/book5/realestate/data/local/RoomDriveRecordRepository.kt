@@ -93,6 +93,8 @@ class RoomDriveRecordRepository(
 
     override suspend fun markSeen(id: Long) = dao.markSeen(id)
 
+    override suspend fun deleteAll() = dao.deleteAll()
+
     private fun LocalDateTime.millis(): Long = atZone(zone).toInstant().toEpochMilli()
 
     private fun Long.dateTime(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(this), zone)

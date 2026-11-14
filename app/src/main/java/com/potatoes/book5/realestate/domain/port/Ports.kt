@@ -29,6 +29,8 @@ interface InterestRepository {
     fun observe(): Flow<InterestCondition?>
     suspend fun save(condition: InterestCondition)
     suspend fun markSkipped()
+    /** 저장된 조건을 지운다. 조건 단계를 마친 상태는 유지한다(F-007 규칙 3). */
+    suspend fun clear()
     /** 저장했거나 건너뛰어 관심 조건 단계를 마쳤는지. */
     suspend fun isDecided(): Boolean
 }
@@ -52,6 +54,7 @@ interface ScrapRepository {
     suspend fun upsert(scrap: Scrap)
     suspend fun delete(apartmentId: String)
     suspend fun markChangeSeen(apartmentId: String)
+    suspend fun deleteAll()
 }
 
 /** 단지 상세와 최신 실거래. 실거래가 API(T-005)를 연결하면 구현을 교체한다. */
@@ -105,4 +108,6 @@ interface DriveRecordRepository {
     /** 확인하지 않은 가장 최근 요약 id */
     fun observeLatestUnseenId(): Flow<Long?>
     suspend fun markSeen(id: Long)
+    /** 진행 중인 세션을 포함해 모든 주행 기록을 지운다. */
+    suspend fun deleteAll()
 }

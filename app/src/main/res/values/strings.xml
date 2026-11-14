@@ -15,6 +15,18 @@
     <string name="consent_alert_leader">대장 교체 알림</string>
     <string name="consent_later">나중에</string>
     <string name="consent_agree">동의하고 시작하기</string>
+    <string name="settings_title">설정</string>
+    <string name="settings_subtitle">주차 중에만 바꿀 수 있어요. 저장을 눌러야 반영돼요</string>
+    <string name="settings_location">차량 위치 사용</string>
+    <string name="settings_data_title">저장된 데이터</string>
+    <string name="settings_data_desc">관심 조건, 스크랩, 주행 기록은 이 차량에만 저장돼요</string>
+    <string name="settings_data_delete">모두 삭제</string>
+    <string name="settings_delete_title">저장된 데이터를 모두 삭제할까요?</string>
+    <string name="settings_delete_message">관심 조건, 스크랩, 주행 기록이 이 차량에서 지워지고 되돌릴 수 없어요. 동의와 알림 설정은 그대로 남아요.</string>
+    <string name="settings_delete_confirm">삭제</string>
+    <string name="settings_data_deleted">저장된 데이터를 삭제했어요</string>
+    <string name="settings_cancel">취소</string>
+    <string name="settings_save">저장</string>
 
     <!-- SCR-003 관심 조건 -->
     <string name="interest_title">어떤 집을 함께 찾고 있나요?</string>
@@ -76,12 +88,10 @@
     <string name="home_today_matches">오늘 일치 %d건</string>
     <string name="home_scraps">스크랩 %d</string>
     <string name="home_drive_summary">지난 주행 요약</string>
-    <string name="home_loading">주변 순위를 불러오는 중이에요</string>
     <string name="scrap_new_deal">새 실거래 등록</string>
     <string name="scrap_price_up">가격 상승</string>
     <string name="scrap_price_down">가격 하락</string>
     <string name="scrap_rank_change">순위 변동</string>
-    <string name="coming_soon_settings">설정은 준비 중이에요</string>
 
     <!-- 공통 -->
     <string name="back">뒤로</string>
@@ -95,9 +105,6 @@
     <string name="scrap_badge_price_up">가격 ▲ %s</string>
     <string name="scrap_badge_price_down">가격 ▼ %s</string>
     <string name="scrap_badge_rank_change">순위 변동</string>
-    <string name="scrap_empty_title">아직 스크랩한 단지가 없어요</string>
-    <string name="scrap_empty_desc">아파트 상세에서 스크랩하면 새 실거래와 가격 변동을 알려 드려요</string>
-    <string name="scrap_changed_empty">새로 확인할 변동이 없어요</string>
 
     <!-- SCR-002 아파트 상세 -->
     <string name="detail_meta">%1$s %2$s · %3$s세대 · %4$d년</string>
@@ -120,7 +127,6 @@
     <string name="detail_distance_unknown">알 수 없음</string>
     <string name="detail_recent_deals">최근 거래</string>
     <string name="detail_deal_meta">%1$d평 %2$d층</string>
-    <string name="detail_loading">단지 정보를 불러오는 중이에요</string>
     <string name="detail_failed">단지 정보를 불러오지 못했어요</string>
     <string name="detail_retry">다시 시도</string>
     <string name="detail_scrap_failed">스크랩을 저장하지 못했어요. 다시 시도해 주세요</string>
@@ -136,15 +142,12 @@
     <string name="axis_newness">신축</string>
     <string name="my_page_edit">조건 수정</string>
     <string name="my_page_set_conditions">조건 정하기</string>
-    <string name="my_page_no_conditions">아직 정한 조건이 없어요</string>
     <string name="my_page_top_title">스크랩 상위 %d곳 · 일치율 순</string>
     <string name="my_page_match">조건 일치 %d%%</string>
     <string name="my_page_legend">점선: 내 조건  ·  채움: 단지</string>
     <string name="my_page_all_scraps">스크랩 전체 %d곳 보기</string>
     <string name="my_page_changes">변동 %d건</string>
     <string name="my_page_no_changes">새 변동 없음</string>
-    <string name="my_page_needs_condition">조건을 정하면 스크랩한 단지가 얼마나 맞는지 비교해 드려요</string>
-    <string name="my_page_no_scraps">아직 스크랩한 단지가 없어요. 단지 상세에서 스크랩하면 여기서 비교해 드려요</string>
 
     <!-- SCR-008 주행 요약 -->
     <string name="summary_title_today">오늘의 임장 요약</string>
@@ -158,9 +161,7 @@
     <string name="summary_leader_changes">대장 교체 %d회</string>
     <string name="summary_no_leader_change">대장 교체 없음</string>
     <string name="summary_passed">지나친 관심 매물 %d</string>
-    <string name="summary_passed_empty">이번 주행에서 지나친 관심 매물이 없어요</string>
     <string name="summary_open_scraps">스크랩 목록 보기 ›</string>
-    <string name="summary_empty">아직 주행 기록이 없어요. 주행을 마치면 순위와 지나친 관심 매물을 정리해 드려요</string>
 
     <!-- SCR-004, SCR-009, SCR-005 주행 중 -->
     <string name="driving_mode_rank">순위</string>

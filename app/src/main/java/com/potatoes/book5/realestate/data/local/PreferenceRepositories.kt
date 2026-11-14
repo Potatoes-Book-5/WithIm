@@ -92,6 +92,18 @@ class PreferenceInterestRepository(
         version.update { it + 1 }
     }
 
+    override suspend fun clear() = withContext(io) {
+        prefs.edit()
+            .putBoolean(KEY_SAVED, false)
+            .remove(KEY_NEIGHBORHOODS)
+            .remove(KEY_PRICES)
+            .remove(KEY_AREAS)
+            .remove(KEY_HOUSEHOLDS)
+            .remove(KEY_BUILDING_AGE)
+            .apply()
+        version.update { it + 1 }
+    }
+
     override suspend fun markSkipped() = withContext(io) {
         prefs.edit().putBoolean(KEY_DECIDED, true).apply()
     }

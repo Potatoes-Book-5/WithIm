@@ -26,6 +26,10 @@ class GetOnboardingStepUseCase(
     }
 }
 
+class GetConsentUseCase(private val consentRepository: ConsentRepository) {
+    suspend operator fun invoke(): ConsentSettings? = consentRepository.get()
+}
+
 class SaveConsentUseCase(private val consentRepository: ConsentRepository) {
     suspend operator fun invoke(settings: ConsentSettings) = consentRepository.save(settings)
 }

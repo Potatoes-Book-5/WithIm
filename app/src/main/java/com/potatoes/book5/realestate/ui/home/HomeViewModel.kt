@@ -75,7 +75,7 @@ class HomeViewModel(
             HomeIntent.OpenScrapChanges -> HomeEffect.Navigate(Screen.Scraps(changedOnly = (_state.value.scrap?.changedCount ?: 0) > 0))
             HomeIntent.OpenScraps -> HomeEffect.Navigate(Screen.Scraps())
             is HomeIntent.OpenApartment -> HomeEffect.Navigate(Screen.Detail(intent.id))
-            HomeIntent.OpenSettings -> HomeEffect.ShowComingSoon(HomeDestination.SETTINGS)
+            HomeIntent.OpenSettings -> HomeEffect.Navigate(Screen.Settings)
             HomeIntent.OpenDriveSummary -> HomeEffect.Navigate(Screen.DriveSummary())
         }
         viewModelScope.launch { _effect.send(effect) }

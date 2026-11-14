@@ -72,8 +72,8 @@ task: T-011
 | 프레임 | 상태 | 와이어프레임 |
 |---|---|---|
 | SCR-010/landscape/parked | 기본 | [SCR-010_landscape_parked.svg](../wireframes/SCR-010_landscape_parked.svg) |
-| SCR-010/landscape/empty | 조건 없음(건너뛰기 사용자). 빈 오각형, `조건 정하기` 버튼, 비교 안내 문구로 구현 | 작성 필요 |
-| SCR-010/landscape/no-scrap | 스크랩 없음. 카드 자리에 안내 문구로 구현 | 작성 필요 |
+| SCR-010/landscape/empty | 조건 없음(건너뛰기 사용자). 빈 오각형과 `조건 정하기` 버튼, 비교 영역은 비움 | 빈 화면(디자인 불필요, 2026-11-14 결정) |
+| SCR-010/landscape/no-scrap | 스크랩 없음. 카드 자리를 비움 | 빈 화면(디자인 불필요, 2026-11-14 결정) |
 | SCR-010/portrait/parked | 2분할 창 | 작성 필요 |
 
 모든 프레임은 light, dark 테마를 각각 만듭니다.

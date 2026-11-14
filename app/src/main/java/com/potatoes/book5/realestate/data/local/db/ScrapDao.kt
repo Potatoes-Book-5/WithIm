@@ -22,6 +22,9 @@ interface ScrapDao {
     @Upsert
     suspend fun upsert(entity: ScrapEntity)
 
+    @Query("DELETE FROM scraps")
+    suspend fun deleteAll()
+
     @Query("DELETE FROM scraps WHERE apartment_id = :apartmentId")
     suspend fun delete(apartmentId: String)
 

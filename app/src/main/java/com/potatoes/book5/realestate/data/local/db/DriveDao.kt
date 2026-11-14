@@ -42,6 +42,10 @@ interface DriveDao {
     @Query("UPDATE drive_sessions SET ended_at = :endedAt WHERE id = :id")
     suspend fun end(id: Long, endedAt: Long)
 
+    /** 하위 테이블은 CASCADE로 함께 지워진다. */
+    @Query("DELETE FROM drive_sessions")
+    suspend fun deleteAll()
+
     @Query("DELETE FROM drive_sessions WHERE id = :id")
     suspend fun deleteSession(id: Long)
 

@@ -66,15 +66,8 @@ fun DriveSummaryScreen(state: DriveSummaryState, onIntent: (DriveSummaryIntent) 
         val summary = state.summary
         AppBar(summary, today, onClose = { onIntent(DriveSummaryIntent.Close) })
         when {
-            state.isLoading -> Unit
-            summary == null -> Box(Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
-                Text(
-                    text = stringResource(R.string.summary_empty),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center,
-                )
-            }
+            // 불러오는 중이거나 기록이 없으면 비워 둔다.
+            state.isLoading || summary == null -> Unit
             else -> Row(
                 modifier = Modifier.fillMaxWidth().weight(1f).padding(top = 40.wpx, bottom = 48.wpx),
                 horizontalArrangement = Arrangement.spacedBy(64.wpx),
@@ -233,12 +226,7 @@ private fun PassedInterests(
         Text(text = stringResource(R.string.summary_passed, items.size), style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(24.wpx))
         if (items.isEmpty()) {
-            Text(
-                text = stringResource(R.string.summary_passed_empty),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f),
-            )
+            Spacer(Modifier.weight(1f))
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth().weight(1f),

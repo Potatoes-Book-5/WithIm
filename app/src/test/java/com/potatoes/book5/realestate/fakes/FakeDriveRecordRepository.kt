@@ -71,5 +71,7 @@ class FakeDriveRecordRepository : DriveRecordRepository {
 
     override suspend fun markSeen(id: Long) = edit(id) { it.copy(seen = true) }
 
+    override suspend fun deleteAll() = sessions.update { emptyMap() }
+
     private fun Session.toSummary() = DriveSummary(id, startedAt, endedAt!!, null, radiusKm, top, changes, passed, seen)
 }

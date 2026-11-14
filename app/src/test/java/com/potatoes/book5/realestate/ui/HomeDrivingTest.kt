@@ -116,6 +116,8 @@ class HomeDrivingTest {
         assertEquals(HomeEffect.Navigate(Screen.Scraps(changedOnly = true)), vm.effect.first())
         vm.onIntent(HomeIntent.OpenScraps)
         assertEquals(HomeEffect.Navigate(Screen.Scraps()), vm.effect.first())
+        vm.onIntent(HomeIntent.OpenSettings)
+        assertEquals(HomeEffect.Navigate(Screen.Settings), vm.effect.first())
         vm.onIntent(HomeIntent.OpenDriveSummary)
         assertEquals(HomeEffect.Navigate(Screen.DriveSummary()), vm.effect.first())
     }

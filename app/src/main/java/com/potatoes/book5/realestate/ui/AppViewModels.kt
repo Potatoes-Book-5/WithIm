@@ -28,6 +28,7 @@ object AppViewModels {
     val APARTMENT_ID_KEY = object : CreationExtras.Key<String> {}
     val SCRAP_FILTER_KEY = object : CreationExtras.Key<ScrapFilter> {}
     val INTEREST_EDITING_KEY = object : CreationExtras.Key<Boolean> {}
+    val SETTINGS_EDITING_KEY = object : CreationExtras.Key<Boolean> {}
     val DRIVE_SESSION_KEY = object : CreationExtras.Key<Long> {}
     /** DRIVE_SESSION_KEY 값. 가장 최근 요약을 뜻한다. */
     const val LATEST_SESSION = -1L
@@ -40,7 +41,10 @@ object AppViewModels {
                 c.simulateNewDeals, c.observeUnseenDriveSummary, c.simulateDriveEnd,
             )
         }
-        initializer { ConsentViewModel(container().saveConsent) }
+        initializer {
+            val c = container()
+            ConsentViewModel(c.saveConsent, c.getConsent, c.deleteUserData, editing = this[SETTINGS_EDITING_KEY] ?: false)
+        }
         initializer {
             val c = container()
             InterestViewModel(

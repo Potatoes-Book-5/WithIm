@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -74,8 +73,8 @@ fun MyPageScreen(state: MyPageState, onIntent: (MyPageIntent) -> Unit) {
                 )
                 Spacer(Modifier.height(24.wpx))
                 when {
-                    state.condition == null -> Placeholder(stringResource(R.string.my_page_needs_condition))
-                    state.cards.isEmpty() -> Placeholder(stringResource(R.string.my_page_no_scraps))
+                    // 조건이나 스크랩이 없으면 비교 영역을 비워 둔다.
+                    state.condition == null || state.cards.isEmpty() -> Spacer(Modifier.weight(1f))
                     else -> {
                         Row(
                             modifier = Modifier.fillMaxWidth().weight(1f),
@@ -147,10 +146,8 @@ private fun ConditionPanel(condition: InterestCondition?, onEdit: () -> Unit, mo
                 )
             }
             val sub = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Medium)
-            if (condition == null) {
-                Text(text = stringResource(R.string.my_page_no_conditions), style = sub, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            } else {
-                conditionLines(condition).forEach { line ->
+            condition?.let { c ->
+                conditionLines(c).forEach { line ->
                     Text(text = line, style = sub, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
@@ -209,20 +206,6 @@ private fun MatchCard(card: MatchCardUi, onClick: () -> Unit, modifier: Modifier
                 color = colors.primary,
             )
         }
-    }
-}
-
-@Composable
-private fun ColumnScope.Placeholder(text: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f)
-            .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(28.wpx))
-            .padding(48.wpx),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text = text, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
     }
 }
 

@@ -61,6 +61,9 @@ fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)
                 Screen.MyPage -> ProvideScreenStore(stores, currentKey) {
                     MyPageRoute(onOpen = open, onBack = onBack)
                 }
+                Screen.Settings -> ProvideScreenStore(stores, currentKey) {
+                    ConsentRoute(onOpenInterestConditions = {}, onOpenHome = {}, editing = true, onClose = onBack)
+                }
                 is Screen.DriveSummary -> ProvideScreenStore(stores, currentKey) {
                     DriveSummaryRoute(sessionId = screen.sessionId, onOpen = open, onClose = onBack)
                 }

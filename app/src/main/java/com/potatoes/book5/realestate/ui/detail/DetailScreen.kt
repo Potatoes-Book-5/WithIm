@@ -79,7 +79,8 @@ fun DetailScreen(state: DetailState, onIntent: (DetailIntent) -> Unit) {
                 Spacer(Modifier.height(32.wpx))
                 PillButton(text = stringResource(R.string.detail_retry), onClick = { onIntent(DetailIntent.Retry) })
             }
-            else -> Message(stringResource(R.string.detail_loading))
+            // 불러오는 중에는 비워 둔다.
+            else -> Unit
         }
     }
 }

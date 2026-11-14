@@ -30,6 +30,8 @@ class RoomScrapRepository(
 
     override suspend fun upsert(scrap: Scrap) = dao.upsert(scrap.toEntity(zone))
 
+    override suspend fun deleteAll() = dao.deleteAll()
+
     override suspend fun delete(apartmentId: String) = dao.delete(apartmentId)
 
     override suspend fun markChangeSeen(apartmentId: String) = dao.markChangeSeen(apartmentId)
