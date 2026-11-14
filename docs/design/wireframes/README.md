@@ -27,6 +27,8 @@
 | [SCR-009_portrait_driving_fallback.svg](SCR-009_portrait_driving_fallback.svg) | 대체안(레이더), Figma 이관 보류 | [SCR-009](../screens/SCR-009-driving-map-mode.md) |
 | [SCR-010_landscape_parked.svg](SCR-010_landscape_parked.svg) | `SCR-010/landscape/parked/light` | [SCR-010](../screens/SCR-010-my-page.md) |
 
+전체 화면을 표지와 함께 한 파일로 모은 [wireframes.pdf](wireframes.pdf)도 있습니다. SVG를 고치면 PDF도 다시 만들어야 합니다.
+
 ## Figma로 가져오기
 
 1. SVG 파일을 Figma 캔버스로 드래그합니다. 편집 가능한 벡터와 텍스트 레이어로 변환됩니다.
