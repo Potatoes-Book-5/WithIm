@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.potatoes.book5.realestate.R
+import com.potatoes.book5.realestate.core.ui.R as CoreUiR
 import com.potatoes.book5.realestate.domain.model.AreaRange
 import com.potatoes.book5.realestate.domain.model.PriceRange
 import com.potatoes.book5.realestate.domain.model.ScrapChangeKind
@@ -148,7 +149,7 @@ private fun LeaderCard(item: RankItemUi, onClick: () -> Unit, modifier: Modifier
                     modifier = Modifier.weight(1f),
                 )
                 Text(
-                    text = stringResource(R.string.rank_n, item.rank),
+                    text = stringResource(CoreUiR.string.rank_n, item.rank),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary,
                 )

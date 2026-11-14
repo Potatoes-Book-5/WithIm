@@ -43,7 +43,8 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import com.potatoes.book5.realestate.R
+import com.potatoes.book5.realestate.feature.driving.R
+import com.potatoes.book5.realestate.core.ui.R as CoreUiR
 import com.potatoes.book5.realestate.ui.common.CrownIcon
 import com.potatoes.book5.realestate.ui.common.MapPointUi
 import com.potatoes.book5.realestate.ui.common.MinTouchHeight
@@ -63,7 +64,7 @@ import java.time.LocalDate
  * 주행 중에는 Top 3만 크게 보여 주고, 화면 전환 외의 조작은 두지 않는다(DD-002, DG-004).
  */
 @Composable
-fun DrivingScreen(state: DrivingScreenState, onIntent: (DrivingIntent) -> Unit) {
+fun DrivingScreen(state: DrivingScreenState, onIntent: (DrivingIntent) -> Unit, naverMapAvailable: Boolean = false) {
     Box(
         Modifier
             .fillMaxSize()
@@ -74,7 +75,7 @@ fun DrivingScreen(state: DrivingScreenState, onIntent: (DrivingIntent) -> Unit) 
             Box(Modifier.weight(1f).fillMaxWidth().padding(top = 24.wpx, bottom = 48.wpx)) {
                 when (state.mode) {
                     DrivingMode.RANK -> RankCards(state.ranking)
-                    DrivingMode.MAP -> MapWithList(state)
+                    DrivingMode.MAP -> MapWithList(state, naverMapAvailable)
                 }
             }
         }
@@ -155,7 +156,7 @@ private fun RankCards(ranking: List<RankItemUi>) {
                         }
                     } else {
                         Text(
-                            stringResource(R.string.rank_n, item.rank),
+                            stringResource(CoreUiR.string.rank_n, item.rank),
                             style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -173,14 +174,9 @@ private fun RankCards(ranking: List<RankItemUi>) {
 
 /** SCR-009 Landscape(시안 D): 왼쪽 지도, 오른쪽 순위와 관심 매물 */
 @Composable
-private fun MapWithList(state: DrivingScreenState) {
+private fun MapWithList(state: DrivingScreenState, naverMapAvailable: Boolean) {
     Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(32.wpx)) {
-        SchematicMap(
-            ranking = state.ranking,
-            interestMatches = state.interestMatches,
-            others = state.others,
-            modifier = Modifier.weight(1f).fillMaxHeight(),
-        )
+        DrivingMap(state = state, naverMapAvailable = naverMapAvailable, modifier = Modifier.weight(1f).fillMaxHeight())
         Column(Modifier.width(520.wpx), verticalArrangement = Arrangement.spacedBy(20.wpx)) {
             Text(stringResource(R.string.driving_list_title, state.radiusKm), style = MaterialTheme.typography.titleMedium)
             state.ranking.forEach { item -> RankListRow(item) }

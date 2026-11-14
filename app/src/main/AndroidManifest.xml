@@ -16,6 +16,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.KingOfRealEstate">
+        <!-- 네이버 지도 Client ID(ADR-004). 값은 local.properties에서 빌드 때 채운다. -->
+        <meta-data
+            android:name="com.naver.maps.map.NCP_KEY_ID"
+            android:value="${naverMapClientId}" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

@@ -25,6 +25,15 @@ val vworldApiKeyLiteral = providers.gradleProperty("VWORLD_API_KEY").orNull?.tri
     .let { value -> "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"")
         .replace("\n", "\\n").replace("\r", "\\r") + "\"" }
 
+// 네이버 지도 Client ID(ADR-004). 콘솔 헤더 이름(X-NCP-APIGW-API-KEY-ID)으로 적어도 읽는다.
+// Client Secret(X-NCP-APIGW-API-KEY)은 지도 표시에 쓰지 않으므로 읽지 않는다.
+val naverMapClientId = localProp("naver.map.clientId").ifEmpty { localProp("X-NCP-APIGW-API-KEY-ID") }
+
+// 값은 출력하지 않고 비어 있는지만 알린다.
+if (naverMapClientId.isEmpty()) {
+    logger.warn("local.properties에 naver.map.clientId가 없습니다. 주행 지도 모드는 간이 지도로 표시됩니다.")
+}
+
 android {
     namespace = "com.potatoes.book5.realestate"
     compileSdk = 35
@@ -42,6 +51,10 @@ android {
         buildConfigField("String", "PLEOS_PROJECT_ID", "\"${localProp("pleos.projectId")}\"")
         buildConfigField("String", "PLEOS_CLIENT_ID", "\"${localProp("pleos.clientId")}\"")
         buildConfigField("String", "PLEOS_CLIENT_SECRET", "\"${localProp("pleos.clientSecret")}\"")
+        // 네이버 지도 Client ID(ADR-004). 비어 있으면 주행 지도 모드가 간이 지도로 대체된다.
+        buildConfigField("String", "NAVER_MAP_CLIENT_ID", "\"$naverMapClientId\"")
+        // SDK는 매니페스트 meta-data(com.naver.maps.map.NCP_KEY_ID)에서 Client ID를 읽는다.
+        manifestPlaceholders["naverMapClientId"] = naverMapClientId
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -82,6 +95,9 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
     implementation(project(":feature:yeongtong"))
+    implementation(project(":core:designsystem"))
+    implementation(project(":core:ui"))
+    implementation(project(":feature:driving"))
     // Pleos Connect SDK — 요구사항 확정 후 주석 해제
     // implementation(libs.pleos.vehicle)
 

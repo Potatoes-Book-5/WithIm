@@ -1,5 +1,6 @@
 package com.potatoes.book5.realestate.ui.driving
 
+import com.potatoes.book5.realestate.domain.model.VehiclePose
 import com.potatoes.book5.realestate.ui.common.MapPointUi
 import com.potatoes.book5.realestate.ui.common.RankItemUi
 
@@ -21,6 +22,8 @@ data class DrivingScreenState(
     val ranking: List<RankItemUi> = emptyList(),
     val interestMatches: List<MapPointUi> = emptyList(),
     val others: List<MapPointUi> = emptyList(),
+    /** 지도 중심이 되는 차량 위치. null이면 간이 지도로 그린다. */
+    val vehicle: VehiclePose? = null,
     val alert: LeaderAlertUi? = null,
 )
 
@@ -34,6 +37,7 @@ sealed interface DrivingResult {
         val ranking: List<RankItemUi>,
         val interestMatches: List<MapPointUi>,
         val others: List<MapPointUi>,
+        val vehicle: VehiclePose? = null,
     ) : DrivingResult
     data class ModeSelected(val mode: DrivingMode) : DrivingResult
     data class AlertShown(val alert: LeaderAlertUi) : DrivingResult

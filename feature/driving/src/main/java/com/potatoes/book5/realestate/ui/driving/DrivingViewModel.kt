@@ -37,6 +37,7 @@ class DrivingViewModel(
                         ranking = snapshot.top.mapIndexed { i, item -> item.toRankItem(i + 1) },
                         interestMatches = snapshot.interestMatches.map { it.toMapPoint() },
                         others = snapshot.others.map { it.toMapPoint() },
+                        vehicle = snapshot.vehicle,
                     )
                 )
             }

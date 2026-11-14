@@ -1,6 +1,6 @@
 package com.potatoes.book5.realestate.ui.common
 
-import com.potatoes.book5.realestate.R
+import com.potatoes.book5.realestate.core.ui.R
 import com.potatoes.book5.realestate.domain.model.AreaRange
 import com.potatoes.book5.realestate.domain.model.BuildingAge
 import com.potatoes.book5.realestate.domain.model.HouseholdMin

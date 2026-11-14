@@ -10,7 +10,18 @@ data class Apartment(
     val priceManwon: Long,
     val areaPyeong: Int,
     val dealDate: LocalDate,
+    /** 단지 좌표. 데이터 출처(T-005)가 좌표를 주지 않으면 null */
+    val location: GeoPoint? = null,
 )
+
+/** WGS84 위경도. */
+data class GeoPoint(val latitude: Double, val longitude: Double)
+
+/**
+ * 차량 위치와 진행 방향.
+ * @param headingDeg 북쪽 기준 시계 방향 진행 방위(0~360)
+ */
+data class VehiclePose(val location: GeoPoint, val headingDeg: Double)
 
 /**
  * 차량 기준 주변 단지.
@@ -36,6 +47,8 @@ data class RankingSnapshot(
     val others: List<NearbyApartment>,
     /** 실거래 데이터 기준 시각 */
     val dataAsOf: LocalDateTime,
+    /** 스냅샷 기준 차량 위치. 위치를 모르면 null이고 지도는 간이 지도로 대체한다(SCR-009). */
+    val vehicle: VehiclePose? = null,
 ) {
     val leader: NearbyApartment? get() = top.firstOrNull()
 }
