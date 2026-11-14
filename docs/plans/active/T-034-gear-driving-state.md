@@ -62,7 +62,9 @@ flowchart LR
 - [x] L1 검증(`./harness/verify.sh`, `:core:domain:test`, `--docs`)
 - [x] 에뮬레이터에서 기어 미지원 대체 흐름 확인(서비스 없음 → 주차 유지, 비정상 종료 없음)
 - [ ] 개발 버튼으로 수동 전환 확인. 이 AVD에서는 버튼이 상태 표시줄 아래에 있어 누를 수 없었다(기존 화면 배치 문제)
-- [ ] Vehicle 서비스가 있는 환경(데브박스·실차)에서 P ↔ D 전환으로 화면 전환과 요약 확인
+- [x] Pleos 이미지 에뮬레이터에서 P ↔ D 전환으로 주행 상태와 화면 전환 확인
+- [x] 주차 3분 뒤 주행 요약 표시 확인(T-035 검증 중, 에뮬레이터 위치를 수원으로 옮긴 뒤)
+- [ ] 실차·데브박스에서 기어 수신 확인
 
 ## 검증 방법
 
@@ -74,13 +76,14 @@ flowchart LR
 
 - 공식 문서에 `Gear` 도메인, `VehicleGear` 값, `CAR_DRIVE`와 기어의 관계가 없다. SDK 2.3.2 바이너리와 공식 샘플 앱 매니페스트로 확인했다. 문서가 갱신되면 대조한다.
 - 지원 여부 확인 방법. `checkGearCapabilities`가 없다. 미지원 차량에서 어떤 오류(`ERROR_NOT_SUPPORTED_PROPERTY` 등)가 오는지 확인 필요
-- `registerGearSelection`이 등록 직후 현재 값을 보내는지, 콜백 스레드, 서비스 연결이 끊긴 뒤 자동 재연결 여부
-- `initialize()` 직후 바로 API를 불러도 되는지(문서에 연결 완료 콜백이 없음)
+- 서비스 연결이 끊긴 뒤 자동 재연결 여부
+- 주행 중(D) 플랫폼이 DO 미선언 앱을 `주행 중에는 사용할 수 없습니다` 화면으로 가린다. 앱 상태는 주행 중으로 바뀌지만 주행 화면(SCR-004)은 보이지 않는다. DO 선언은 T-001(ADR-001)에서 정한다
 - N(세차, 견인)이나 주차장 안 R 조작도 주행으로 본다. 주행 세션이 짧게 생길 수 있다. 기록 없는 세션은 요약을 만들지 않는다(F-009 예외).
 - API-002는 기어 같은 표준 데이터에 AAOS Car API를 권한다. Pleos 기어 API를 쓰는 근거는 사용자 결정이다. 심사 영향은 T-001 문의에 포함할지 정한다.
 
 ## 결정 로그
 
+- 2026-11-14: 주행 요약을 기어 P 3분 뒤가 아니라 P 즉시 띄운다(사용자 결정). `DriveSessionRecorder.endDelay` 기본값을 0으로 바꿨다. 잠깐 P에 두었다 출발하면 세션과 요약이 나뉜다.
 - 2026-11-14: 사용자 요청에 따라 Pleos Vehicle SDK의 기어 상태를 쓴다. API-002(SHOULD)의 AAOS `GEAR_SELECTION`은 쓰지 않는다.
 - 2026-11-14: 기어 P = 주행 완료, 그 밖의 기어 = 주행 중(사용자 결정). `GEAR_UNKNOWN`은 기어가 아니므로 상태를 바꾸지 않는다(팀 해석).
 - 2026-11-14: 기어를 읽은 뒤 오류는 상태 유지, 처음부터 못 읽으면 개발용 수동 전환을 대체 흐름으로 쓴다.
@@ -90,3 +93,8 @@ flowchart LR
 
 - 2026-11-14: 조사, 설계, 구현, 단위 테스트(`GearDrivingStateProviderTest` 9건, `VehicleGearMappingTest` 2건)
 - 2026-11-14: `./harness/verify.sh`, `:core:domain:test`, `--docs` 통과. 로컬 AVD `Pleos_Connect_v2.1.0`(빌드 지문 `sdk_gcar_arm64`, Android 15)에는 Pleos Vehicle 서비스(`VEHICLE_START` 처리 서비스)와 Virtual Console(8088)이 없었다. `CAR_DRIVE` 권한 정의가 없어 `registerGearSelection`이 `SecurityException`을 던졌고, `PleosGear` 경고 로그 후 홈(주차)으로 남았다. 실제 기어 P ↔ D 전환, `onSelected` 수신, 주차 3분 뒤 요약 표시는 Vehicle 서비스가 있는 환경에서 확인해야 한다
+- 2026-11-14: 로컬 AVD `Pleos_Connect_v2.1.0`의 시스템 이미지가 Pleos 이미지가 아니라 일반 Android 15 Automotive(`android-35-ext15/android-automotive`)였다. 설치된 Pleos 이미지(`android-34/pleos_car_emulator`)로 검증용 AVD `Pleos_Connect_T032_test`(Cold boot, RAM 4GB, 데이터 4GB)를 따로 만들었다. 빌드 지문 `Pleos/crp_avd_arm64/...:14/RELEASE.release_connect_v2.1.0`, Vehicle 서비스(`ai.pleos.playground.service.vehicle`), `CAR_DRIVE` 권한 정의, Virtual Console(8088)이 있었다
+- 2026-11-14: Pleos 이미지에서 확인한 SDK 동작. `CAR_DRIVE`는 설치 시 허용됐다. `initialize()` 직후 `registerGearSelection`을 불러도 SDK가 요청을 쌓아 두고, 서비스 연결(약 1초) 뒤 `VENDOR_GEAR_SELECTION` 현재 값을 보냈다. 콜백은 binder 스레드에서 왔다. 값은 P=4, D=8로 `VehicleGear` id와 같다
+- 2026-11-14: Virtual Console에서 P → D → P → D → P를 바꾸자 앱이 매번 값을 받았다. D에서 앱 UI 트리는 주행 화면(`순위`, `지도`, `주행 중`, 개발 버튼 `주차`)으로 바뀌었지만 화면에는 플랫폼의 `주행 중에는 사용할 수 없습니다`가 덮였다. P로 돌아오면 홈(개발 버튼 `주행 시작`)으로 돌아왔다. 에뮬레이터에서 실거래 갱신이 실패해(`갱신하지 못했어요`) 순위 스냅샷과 주행 세션이 생기지 않아 요약은 확인하지 못했다
+- 2026-11-14: 에뮬레이터 GPS를 삼성전자 수원 본사 부근으로 옮긴 뒤(location-input.md) Virtual Console로 D → P를 고르고 3분 기다리자 주행 요약(SCR-008) `오늘의 임장 요약`이 자동으로 떴다. 최종 순위 Top 3와 `대장 교체 없음`이 보였다([화면](../../screenshots/T-034-summary-after-park.png))
+- 2026-11-14: 요약 대기 시간을 0으로 바꾼 뒤 같은 에뮬레이터에서 D(약 20초) → P를 고르자 3초 안에 `오늘의 임장 요약`이 떴다([화면](../../screenshots/T-034-summary-after-park.png))

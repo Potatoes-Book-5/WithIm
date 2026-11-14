@@ -15,7 +15,6 @@ import com.potatoes.book5.realestate.domain.port.ScrapRepository
 import com.potatoes.book5.realestate.domain.port.VehicleSimulation
 import java.time.LocalDateTime
 import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -29,7 +28,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 /**
  * 주행 세션을 기록한다(F-009 규칙 1, 2, 5, SM-009). 앱 프로세스가 살아 있는 동안 계속 실행한다.
  * - Drive: 세션을 열거나 이어 쓰고, 순위 스냅샷마다 저장한다. 대장 교체는 알림 간격과 관계없이 모두 기록한다.
- * - Parking: [endDelay](제안값 3분) 안에 다시 Drive가 되지 않으면 주차한 시각으로 세션을 닫는다.
+ * - Parking: [endDelay] 안에 다시 Drive가 되지 않으면 주차한 시각으로 세션을 닫는다. 기본값 0은 기어 P가 되는 즉시 닫는다(T-034, 사용자 결정).
  * - 시작할 때 이전 실행에서 닫히지 않은 세션은 마지막 기록 시각으로 닫는다.
  */
 class DriveSessionRecorder(
@@ -37,7 +36,7 @@ class DriveSessionRecorder(
     private val rankingRepository: RankingRepository,
     private val repository: DriveRecordRepository,
     private val now: () -> LocalDateTime = LocalDateTime::now,
-    private val endDelay: Duration = 3.minutes,
+    private val endDelay: Duration = Duration.ZERO,
     private val keep: Int = 10,
 ) {
     /** 개발 빌드에서 기다리지 않고 세션을 닫는 신호. 받을 때까지 남아 있다. */
@@ -139,7 +138,7 @@ class ToggleScrapByIdUseCase(
         }
 }
 
-/** 개발 빌드 전용: 주차로 바꾸고 3분을 기다리지 않고 세션을 닫는다. */
+/** 개발 빌드 전용: 주차로 바꾸고 [DriveSessionRecorder]의 대기 시간과 관계없이 세션을 닫는다. */
 class SimulateDriveEndUseCase(
     private val simulation: VehicleSimulation,
     private val recorder: DriveSessionRecorder,
