@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 class GleoActionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         android.util.Log.d("GleoDebug", "Request received")
+        val known = com.potatoes.book5.realestate.vehicle.gleo.GleoAction.fromWire(intent.action)
+        android.util.Log.i("GleoE2E", "event=received action=${known?.name ?: "UNKNOWN"} ")
         val receivedAtMillis = System.nanoTime() / 1_000_000L
         val pending = goAsync()
         val finished = AtomicBoolean(false)

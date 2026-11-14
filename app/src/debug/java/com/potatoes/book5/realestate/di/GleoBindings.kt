@@ -12,7 +12,15 @@ internal object GleoBindings {
    GetAreaPriceSummaryUseCase(DummyAreaPriceSummaryRepository()),
    SaveInterestAreaUseCase(DummyInterestAreaRepository()),
    GetDailyBriefingUseCase(DummyDailyBriefingRepository()),
-   BroadcastGleoCallbackSender(context, responseAction = BroadcastGleoCallbackSender.GLEO_RESPONSE_ACTION),
+   object : GleoCallbackSender {
+    private val delegate = BroadcastGleoCallbackSender(context, responseAction = BroadcastGleoCallbackSender.GLEO_RESPONSE_ACTION)
+    override suspend fun send(callback: GleoCallback) {
+     delegate.send(callback)
+     // Fixed labels only. Never log request payloads, locations, identifiers or response text.
+     val status = callback.status.takeIf { it in setOf("success", "asking", "fail") } ?: "unknown"
+     android.util.Log.i("GleoE2E", "event=callback_sent action=${callback.action.name} status=$status persisted=${callback.data.firstOrNull()?.get("persisted") == true} ")
+    }
+   },
    { AppCallContext(UUID.randomUUID().toString(), session, "local-device-scope", voiceContext.snapshot()) },
    scrapTarget = scrap
   ))

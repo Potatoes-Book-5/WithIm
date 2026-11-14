@@ -1,0 +1,8 @@
+{
+  "unprotected": [
+    "^/android\\.emulation\\.control\\.EmulatorController/injectAudio$",
+    "^/android\\.emulation\\.control\\.EmulatorController/getMicrophoneState$",
+    "^/android\\.emulation\\.control\\.EmulatorController/setMicrophoneState$"
+  ],
+  "allowlist": []
+}
