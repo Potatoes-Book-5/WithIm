@@ -23,6 +23,7 @@ fun apiKeyLiteral(key: String): String = localProp(key)
     .let { value -> "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"")
         .replace("\n", "\\n").replace("\r", "\\r") + "\"" }
 val molitApiKeyLiteral = apiKeyLiteral("MOLIT_API_KEY")
+val kaptApiKeyLiteral = apiKeyLiteral("KAPT_API_KEY")
 val vworldApiKeyLiteral = apiKeyLiteral("VWORLD_API_KEY")
 
 // 네이버 지도 Client ID(ADR-004). 콘솔 헤더 이름(X-NCP-APIGW-API-KEY-ID)으로 적어도 읽는다.
@@ -46,6 +47,7 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         buildConfigField("String", "MOLIT_API_KEY", molitApiKeyLiteral)
+        buildConfigField("String", "KAPT_API_KEY", kaptApiKeyLiteral)
         buildConfigField("String", "VWORLD_API_KEY", vworldApiKeyLiteral)
 
         buildConfigField("String", "PLEOS_PROJECT_ID", "\"${localProp("pleos.projectId")}\"")

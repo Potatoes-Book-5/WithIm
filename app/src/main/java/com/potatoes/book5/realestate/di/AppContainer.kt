@@ -3,6 +3,7 @@ package com.potatoes.book5.realestate.di
 import android.content.Context
 import com.potatoes.book5.realestate.BuildConfig
 import com.potatoes.book5.realestate.data.remote.MolitRepositoryFactory
+import com.potatoes.book5.realestate.data.remote.KaptRepositoryFactory
 import com.potatoes.book5.realestate.data.remote.VworldGeocoderFactory
 import com.potatoes.book5.realestate.data.remote.VworldDistrictResolverFactory
 import com.potatoes.book5.realestate.domain.usecase.GetApartmentTradesUseCase
@@ -73,7 +74,8 @@ class AppContainer(context: Context) {
     val marketRepository by lazy {
         LiveMarketRepository(MolitRepositoryFactory.create(BuildConfig.MOLIT_API_KEY),
             VworldGeocoderFactory.create(BuildConfig.VWORLD_API_KEY), interestRepository, vehicleLocationProvider,
-            VworldDistrictResolverFactory.create(BuildConfig.VWORLD_API_KEY))
+            VworldDistrictResolverFactory.create(BuildConfig.VWORLD_API_KEY),
+            householdRepository = KaptRepositoryFactory.create(BuildConfig.KAPT_API_KEY))
     }
     private val neighborhoodRepository get() = marketRepository
     private val rankingRepository get() = marketRepository
