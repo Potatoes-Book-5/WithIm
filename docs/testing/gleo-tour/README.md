@@ -70,10 +70,12 @@
 
 ## 검증 기록
 
-문서 검사와 CSV/JSON/합성 산술 정합성만 수행한다. 실행 명령·결과·리뷰는 [T-039 계획](../../plans/active/T-039-gleo-integration.md)에 기록한다. 앱 코드가 없으므로 L1/L2/L3 또는 실제 Gleo/차량 E2E를 실행했다고 기록하지 않는다.
+원본 90개 제품 TC는 미실행 상태를 유지한다. 설계 초기 문서·fixture 검사는 [T-039 계획](../../plans/active/T-039-gleo-integration.md), 이후 앱 구현의 하위 계층 검증은 아래 별도 기록에서 확인한다. 앱 Intent/계측 성공을 실제 Gleo/차량 여정 TC의 PASS로 올리지 않는다.
 
 ## Dummy 처리 경로의 별도 검증
 
 [T-039 개발 검증](dummy-adapter.md)은 debug Intent/API 경로의 단위·Android 테스트다. 이 결과는 위 90개 제품/Gleo E2E 케이스의 실행 상태와 별도로 관리한다.
+
+[T-042 합성 음성 검증](synthesized-speech.md)은 생성 TTS→Pleos 가상 마이크→앱 이벤트 자동화, 전체 Android 계측 17개, 음성 연결 BLOCKED 결과와 기존 TC의 검증 범위를 기록한다.
 
 STEP 3 확장 TC-083~TC-090은 문서상 인수 조건이며 현재 dummy E2E 통과로 PASS 처리하지 않는다. 기존 가격 함수의 지역 확인 확장 계약 및 실제 Gleo·화면 검증이 필요하다.

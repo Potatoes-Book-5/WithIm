@@ -1,0 +1,209 @@
+{
+  "task": "T-042",
+  "recorded_date": "2026-11-15",
+  "timezone": "Asia/Seoul",
+  "runtime": {
+    "avd": "Pleos_Connect_v2.1.0",
+    "pleos_guard_passed": true,
+    "read_only": true,
+    "host_microphone": false
+  },
+  "verification": {
+    "android_jvm": {
+      "tests": 155,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "host_harness": {
+      "tests": 17,
+      "failures": 0
+    },
+    "android_instrumentation": {
+      "status": "PASS",
+      "expected_tests": 17,
+      "speech_test": false,
+      "events": [
+        {
+          "event": "received",
+          "action": "UNKNOWN"
+        },
+        {
+          "event": "received",
+          "action": "GET_AREA_PRICE_SUMMARY"
+        },
+        {
+          "event": "callback_sent",
+          "action": "GET_AREA_PRICE_SUMMARY",
+          "status": "success",
+          "persisted": false
+        },
+        {
+          "event": "received",
+          "action": "SAVE_INTEREST_AREA"
+        },
+        {
+          "event": "callback_sent",
+          "action": "SAVE_INTEREST_AREA",
+          "status": "fail",
+          "persisted": false
+        },
+        {
+          "event": "received",
+          "action": "GET_REAL_ESTATE_BRIEFING"
+        },
+        {
+          "event": "callback_sent",
+          "action": "GET_REAL_ESTATE_BRIEFING",
+          "status": "success",
+          "persisted": false
+        },
+        {
+          "event": "received",
+          "action": "GET_AREA_PRICE_SUMMARY"
+        },
+        {
+          "event": "callback_sent",
+          "action": "GET_AREA_PRICE_SUMMARY",
+          "status": "success",
+          "persisted": false
+        },
+        {
+          "event": "received",
+          "action": "SAVE_INTEREST_AREA"
+        },
+        {
+          "event": "callback_sent",
+          "action": "SAVE_INTEREST_AREA",
+          "status": "fail",
+          "persisted": false
+        },
+        {
+          "event": "received",
+          "action": "SAVE_INTEREST_AREA"
+        },
+        {
+          "event": "callback_sent",
+          "action": "SAVE_INTEREST_AREA",
+          "status": "asking",
+          "persisted": false
+        },
+        {
+          "event": "received",
+          "action": "GET_AREA_PRICE_SUMMARY"
+        },
+        {
+          "event": "callback_sent",
+          "action": "GET_AREA_PRICE_SUMMARY",
+          "status": "success",
+          "persisted": false
+        }
+      ],
+      "prepared_1000_reads_ms": [
+        10
+      ]
+    }
+  },
+  "audio_injection_smoke": [
+    {
+      "id": "speech-briefing",
+      "text": "임과 함께에서 부동산 브리핑 알려줘",
+      "expected_action": "GET_REAL_ESTATE_BRIEFING",
+      "expected_status": "success",
+      "stt_transcript_verified": false,
+      "status": "INCONCLUSIVE",
+      "assistant_binding_null": true,
+      "injection": {
+        "bytes": 87592,
+        "seconds": 2.73725,
+        "rpc": "OK",
+        "host_microphone": false
+      },
+      "events": []
+    },
+    {
+      "id": "speech-price",
+      "text": "임과 함께에서 현재 위치의 집값 알려줘",
+      "expected_action": "GET_AREA_PRICE_SUMMARY",
+      "expected_status": "success",
+      "stt_transcript_verified": false,
+      "status": "INCONCLUSIVE",
+      "assistant_binding_null": true,
+      "injection": {
+        "bytes": 96506,
+        "seconds": 3.0158125,
+        "rpc": "OK",
+        "host_microphone": false
+      },
+      "events": []
+    },
+    {
+      "id": "speech-scrap-no-target",
+      "text": "임과 함께에서 이 단지 스크랩해 줘",
+      "expected_action": "SCRAP_APARTMENT",
+      "expected_status": "asking",
+      "stt_transcript_verified": false,
+      "status": "INCONCLUSIVE",
+      "assistant_binding_null": true,
+      "injection": {
+        "bytes": 80534,
+        "seconds": 2.5166875,
+        "rpc": "OK",
+        "host_microphone": false
+      },
+      "events": []
+    }
+  ],
+  "guarded_speech_run": [
+    {
+      "id": "speech-briefing",
+      "text": "임과 함께에서 부동산 브리핑 알려줘",
+      "expected_action": "GET_REAL_ESTATE_BRIEFING",
+      "expected_status": "success",
+      "stt_transcript_verified": false,
+      "status": "BLOCKED",
+      "assistant_binding_null": true,
+      "reason": "ASSISTANT_NOT_BOUND",
+      "events": []
+    },
+    {
+      "id": "speech-price",
+      "text": "임과 함께에서 현재 위치의 집값 알려줘",
+      "expected_action": "GET_AREA_PRICE_SUMMARY",
+      "expected_status": "success",
+      "stt_transcript_verified": false,
+      "status": "BLOCKED",
+      "assistant_binding_null": true,
+      "reason": "ASSISTANT_NOT_BOUND",
+      "events": []
+    },
+    {
+      "id": "speech-scrap-no-target",
+      "text": "임과 함께에서 이 단지 스크랩해 줘",
+      "expected_action": "SCRAP_APARTMENT",
+      "expected_status": "asking",
+      "stt_transcript_verified": false,
+      "status": "BLOCKED",
+      "assistant_binding_null": true,
+      "reason": "ASSISTANT_NOT_BOUND",
+      "events": []
+    }
+  ],
+  "full_speech_e2e_verified": false,
+  "product_tc": {
+    "total": 90,
+    "new_full_e2e_passes": 0,
+    "csv_status_changed": false
+  },
+  "review": {
+    "initial_findings": 2,
+    "fixed_findings": 2,
+    "follow_up_blockers": 0
+  },
+  "cleanup": {
+    "test_emulator_closed": true,
+    "audio_listener_closed": true,
+    "session_active": false
+  },
+  "implementation_commit": "cfe66e5"
+}

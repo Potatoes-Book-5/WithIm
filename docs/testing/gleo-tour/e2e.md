@@ -3,6 +3,8 @@ task: T-039
 ---
 # Gleo E2E
 
+최신 합성 음성/기기 검증은 [T-042 TTS 검증](synthesized-speech.md)을 따른다. 생성 음성 주입 3개와 Pleos 전체 Android 계측 17개를 확인했으며, 실제 Gleo 음성 실행은 assistant 연결 부재로 BLOCKED다. 아래 이전 실행 기록과 구분한다.
+
 ## 자동 검증
 
 JDK 17과 Android SDK, 온라인 Pleos 기기가 필요하다. 저장소 루트에서 실행한다.
@@ -70,3 +72,5 @@ VoiceScrapE2ETest는 cold read의 DATA_NOT_READY와 저장 없음, 준비된 데
 Android 실행·계측 대상은 Pleos Connect로 제한한다. 하네스는 automotive 기능과 Pleos 핵심 차량 서비스 패키지를 사전 확인하며, 일반 Phone AVD·미확인 기기에서는 설치 전에 종료한다. ANDROID_SERIAL 지정 시 해당 기기만, 미지정 시 연결된 모든 온라인 기기를 검사한다. 이는 개발 환경 검사이며 앱의 차량 모델별 분기가 아니다.
 
 T-041 검증 범위: JVM 155개, debug/release 빌드·lint·release 테스트 컴파일·Android 계측 APK 빌드 통과. JVM 경합 테스트의 1,000회 읽기는 3ms였다. Pleos 기기에서 새 계측은 package/계측 서비스 불안정으로 미완료다. 이전 T-040 기기 통과 기록을 T-041의 기기 통과로 재사용하지 않는다. 일반 Phone AVD 시도는 유효 검증에서 제외한다. 안정적인 Pleos 환경에서 `./harness/gleo-e2e.sh`로 재검증한다.
+
+T-042 후속 실행: read-only Pleos Connect에서 Gleo 경계 10개와 전체 Android 계측 17개가 통과했다. PreparedMarketPerf의 1,000회 조회는 10ms였다. [기계 판독 증거](runs/2026-11-15-tts.json)에 계측 이벤트와 음성 경로의 별도 BLOCKED 상태를 남긴다.
