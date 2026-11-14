@@ -22,8 +22,8 @@ Gleo 음성 요청을 지역 가격 조회·관심 지역 저장·관심 지역 
 
 | 함수 | 선택 입력 | 처리 | 기본 component |
 |---|---|---|---|
-| GET_AREA_PRICE_SUMMARY | areaQuery: string | 현재 또는 지정 지역의 가격 요약 | service |
-| SAVE_INTEREST_AREA | areaQuery: string | 문맥/현재/지정 관심 지역 저장 | service |
+| GET_AREA_PRICE_SUMMARY | target: enum, areaQuery: string | 현재 또는 지정 지역의 가격 요약 | service |
+| SAVE_INTEREST_AREA | target: enum, areaQuery: string | 문맥/현재/지정 관심 지역 저장 | service |
 | GET_REAL_ESTATE_BRIEFING | 없음 | 활성 프로필 관심 지역 변동 요약 | service |
 
 - MVP의 음성 입력은 지역 지정으로 제한한다. 면적·기간은 F-002의 저장 조건/기본값을 사용하며, 발화만으로 면적 필터를 바꾸는 기능은 지원 범위가 아니다. 원래 발화가 앱에 전달된다고 가정하지 않는다.
@@ -105,4 +105,4 @@ Gleo가 요청 ID를 전달한다는 보장은 없다. 앱 내부 요청 ID와 G
 
 ## Intent 어댑터 구현 준비
 
-외부 wire와 내부 호출을 [gleo-intent-adapter 계약](../../api/gleo-intent-adapter.md) 및 [App API 계약](../../api/app-action-api.md)으로 분리한 초안이 있다. [T-021 계획](../../plans/active/T-021-gleo-intent-adapter-dummy.md)은 기존 아키텍처 안에서 dummy 응답 경로를 구현할 순서를 정의한다. target enum 추가는 vNext 제안이며 현재 JSON 예시/런타임이 이미 바뀌었다는 뜻은 아니다. 이번 단계의 dummy 저장은 실제 저장 성공과 구분한다.
+외부 wire와 내부 호출을 [gleo-intent-adapter 계약](../../api/gleo-intent-adapter.md) 및 [App API 계약](../../api/app-action-api.md)으로 분리한 초안이 있다. [T-021 계획](../../plans/active/T-021-gleo-intent-adapter-dummy.md)은 기존 아키텍처 안에서 dummy 응답 경로를 구현할 순서를 정의한다. target enum은 문서 스키마와 debug 처리 경로에 반영했다. 실제 Gleo에 등록/검증한 것은 아니다. 이번 단계의 dummy 저장은 실제 저장 성공과 구분한다.

@@ -46,6 +46,17 @@ import com.potatoes.book5.realestate.domain.usecase.SimulateAreaChangeUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateDrivingUseCase
 import com.potatoes.book5.realestate.domain.usecase.SkipInterestConditionUseCase
 import com.potatoes.book5.realestate.vehicle.simulation.SimulatedDrivingStateProvider
+import com.potatoes.book5.realestate.data.sample.gleo.DummyAreaPriceSummaryRepository
+import com.potatoes.book5.realestate.data.sample.gleo.DummyInterestAreaRepository
+import com.potatoes.book5.realestate.data.sample.gleo.DummyDailyBriefingRepository
+import com.potatoes.book5.realestate.domain.model.appaction.AppCallContext
+import com.potatoes.book5.realestate.domain.usecase.GetAreaPriceSummaryUseCase
+import com.potatoes.book5.realestate.domain.usecase.SaveInterestAreaUseCase
+import com.potatoes.book5.realestate.domain.usecase.GetDailyBriefingUseCase
+import com.potatoes.book5.realestate.vehicle.gleo.BroadcastGleoCallbackSender
+import com.potatoes.book5.realestate.vehicle.gleo.GleoAndroidHandler
+import com.potatoes.book5.realestate.vehicle.gleo.GleoIntentAdapter
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 
 /**
@@ -108,4 +119,16 @@ class AppContainer(context: Context) {
 
     val getConsent = GetConsentUseCase(consentRepository)
     val deleteUserData = DeleteUserDataUseCase(interestRepository, scrapRepository, driveRecordRepository)
+
+    // A separate synthetic scope; no Room, preferences, actual location or real profile is passed in.
+    private val gleoAppSessionId by lazy { UUID.randomUUID().toString() }
+    val gleoIntentHandler: GleoAndroidHandler by lazy {
+        GleoAndroidHandler(GleoIntentAdapter(
+            GetAreaPriceSummaryUseCase(DummyAreaPriceSummaryRepository()),
+            SaveInterestAreaUseCase(DummyInterestAreaRepository()),
+            GetDailyBriefingUseCase(DummyDailyBriefingRepository()),
+            BroadcastGleoCallbackSender(context),
+            { AppCallContext(UUID.randomUUID().toString(), gleoAppSessionId, "synthetic-profile") },
+        ))
+    }
 }

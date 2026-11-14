@@ -4,7 +4,7 @@ task: T-021
 
 # gleo-intent-adapter 외부 호출 계약 초안
 
-내부 호출은 [App Action API](app-action-api.md), 코드 배치는 [ADR-006](../decisions/ADR-006-gleo-intent-adapter.md), 작업 순서는 [실행 계획](../plans/active/T-021-gleo-intent-adapter-dummy.md)을 따른다. 현재 코드 구현이나 Gleo의 호환성 확인 완료를 뜻하지 않는다.
+내부 호출은 [App Action API](app-action-api.md), 코드 배치는 [ADR-006](../decisions/ADR-006-gleo-intent-adapter.md), 작업 순서는 [실행 계획](../plans/active/T-021-gleo-intent-adapter-dummy.md)을 따른다. T-021에서 debug dummy 경로를 구현했다. 실제 Gleo 호환성/등록은 미검증이다.
 
 ## 1. 컴포넌트 경계
 
@@ -18,9 +18,9 @@ task: T-021
 
 가격 계산, 지역 저장, 추천, 프로필 식별은 어댑터 책임이 아니다. Android Intent와 MVI Intent를 혼용하지 않으며 ui/ViewModel/data 구현체를 참조하지 않는다.
 
-## 2. 제안 스키마 vNext
+## 2. 스키마 vNext
 
-기존 [schema.example.json](../platform/examples/gleo/schema.example.json)은 areaQuery만 있는 초안이다. 구현 단계에서 아래 계약과 함께 갱신하며, 현 예시를 이미 수정/등록한 것으로 간주하지 않는다.
+[schema.example.json](../platform/examples/gleo/schema.example.json)은 아래 target 계약으로 갱신했다. 문서 예시이며 앱 assets에 자동 등록하지 않는다.
 
 - GET_AREA_PRICE_SUMMARY와 SAVE_INTEREST_AREA에 `target: string enum`을 추가한다.
 - enum: CURRENT_LOCATION / LAST_REFERENCED_AREA / NAMED_AREA.
@@ -35,7 +35,7 @@ target 누락/잘못된 enum/이름 누락은 해당 요청을 실행하지 않�
 
 공식 예제에는 ACTION_PARAM JSON과 actionParameters 등 상이한 표현이 있어 실제 설치 버전 검증이 필요하다. 초기 자동 테스트는 `ACTION_PARAM`에 JSON 객체 문자열을 담는 **명시된 테스트 profile**로 고정한다. 실제 Gleo 지원을 보장하는 값이 아니다.
 
-예정된 decoder는 선택된 GleoWireProfile에 대해서만 파싱한다. 복수 키가 충돌하면 거부하고, 임의 fallback/이중 JSON 문자열 자동 복구/여러 형식 추측은 하지 않는다. 설치 버전 확인 후 profile을 DI에서 선택한다.
+현재 decoder는 ACTION_PARAM 객체 JSON profile 하나만 지원한다. 복수 키가 충돌하면 거부하고, 임의 fallback/이중 JSON 문자열 자동 복구/여러 형식 추측은 하지 않는다. 다른 profile은 설치 버전 검증 후 추가한다. 일반화한 profile 선택 계층은 아직 없다.
 
 - action은 등록한 3개만 allowlist 처리한다.
 - null/알 수 없는 action은 API와 Callback을 호출하지 않는다.
@@ -45,10 +45,10 @@ target 누락/잘못된 enum/이름 누락은 해당 요청을 실행하지 않�
 
 ## 4. 수신 생명주기·기한·동시성
 
-- `GleoActionReceiver`는 루트 Android 진입점 패키지의 debug 소스에 둔다. Application/AppContainer 연결은 이 bootstrap만 담당하며, vehicle.gleo에서 di나 Application을 역참조하지 않는다. debug manifest에서만 노출하는 초기안을 제안한다. release에는 exported receiver·Gleo 등록용 schema asset을 넣지 않는다.
+- `GleoActionReceiver`는 루트 Android 진입점 패키지의 debug 소스에 둔다. Application/AppContainer 연결은 이 bootstrap만 담당하며, vehicle.gleo에서 di나 Application을 역참조하지 않는다. debug manifest에서만 노출한다. release에는 exported receiver·Gleo 등록용 schema asset을 넣지 않는다.
 - `onReceive`는 즉시 `goAsync()`로 수신 생명주기를 확보하고 짧은 비동기 작업으로 넘긴다. Activity/FGS/상주 서비스는 시작하지 않는다.
-- DI가 제공한 scope/dispatcher로 실행하고 `PendingResult.finish()`는 성공/오류/취소/기한 초과/중복 수신 등 모든 종료 경로의 finally에서 한 번 호출한다.
-- 수신 시점부터 전체 내부 상한은 기존 제안 5초다. API 평가 budget을 더 짧게 잡아 인코딩·송신·정리 시간을 확보한다. budget 값은 구현 테스트에서 설정값으로 명시하고 플랫폼 보장처럼 쓰지 않는다.
+- DI가 제공한 scope/dispatcher로 실행하고 `PendingResult.finish()`는 Job completion callback과 원자적 1회 gate로 모든 종료 경로에서 한 번 호출한다. 코루틴 본문 진입 전 취소에도 정리되도록 finally 대신 completion callback을 사용한다.
+- 수신 시점부터 전체 내부 상한은 기존 제안 5초다. API budget은 4초, 전체는 5초로 생성자 주입하며 송신/정리 시간을 확보한다. 수신 시각은 루트 Receiver에서 단조 시계로 기록한다. 이는 플랫폼 보장값이 아니다.
 - 수락한 요청은 Callback을 최대 한 번만 송신한다. 송신 시점이 기한을 지났으면 뒤늦은 응답을 보내지 않는다. deadline과 완료의 경합을 한 종료 상태로 처리한다.
 - 실제 Gleo correlation 정보 확인 전에는 앱 내 single-flight로 수락 요청을 1개로 제한한다. 대기열은 만들지 않는다.
 - 중복/겹친 요청에 요청 식별자가 없다면 무조건 BUSY Callback을 보내지 않는다. 같은 functionName의 이전 응답으로 오인될 수 있으므로 추가 요청을 실행·응답하지 않고 종료한다. 수락한 첫 요청만 정상 완료한다. 이는 임시 제한이며 실제 다중 요청 호환성 검증 전 운영 사용하지 않는다.
@@ -83,3 +83,7 @@ dummy 저장에는 success를 쓰지 않으므로 F-011의 영속 저장 후 성
 초기 구현은 명시한 target의 한 Action 처리와 주입한 합성 문맥만 검증한다. 별도의 target 없이 말한 ‘이 동네’에 대한 운영 fallback은 F-010 R-CONTEXT와 조정 전 지원 완료로 표시하지 않는다. ‘첫 번째 후보’처럼 원천 세션·후속 호출 연결이 필요한 대화를 지원 완료로 표시하지 않는다. 합성 LAST_REFERENCED_AREA는 앱이 소유한 문맥이며 Gleo 대화 세션의 복원이 아니다.
 
 가격·브리핑의 실제 데이터 조회, 지역 영속 저장, 현재 GPS, 주행 중 실행, 자동 발화, UI 이동, 카메라, 내비는 이 어댑터 dummy 구현의 완료 조건에 포함하지 않는다.
+
+## 구현 파일과 개발 검증
+
+구현은 vehicle.gleo/GleoAndroidHandler(Decoder 포함), GleoIntentAdapter, GleoRequestValidator, GleoResponseMapper, GleoRequestCoordinator, GleoContract, BroadcastGleoCallbackSender(Encoder 포함)로 구성한다. 순수 부분과 Android codec을 분리했다. wire JSON은 4,096자, 지역명은 256자로 제한하며 이는 개발용 입력 제한값이다. 실행 방법과 검증 결과는 [dummy 검증 가이드](../testing/gleo-tour/dummy-adapter.md)를 따른다.

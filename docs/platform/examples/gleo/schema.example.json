@@ -11,12 +11,23 @@
         "parameters": {
           "type": "object",
           "properties": {
+            "target": {
+              "type": "string",
+              "enum": [
+                "CURRENT_LOCATION",
+                "LAST_REFERENCED_AREA",
+                "NAMED_AREA"
+              ],
+              "description": "The source of the target area: the current vehicle location, an explicitly referenced earlier area, or a named area."
+            },
             "areaQuery": {
               "type": "string",
-              "description": "The name of the area to inspect, or an explicit reference to the current vehicle area."
+              "description": "The name of the requested area when the target is NAMED_AREA."
             }
           },
-          "required": []
+          "required": [
+            "target"
+          ]
         },
         "component": "service"
       }
@@ -29,12 +40,23 @@
         "parameters": {
           "type": "object",
           "properties": {
+            "target": {
+              "type": "string",
+              "enum": [
+                "CURRENT_LOCATION",
+                "LAST_REFERENCED_AREA",
+                "NAMED_AREA"
+              ],
+              "description": "The source of the target area: the current vehicle location, an explicitly referenced earlier area, or a named area."
+            },
             "areaQuery": {
               "type": "string",
-              "description": "The name of the area to save, or an explicit reference to the current vehicle area."
+              "description": "The name of the requested area when the target is NAMED_AREA."
             }
           },
-          "required": []
+          "required": [
+            "target"
+          ]
         },
         "component": "service"
       }

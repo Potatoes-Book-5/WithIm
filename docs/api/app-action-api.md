@@ -4,7 +4,7 @@ task: T-021
 
 # UseCase 기반 App Action API 초안
 
-구현 전 설계다. [ARCHITECTURE](../ARCHITECTURE.md)의 domain/port/usecase 규칙과 [ADR-003](../decisions/ADR-003-clean-architecture-mvi.md)을 따른다. Android wire 규칙은 [어댑터 계약](gleo-intent-adapter.md)에서 별도로 정의한다.
+T-021의 dummy 구현 계약이다. 실제 Gleo/원천 데이터 연동은 미검증이다. [ARCHITECTURE](../ARCHITECTURE.md)의 domain/port/usecase 규칙과 [ADR-003](../decisions/ADR-003-clean-architecture-mvi.md)을 따른다. Android wire 규칙은 [어댑터 계약](gleo-intent-adapter.md)에서 별도로 정의한다.
 
 ## 1. API의 의미와 소유 계층
 
@@ -14,11 +14,11 @@ App API는 다음 세 UseCase의 공개 계약이다. 별도 Service 계층이�
 
 | 외부 액션 | 내부 API/UseCase | 입력 | 결과 |
 |---|---|---|---|
-| GET_AREA_PRICE_SUMMARY | GetAreaPriceSummaryUseCase | PriceSummaryQuery + AppCallContext | Outcome<ActionResult<PriceSummaryPayload>> |
-| SAVE_INTEREST_AREA | SaveInterestAreaUseCase | SaveInterestAreaCommand + AppCallContext | Outcome<ActionResult<InterestAreaSavePayload>> |
-| GET_REAL_ESTATE_BRIEFING | GetDailyBriefingUseCase | DailyBriefingQuery + AppCallContext | Outcome<ActionResult<DailyBriefingPayload>> |
+| GET_AREA_PRICE_SUMMARY | GetAreaPriceSummaryUseCase | AreaTarget + AppCallContext | Outcome<ActionResult<PriceSummaryPayload>> |
+| SAVE_INTEREST_AREA | SaveInterestAreaUseCase | AreaTarget + AppCallContext | Outcome<ActionResult<InterestAreaSavePayload>> |
+| GET_REAL_ESTATE_BRIEFING | GetDailyBriefingUseCase | AppCallContext | Outcome<ActionResult<DailyBriefingPayload>> |
 
-예정 호출 형태는 `suspend operator fun invoke(input, context)`다. 실제 구현 전 기존 domain 모델/포트와 대조하여 중복 타입을 만들지 않는다. 최신 main에는 DomainError와 Outcome이 `domain/error/Outcome.kt`에 함께 있으므로 다시 정의하지 않는다.
+호출 형태는 `suspend operator fun invoke(input, context)`다. 기존 domain/error/Outcome.kt를 재사용하며 새 Outcome을 만들지 않았다. 최신 main에는 DomainError와 Outcome이 `domain/error/Outcome.kt`에 함께 있으므로 다시 정의하지 않는다.
 
 ## 2. 공통 입력
 
@@ -38,7 +38,7 @@ App API는 다음 세 UseCase의 공개 계약이다. 별도 Service 계층이�
 | requestId | 어댑터가 생성 | 앱 내부 추적용. Gleo correlation ID라는 의미 없음 |
 | appSessionId | DI가 제공하는 앱 실행 세션 | Gleo 대화 세션을 추정하지 않음 |
 | profileScope | 신뢰 가능한 앱 상태/이번 단계의 합성 프로필 | Intent extras에서 profileId를 받지 않음 |
-| executionMode | DI 구성 | 초기 구현은 DUMMY로 고정 |
+| 실행 모드 | DI가 선택한 Dummy Repository | context 입력 필드가 아니며 결과 metadata에 DUMMY로 표시 |
 
 앱 세션/프로필 타입은 구현 시 기존 모델을 먼저 재사용한다. dummy 프로필은 실제 사용자 로그인·동의·부부 식별을 구현한 것이 아니다. 실행 기한과 취소의 소유자는 외부 호출 어댑터이며 domain에는 Android 시계 타입을 전달하지 않는다.
 
@@ -47,7 +47,7 @@ App API는 다음 세 UseCase의 공개 계약이다. 별도 Service 계층이�
 기존 `Outcome`을 유지하면서 `ActionResult<T>`를 다음 두 가지 의미로 제안한다.
 
 - `Completed<T>`: API 평가가 끝났고 typed payload와 `ResultMetadata`를 반환함. 저장 성공은 payload의 mutation 상태로 별도 확인한다.
-- `NeedsInput`: 필요한 필드 코드 또는 선택 후보를 반환함. 사용자에게 보여 줄 영문 문장·Gleo `asking` 문자열은 어댑터에서 생성한다.
+- `NeedsInput`: 필요한 필드 코드를 반환함. 선택 후보를 이용한 후속 대화는 미구현. 사용자에게 보여 줄 영문 문장·Gleo `asking` 문자열은 어댑터에서 생성한다.
 
 `ResultMetadata`는 `executionMode`, `sourceId`, `sourceAsOf`, `synthetic`를 갖는다. dummy에서는 `executionMode=DUMMY`, `synthetic=true`, 원천 식별자는 합성임을 명시한다. UI/Callback 표시용 억 단위 문자열 대신 원 단위 정수 금액을 반환한다.
 
@@ -55,7 +55,7 @@ App API는 다음 세 UseCase의 공개 계약이다. 별도 Service 계층이�
 
 ## 4. 가격 요약 계약
 
-- PriceSummaryQuery: AreaTarget. 면적/기간의 음성 변경은 이번 스키마 범위 밖이다.
+- 입력: AreaTarget. 면적/기간의 음성 변경은 이번 스키마 범위 밖이다.
 - PriceSummaryPayload: 확정된 합성 지역, 집계 면적/기간, 표본수, 평균 원 단위 가격, 최고 거래 금액/단지, 원천 메타데이터.
 - 수치/집계 의미는 F-002가 소유한다. dummy는 기존 합성 fixture의 값만 반환하며 실제 가격 공급자·현재 위치를 조회하지 않는다.
 - CURRENT_LOCATION은 실제 좌표 대신 문서화한 합성 현재 지역을 사용한다. NAMED_AREA는 합성 fixture의 알려진 이름에만 응답하고, 실제 지역명은 `Unsupported`로 반환한다. 실제 지역명에 합성 가격을 붙여 답하지 않는다.
@@ -64,7 +64,7 @@ App API는 다음 세 UseCase의 공개 계약이다. 별도 Service 계층이�
 
 ## 5. 관심 지역 저장 계약
 
-- SaveInterestAreaCommand: AreaTarget.
+- 입력: AreaTarget.
 - InterestAreaSavePayload: 합성 지역, `mutationState`, `persisted`, 메타데이터.
 - 초기 dummy 결과는 `mutationState=NOT_APPLIED`, `persisted=false`다. Completed는 호출 평가 완료만 의미하고 실제 저장 완료를 뜻하지 않는다.
 - SharedPreferences/Room/파일/네트워크/기존 단지 스크랩을 변경하지 않는다. 단지 스크랩 저장소를 지역 저장의 대용으로 호출하지 않는다.
@@ -73,7 +73,7 @@ App API는 다음 세 UseCase의 공개 계약이다. 별도 Service 계층이�
 
 ## 6. 데일리 브리핑 계약
 
-- DailyBriefingQuery: 기본 요약 요청. 원천 접근·프로필 선택·읽음 변경을 외부 입력에 포함하지 않는다.
+- 입력: AppCallContext를 통한 기본 요약 요청. 원천 접근·프로필 선택·읽음 변경을 외부 입력에 포함하지 않는다.
 - DailyBriefingPayload: 합성 항목 목록, 항목 유형/ID, 합성 게시/수집 시점, 원천별 조회 상태, 메타데이터.
 - 초기 결과는 고정된 합성 데이터다. 실거래·청약·뉴스를 수집하거나 읽음 체크포인트를 변경하지 않는다.
 - 조회 API가 읽음/자동 브리핑 완료 처리를 겸하지 않는다. 실제 열람 확인 API는 후속 범위다.

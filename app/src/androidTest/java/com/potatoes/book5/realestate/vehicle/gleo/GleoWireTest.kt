@@ -1,0 +1,107 @@
+package com.potatoes.book5.realestate.vehicle.gleo
+
+import android.content.BroadcastReceiver
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import androidx.core.content.ContextCompat
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.potatoes.book5.realestate.GleoActionReceiver
+import org.json.JSONArray
+import org.json.JSONObject
+import org.junit.Assert.*
+import org.junit.Test
+import org.junit.runner.RunWith
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
+
+@RunWith(AndroidJUnit4::class)
+class GleoWireTest {
+    private val decoder = GleoIntentDecoder()
+    private val price = GleoAction.GET_AREA_PRICE_SUMMARY
+    @Test fun decoderAcceptsOnlyKnownActionAndSelectedJsonProfile() {
+        assertNull(decoder.decode(Intent("UNKNOWN")))
+        val valid = decoder.decode(Intent(price.name).putExtra("ACTION_PARAM", "{\"target\":\"CURRENT_LOCATION\"}"))!!
+        assertNull(valid.decodingError)
+        assertEquals("CURRENT_LOCATION", valid.parameters["target"])
+        assertEquals("MALFORMED_REQUEST", decoder.decode(Intent(price.name).putExtra("ACTION_PARAM", "[1]"))!!.decodingError)
+        assertEquals("MALFORMED_REQUEST", decoder.decode(Intent(price.name).putExtra("ACTION_PARAM", "not JSON"))!!.decodingError)
+        assertEquals("CONFLICTING_WIRE_PROFILE", decoder.decode(Intent(price.name)
+            .putExtra("ACTION_PARAM", "{}").putExtra("actionParameters", "{}"))!!.decodingError)
+    }
+    @Test fun decoderBoundsPayloadAndDoesNotCoerceValues() {
+        assertEquals("PAYLOAD_TOO_LARGE", decoder.decode(Intent(price.name).putExtra("ACTION_PARAM", "a".repeat(4097)))!!.decodingError)
+        val wrongType = decoder.decode(Intent(price.name).putExtra("ACTION_PARAM", "{\"target\":42}"))!!
+        assertEquals(GleoValidation.Invalid("INVALID_TARGET_TYPE"), GleoRequestValidator().validate(wrongType))
+        val nullType = decoder.decode(Intent(price.name).putExtra("ACTION_PARAM", "{\"target\":null}"))!!
+        assertEquals(GleoValidation.Invalid("INVALID_TARGET_TYPE"), GleoRequestValidator().validate(nullType))
+    }
+    @Test fun callbackEncodesNestedDataAsStringAndAlwaysStaysSilent() {
+        val json = JSONObject(GleoCallbackEncoder().encode(GleoCallback.failure(price, "INVALID_REQUEST")))
+        assertEquals(price.name, json.getString("functionName"))
+        assertEquals("silent", json.getString("mode"))
+        assertTrue(json.get("data") is String)
+        assertEquals("INVALID_REQUEST", JSONArray(json.getString("data")).getJSONObject(0).getString("code"))
+    }
+    @Test fun manifestReceiverDispatchesThreeActionsThroughApplicationContainer() {
+        withResponseReceiver { context, responses ->
+            send(context, GleoAction.GET_AREA_PRICE_SUMMARY, "{\"target\":\"CURRENT_LOCATION\"}")
+            val priceResponse = take(responses)
+            assertEquals("success", priceResponse.getString("status"))
+            assertEquals("silent", priceResponse.getString("mode"))
+            val prices = JSONArray(priceResponse.getString("data")).getJSONObject(0)
+            assertEquals(1200000000L, prices.getLong("averagePriceKrw"))
+            assertTrue(prices.getBoolean("synthetic"))
+
+            send(context, GleoAction.SAVE_INTEREST_AREA, "{\"target\":\"CURRENT_LOCATION\"}")
+            val save = take(responses)
+            assertEquals("fail", save.getString("status"))
+            val mutation = JSONArray(save.getString("data")).getJSONObject(0)
+            assertFalse(mutation.getBoolean("persisted"))
+            assertEquals("DUMMY_NOT_PERSISTED", mutation.getString("code"))
+
+            send(context, GleoAction.GET_REAL_ESTATE_BRIEFING, "{}")
+            val briefing = take(responses)
+            assertEquals("success", briefing.getString("status"))
+            assertEquals(3, JSONArray(briefing.getString("data")).length())
+            assertNull(responses.poll(250, TimeUnit.MILLISECONDS))
+        }
+    }
+    @Test fun receiverRejectsMalformedAndMissingTargetThenRemainsUsable() {
+        withResponseReceiver { context, responses ->
+            send(context, GleoAction.SAVE_INTEREST_AREA, "bad JSON")
+            assertEquals("fail", take(responses).getString("status"))
+            send(context, GleoAction.SAVE_INTEREST_AREA, "{}")
+            assertEquals("asking", take(responses).getString("status"))
+            send(context, GleoAction.GET_AREA_PRICE_SUMMARY, "{\"target\":\"CURRENT_LOCATION\"}")
+            assertEquals("success", take(responses).getString("status"))
+        }
+    }
+    @Test fun receiverIgnoresUnknownAction() {
+        withResponseReceiver { context, responses ->
+            context.sendBroadcast(Intent("UNKNOWN").setComponent(ComponentName(context, GleoActionReceiver::class.java)))
+            assertNull(responses.poll(500, TimeUnit.MILLISECONDS))
+        }
+    }
+    private fun send(context: Context, action: GleoAction, json: String) {
+        context.sendBroadcast(Intent(action.name).setComponent(ComponentName(context, GleoActionReceiver::class.java))
+            .putExtra("ACTION_PARAM", json))
+    }
+    private fun take(queue: LinkedBlockingQueue<Intent>): JSONObject {
+        val intent = queue.poll(10, TimeUnit.SECONDS)
+        assertNotNull("Expected one app-local dummy callback", intent)
+        assertEquals(InstrumentationRegistry.getInstrumentation().targetContext.packageName, intent!!.getStringExtra("packageName"))
+        return JSONObject(intent.getStringExtra("response")!!)
+    }
+    private fun withResponseReceiver(test: (Context, LinkedBlockingQueue<Intent>) -> Unit) {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val queue = LinkedBlockingQueue<Intent>()
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) { queue.offer(intent) }
+        }
+        ContextCompat.registerReceiver(context, receiver, IntentFilter(BroadcastGleoCallbackSender.TEST_RESPONSE_ACTION), ContextCompat.RECEIVER_NOT_EXPORTED)
+        try { test(context, queue) } finally { context.unregisterReceiver(receiver) }
+    }
+}

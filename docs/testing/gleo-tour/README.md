@@ -69,3 +69,7 @@
 ## 검증 기록
 
 문서 검사와 CSV/JSON/합성 산술 정합성만 수행한다. 실행 명령·결과·리뷰는 [T-020 계획](../../plans/active/T-020-gleo-spec-integration.md)에 기록한다. 앱 코드가 없으므로 L1/L2/L3 또는 실제 Gleo/차량 E2E를 실행했다고 기록하지 않는다.
+
+## Dummy 처리 경로의 별도 검증
+
+[T-021 개발 검증](dummy-adapter.md)은 debug Intent/API 경로의 단위·Android 테스트다. 이 결과는 위 82개 제품/Gleo E2E 케이스의 실행 상태와 별도로 관리한다.

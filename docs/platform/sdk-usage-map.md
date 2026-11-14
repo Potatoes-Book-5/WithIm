@@ -20,3 +20,7 @@
 | F-014 카메라 | 외부 앱 표준 스트림/녹화 API 미확인 | 직접 접근 금지, MVP 비활성 | 미확정 |
 
 출처·확인일·현재 Emulator와의 버전 차이는 [gleo-integration](gleo-integration.md)을 따른다. 이 표가 기존 SDK 환경 변경이나 권한 승인을 의미하지 않는다.
+
+## T-021 dummy 연결 상태
+
+Gleo debug 수신/앱 내부 Callback 경로는 Android API만 사용한다. 기존 3개 domain UseCase와 Dummy Repository를 AppContainer에서 조립하며 Pleos SDK 의존성이나 차량 권한을 활성화하지 않는다. 실제 Gleo wire/등록/목적지/인증/음성은 계속 미검증이다. [개발 검증](../testing/gleo-tour/dummy-adapter.md)을 참조한다.

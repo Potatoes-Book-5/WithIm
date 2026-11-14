@@ -53,9 +53,9 @@ flowchart LR
 
 Android Intent와 화면의 MVI Intent는 별개다. 외부 요청은 화면을 거치지 않고 UseCase를 호출한다. 후속 UI가 필요하면 domain 데이터 변화→ViewModel Result→Reducer→State로 반영하며 기존 규칙을 유지한다.
 
-## 계획할 파일 배치
+## 구현 파일 배치
 
-아래는 구현 후의 예상 경로이며 현재 파일 존재를 의미하지 않는다. 최신 main의 기존 타입/디렉토리와 대조한 뒤 파일을 추가한다.
+실제 추가한 파일과 책임은 아래와 같다. UseCase는 한 파일에 3개 클래스로 정의했으며 각 클래스의 동작/호출 계약은 독립적이다.
 
 ```text
 app/src/main/java/com/potatoes/book5/realestate/
@@ -63,16 +63,15 @@ app/src/main/java/com/potatoes/book5/realestate/
 │   ├── model/appaction/          # AreaTarget, AppCallContext, typed 결과
 │   ├── port/                    # 가격 요약·관심 지역·브리핑 포트
 │   └── usecase/
-│       ├── GetAreaPriceSummaryUseCase.kt
-│       ├── SaveInterestAreaUseCase.kt
-│       └── GetDailyBriefingUseCase.kt
+│       └── AppActionUseCases.kt # GetAreaPriceSummary/SaveInterestArea/GetDailyBriefingUseCase
 ├── data/sample/gleo/             # 포트의 Dummy 구현
 ├── vehicle/gleo/
 │   ├── GleoIntentAdapter.kt
-│   ├── GleoIntentDecoder.kt      # Android/JSON 진입 경계
+│   ├── GleoAndroidHandler.kt     # GleoIntentDecoder 포함, Android/JSON 진입 경계
 │   ├── GleoRequestValidator.kt   # 정규화 DTO의 순수 검증
-│   ├── GleoCallbackEncoder.kt
-│   ├── GleoCallbackSender.kt     # 전송 인터페이스 + Android 구현
+│   ├── GleoResponseMapper.kt
+│   ├── GleoContract.kt           # typed wire DTO, Callback sender 인터페이스
+│   ├── BroadcastGleoCallbackSender.kt # Android 송신과 Encoder
 │   └── GleoRequestCoordinator.kt # single-flight·기한·1회 완료
 └── di/AppContainer.kt           # 기존 조립에 추가
 
@@ -107,54 +106,54 @@ Receiver는 기존 MainActivity와 같은 루트 Android 진입점 패키지에 
 
 ### 0. 기준 브랜치와 ID 정리
 
-- [ ] 최신 main을 다시 확인하고 Gleo 문서와 통합할 기준 브랜치를 준비한다. 사용자 변경을 덮어쓰지 않는다.
-- [ ] 기존 작업 번호 충돌을 새 ID로 조정하고 관련 frontmatter/Refs/색인을 함께 수정한다. 과거 승인된 Room ADR을 대체하지 않는다.
-- [ ] 기존 main의 AppContainer/Outcome/포트/샘플 모델과 실제 라이브러리 버전을 재확인한다.
-- [ ] 문서·ID 검사 통과. 새로운 구현 작업 ID를 등록하고 이 계획에 연결한다.
+- [x] 최신 main을 다시 확인하고 Gleo 문서와 통합할 기준 브랜치를 준비한다. 사용자 변경을 덮어쓰지 않는다.
+- [x] 기존 작업 번호 충돌을 새 ID로 조정하고 관련 frontmatter/Refs/색인을 함께 수정한다. 과거 승인된 Room ADR을 대체하지 않는다.
+- [x] 기존 main의 AppContainer/Outcome/포트/샘플 모델과 실제 라이브러리 버전을 재확인한다.
+- [x] 문서·ID 검사 통과. 새로운 구현 작업 ID를 등록하고 이 계획에 연결한다.
 
 ### 1. 계약을 고정하고 스키마·테스트와 맞춤
 
-- [ ] App API의 입력/결과/오류·dummy 의미를 검토한다.
-- [ ] 스키마에 target enum을 추가하고 areaQuery와의 조합 검증을 정의한다. 명시적 합성 대상 호출만 검증하며, 맥락 없는 ‘이 동네’의 운영 해석은 기존 F-010과 별도 대조 전 지원 완료로 표시하지 않는다.
-- [ ] wire profile을 테스트 입력 기준으로 명시한다. 실제 설치된 Gleo 확인 전에는 호환성을 확정하지 않는다.
-- [ ] 기존 테스트 중 현재/직전 지역 선택·timeout·저장 성공 조건을 새 계약과 연결한다. 실제 영속화 케이스를 dummy 통과로 처리하지 않는다.
+- [x] App API의 입력/결과/오류·dummy 의미를 검토한다.
+- [x] 스키마에 target enum을 추가하고 areaQuery와의 조합 검증을 정의한다. 명시적 합성 대상 호출만 검증하며, 맥락 없는 ‘이 동네’의 운영 해석은 기존 F-010과 별도 대조 전 지원 완료로 표시하지 않는다.
+- [x] wire profile을 테스트 입력 기준으로 명시한다. 실제 설치된 Gleo 확인 전에는 호환성을 확정하지 않는다.
+- [x] 기존 테스트 중 현재/직전 지역 선택·timeout·저장 성공 조건을 새 계약과 연결한다. 실제 영속화 케이스를 dummy 통과로 처리하지 않는다.
 
 ### 2. domain API와 포트를 구현
 
-- [ ] 기존 Outcome/DomainError와 재사용 가능한 타입을 활용한다.
-- [ ] 순수 Kotlin target/context/결과와 3개 UseCase를 구현한다.
-- [ ] 예상 가능한 입력/지원 실패를 Outcome으로 반환하고 cancellation을 삼키지 않는다.
-- [ ] Android 없는 JVM 테스트로 검증한다.
+- [x] 기존 Outcome/DomainError와 재사용 가능한 타입을 활용한다.
+- [x] 순수 Kotlin target/context/결과와 3개 UseCase를 구현한다.
+- [x] 예상 가능한 입력/지원 실패를 Outcome으로 반환하고 cancellation을 삼키지 않는다.
+- [x] Android 없는 JVM 테스트로 검증한다.
 
 ### 3. Dummy Repository를 구현
 
-- [ ] data.sample.gleo에 포트 구현을 둔다. 합성 fixture는 주입/고정 시계로 결정적 결과를 보장한다.
-- [ ] 가격/브리핑은 원천·기간·synthetic 표식을 갖는다.
-- [ ] 저장은 NOT_APPLIED/persisted=false이며 Room/SharedPreferences/파일/네트워크를 건드리지 않는다.
-- [ ] 같은 입력·fixture의 같은 출력과 부작용 없음을 테스트한다.
+- [x] data.sample.gleo에 포트 구현을 둔다. 합성 fixture는 주입/고정 시계로 결정적 결과를 보장한다.
+- [x] 가격/브리핑은 원천·기간·synthetic 표식을 갖는다.
+- [x] 저장은 NOT_APPLIED/persisted=false이며 Room/SharedPreferences/파일/네트워크를 건드리지 않는다.
+- [x] 같은 입력·fixture의 같은 출력과 부작용 없음을 테스트한다.
 
 ### 4. gleo-intent-adapter를 구현
 
-- [ ] 선택한 profile의 Android Intent→wire DTO decode와 순수 검증을 분리한다.
-- [ ] 알려진 3개 action을 적절한 domain UseCase에 연결한다.
-- [ ] 결과/오류→공식 Callback envelope를 변환하고 data를 JSON 배열 문자열로 인코딩한다.
-- [ ] 합성 저장은 fail, 합성 조회는 명시적 synthetic success로 반환한다. 모두 silent다.
-- [ ] single-flight/전체 deadline/최대 1회 응답/마감 후 응답 금지 경합을 테스트한다.
+- [x] 선택한 profile의 Android Intent→wire DTO decode와 순수 검증을 분리한다.
+- [x] 알려진 3개 action을 적절한 domain UseCase에 연결한다.
+- [x] 결과/오류→공식 Callback envelope를 변환하고 data를 JSON 배열 문자열로 인코딩한다.
+- [x] 합성 저장은 fail, 합성 조회는 명시적 synthetic success로 반환한다. 모두 silent다.
+- [x] single-flight/전체 deadline/최대 1회 응답/마감 후 응답 금지 경합을 테스트한다.
 
 ### 5. debug Receiver와 DI를 연결
 
-- [ ] 기존 AppContainer가 Dummy Repository→UseCase→Adapter를 조립한다.
-- [ ] 루트 debug Receiver만 Application의 기존 컨테이너에 접근한다. vehicle.gleo는 DI가 생성자 주입한 UseCase/sender/coordinator만 사용하며 di/root Application import가 없다. ViewModel/Activity를 생성하지 않는다.
-- [ ] debug Receiver의 goAsync/finally finish를 구현하고 main thread를 막지 않는다.
-- [ ] Callback test sink는 DI에서 고정한다. 요청 extras의 목적지·프로필·권한 값을 신뢰하지 않는다.
-- [ ] release merged manifest에서 수신점이 노출되지 않는지 확인한다.
+- [x] 기존 AppContainer가 Dummy Repository→UseCase→Adapter를 조립한다.
+- [x] 루트 debug Receiver만 Application의 기존 컨테이너에 접근한다. vehicle.gleo는 DI가 생성자 주입한 UseCase/sender/coordinator만 사용하며 di/root Application import가 없다. ViewModel/Activity를 생성하지 않는다.
+- [x] debug Receiver의 goAsync/finally finish를 구현하고 main thread를 막지 않는다.
+- [x] Callback test sink는 DI에서 고정한다. 요청 extras의 목적지·프로필·권한 값을 신뢰하지 않는다.
+- [x] release merged manifest에서 수신점이 노출되지 않는지 확인한다.
 
 ### 6. 검증·리뷰·문서 갱신
 
-- [ ] Docs, L1 통과. 실행 가능한 장치가 있으면 L2와 명시 Intent 주입을 수행한다.
-- [ ] 별도 reviewer로 의존성 방향·수신 생명주기·dummy 비영속성·Callback 변환을 검토한다.
-- [ ] 아키텍처/SDK 맵/기능/API/테스트 상태를 실제 구현 범위로 갱신한다.
-- [ ] 실제 Gleo 검증 없이 자연어 E2E 통과/스키마 승인/주행 허용을 기록하지 않는다.
+- [x] Docs, L1 통과. 실행 가능한 장치가 있으면 L2와 명시 Intent 주입을 수행한다.
+- [x] 별도 reviewer로 의존성 방향·수신 생명주기·dummy 비영속성·Callback 변환을 검토한다.
+- [x] 아키텍처/SDK 맵/기능/API/테스트 상태를 실제 구현 범위로 갱신한다.
+- [x] 실제 Gleo 검증 없이 자연어 E2E 통과/스키마 승인/주행 허용을 기록하지 않는다.
 
 ## 검증 방법
 
@@ -198,3 +197,15 @@ JVM 테스트에서 Android JSONObject 구현을 사용하려고 Robolectric 같
 - 2026-11-14: 계획/API/ADR의 상대 링크·원장·공백 검사를 통과했다. 별도 reviewer가 아키텍처·dummy 의미·수신 생명주기를 검토했고 중대한 지적 없음으로 확인했다. 자가 검토에서 manifest Receiver의 DI 연결을 루트 bootstrap으로 명시해 vehicle→di 역참조를 방지했고, reviewer 재확인도 완료했다. 구현 체크리스트는 모두 미착수이며 앱 테스트는 실행하지 않았다.
 
 - 2026-11-14: 원격 main=c116c7d 확인, 새 브랜치 생성, 5550ee7/48895f2를 cherry-pick하여 스펙·계획 이관. 기존 main의 T-014~T-019/ADR-005를 보존하고 스펙 T-020/구현 T-021로 조정했다.
+
+## 실제 구현·검증 결과
+
+- 기존 Outcome/DomainError와 AppContainer를 재사용했다. domain/port와 3개 UseCase, data.sample.gleo Dummy 구현, vehicle.gleo의 wire/검증/dispatch/응답/coordinator를 연결했다.
+- manifest Receiver는 debug 루트 진입점에만 있다. 수신 시각을 deadline 계산까지 전달한다. PendingResult 정리는 Job completion+AtomicBoolean으로 구현하여 코루틴 시작 전 취소에도 1회 완료한다.
+- 현재 wire는 ACTION_PARAM JSON 객체 하나로 고정했다. 실제 Gleo profile과 인증은 계속 미확정이다. Callback은 앱 내부 고정 테스트 action으로만 전달한다.
+- 새 JVM 테스트 28개를 포함한 전체 JVM 99개 통과, assembleDebug/lintDebug 통과.
+- 읽기 전용·headless Pleos Connect v2.1.0 API 35 에뮬레이터에서 Android 테스트 13개 통과(새 Gleo 6개 포함). 실제 debug Receiver→기존 DI→API→앱 내부 Callback의 3개 action 왕복을 확인했다.
+- processReleaseMainManifest 통과, release merged manifest에 GleoActionReceiver가 없고 debug에서만 존재함을 확인했다. runtime schema asset은 추가하지 않았다.
+- domain/vehicle/data의 새 코드 import 경계 검사와 schema target 계약 검사 통과. 기존 ui/data.local/Gradle/SDK 파일은 origin/main과 동일하다.
+- 별도 reviewer의 코드 검토에서 중대한 발견 없음. 기존 제품 테스트 CSV 82개와 실제 Gleo 자연어 E2E/운영 인증/음성/차량 API 검증은 이번 테스트 결과로 PASS 처리하지 않았다.
+- 실행 로그: harness/runs/20261114-171400-fast.log, harness/runs/20261114-171755-device.log(로컬·git 제외).

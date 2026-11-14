@@ -1,6 +1,8 @@
 package com.potatoes.book5.realestate
 
 import android.app.Application
+import android.content.Intent
+import kotlinx.coroutines.Job
 import com.potatoes.book5.realestate.di.AppContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,5 +18,11 @@ class RealEstateApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         appScope.launch { container.driveSessionRecorder.run() }
+    }
+
+    /** Android bootstrap only; release has no exported Gleo dummy receiver. */
+    fun launchGleoRequest(intent: Intent, receivedAtMillis: Long): Job {
+        check(BuildConfig.DEBUG)
+        return appScope.launch { container.gleoIntentHandler.handle(intent, receivedAtMillis) }
     }
 }
