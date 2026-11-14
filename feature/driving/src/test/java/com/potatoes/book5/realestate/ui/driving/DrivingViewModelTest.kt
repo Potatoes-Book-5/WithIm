@@ -7,10 +7,12 @@ import com.potatoes.book5.realestate.domain.model.Apartment
 import com.potatoes.book5.realestate.domain.model.ApartmentDetail
 import com.potatoes.book5.realestate.domain.model.ConsentSettings
 import com.potatoes.book5.realestate.domain.model.Deal
+import com.potatoes.book5.realestate.domain.model.GeoPoint
 import com.potatoes.book5.realestate.domain.model.NearbyApartment
 import com.potatoes.book5.realestate.domain.model.Neighborhood
 import com.potatoes.book5.realestate.domain.model.RankingSnapshot
 import com.potatoes.book5.realestate.domain.model.Scrap
+import com.potatoes.book5.realestate.domain.model.VehiclePose
 import com.potatoes.book5.realestate.domain.port.ApartmentRepository
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
 import com.potatoes.book5.realestate.domain.port.MarketRepository
@@ -112,8 +114,11 @@ class DrivingViewModelTest {
             ToggleScrapByIdUseCase(apartments, ToggleScrapUseCase(scraps)),
         )
 
-    /** leaderIds 순서대로 1위부터 채운 스냅샷. */
-    private fun snapshotOf(vararg leaderIds: String) = RankingSnapshot(
+    /**
+     * leaderIds 순서대로 1위부터 채운 스냅샷. 알림은 실제 차량 위치가 있는 스냅샷에서만 나오므로(T-027 삼성전자 임시 기준)
+     * 기본으로 차량 위치를 둔다.
+     */
+    private fun snapshotOf(vararg leaderIds: String, vehicle: VehiclePose? = VEHICLE) = RankingSnapshot(
         neighborhoodName = "정자동",
         radiusKm = 10,
         top = leaderIds.mapIndexed { i, id ->
@@ -122,7 +127,19 @@ class DrivingViewModelTest {
         interestMatches = emptyList(),
         others = emptyList(),
         dataAsOf = LocalDateTime.of(2026, 11, 13, 9, 0),
+        vehicle = vehicle,
     )
+
+    @Test
+    fun `차량 위치 없이 임시 기준으로 조회한 순위는 대장 교체 알림을 띄우지 않는다`() = runTest(dispatcher) {
+        val ranking = FakeRankingRepository(snapshotOf("a", "b", vehicle = null))
+        val vm = viewModel(ranking)
+        runCurrent()
+
+        ranking.snapshots.value = snapshotOf("b", "a", vehicle = null)
+        runCurrent()
+        assertNull(vm.state.value.alert)
+    }
 
     @Test
     fun `알림이 겹치면 이전 알림의 만료가 새 알림을 지우지 않는다`() {
@@ -203,5 +220,9 @@ class DrivingViewModelTest {
         var state = reduceDriving(DrivingScreenState(), DrivingResult.AlertShown(banner))
         state = reduceDriving(state, DrivingResult.AlertShown(leader))
         assertEquals(leader, reduceDriving(state, DrivingResult.AlertScrapChanged(1, ScrapButtonState.SAVED)).alert)
+    }
+
+    private companion object {
+        val VEHICLE = VehiclePose(GeoPoint(37.3670, 127.1080))
     }
 }
