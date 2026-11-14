@@ -1,6 +1,6 @@
 # Gleo 임장 테스트 — S-011
 
-작성일: 2026-11-14 · 실행 상태: **82개 모두 미실행**. 이 문서는 테스트 설계이며 기능 구현/지원/승인 완료를 의미하지 않는다.
+작성일: 2026-11-14 · 실행 상태: **90개 모두 미실행**. 이 문서는 테스트 설계이며 기능 구현/지원/승인 완료를 의미하지 않는다.
 
 ## 원본과 변경 규칙
 
@@ -20,7 +20,7 @@
 - Emulator/차량: UX 제한·창 크기·오디오·SDK 지원·생명주기를 검사한다.
 - Gate는 실제 API/권한/지원 증거를 확보하기 전 BLOCKED로 기록하고 해당 기능을 비활성 유지한다. 기본 케이스에서 미지원 기능 비활성도 검사한다.
 - CSV의 status는 미실행으로 시작한다. 실제 수행 후 PASS/FAIL/BLOCKED와 actual_result/evidence를 기록한다. 명세 검사는 앱 케이스 PASS가 아니다.
-- P0 65개, P1 17개. 이 중 확장 활성화 Gate 5개. 활성화 범위의 P0 실패는 출시 차단이다.
+- P0 72개, P1 18개. 기존 확장 활성화 Gate 5개에 요청형 지역 확인 확장 케이스 8개를 추가했다. 활성화 범위의 P0 실패는 출시 차단이다.
 
 ## 영역별 색인
 
@@ -38,11 +38,13 @@
 | Gleo·오디오 | TC-068~TC-074 | 7 |
 | 개인정보·생명주기 | TC-075~TC-080 | 6 |
 | 성능·전체 여정 | TC-081~TC-082 | 2 |
+| 요청형 지역 확인 | TC-083~TC-090 | 8 |
 
 ## 요구사항 소유 문서
 
 | 로컬 요구사항 | 단일 기준 문서 | 케이스 |
 |---|---|---|
+| R-AREA-CHECK | [F-010](../../product/features/F-010-gleo-app-control.md), [F-011](../../product/features/F-011-interest-area-booking.md) | TC-083~TC-090 |
 | R-01 | [F-010-gleo-app-control](../../product/features/F-010-gleo-app-control.md), [F-002-nearby-price-lookup](../../product/features/F-002-nearby-price-lookup.md) | TC-009, TC-010, TC-011, TC-013, TC-014, TC-015, TC-016, TC-017, TC-018, TC-020, TC-071, TC-082 |
 | R-02 | [F-011-interest-area-booking](../../product/features/F-011-interest-area-booking.md) | TC-021, TC-022, TC-023, TC-024, TC-025, TC-026, TC-027, TC-028, TC-058, TC-075, TC-082 |
 | R-03 | [F-011-interest-area-booking](../../product/features/F-011-interest-area-booking.md), [F-003-apartment-ranking](../../product/features/F-003-apartment-ranking.md) | TC-029, TC-030, TC-031, TC-032, TC-033, TC-034, TC-035, TC-036, TC-037, TC-040, TC-042, TC-075, TC-082 |
@@ -72,4 +74,6 @@
 
 ## Dummy 처리 경로의 별도 검증
 
-[T-039 개발 검증](dummy-adapter.md)은 debug Intent/API 경로의 단위·Android 테스트다. 이 결과는 위 82개 제품/Gleo E2E 케이스의 실행 상태와 별도로 관리한다.
+[T-039 개발 검증](dummy-adapter.md)은 debug Intent/API 경로의 단위·Android 테스트다. 이 결과는 위 90개 제품/Gleo E2E 케이스의 실행 상태와 별도로 관리한다.
+
+STEP 3 확장 TC-083~TC-090은 문서상 인수 조건이며 현재 dummy E2E 통과로 PASS 처리하지 않는다. 기존 가격 함수의 지역 확인 확장 계약 및 실제 Gleo·화면 검증이 필요하다.

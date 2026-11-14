@@ -94,6 +94,14 @@ dummy 저장에는 success를 쓰지 않으므로 F-011의 영속 저장 후 성
 
 현재 dummy 평균 fixture는 최신 main 순위 정책과 독립적이다. 실데이터 API를 연결할 때는 Top 3/5 평균을 사용하지 않고 원본 거래를 기준으로 별도 집계한다. 위치 없는 지도 참고 좌표를 CURRENT_LOCATION으로 사용하지 않는다.
 
+## 요청형 지역 확인의 스키마 확장 제안
+
+[F-010 R-AREA-CHECK](../product/features/F-010-gleo-app-control.md)는 가격 조회와 다른 의미의 지역 확인 요청이다. 기존 가격 함수를 GET_AREA_OVERVIEW로 교체/확장하고 purpose=PRICE_SUMMARY 또는 LOCATION_CHECK로 구분해 총 3개 함수를 유지하는 안을 제안한다. LOCATION_CHECK에서 areaQuery로 지정한 지역은 비교 대상이고 실제 위치는 앱이 신뢰 가능한 입력에서 확보한다. “저장한 지역에 들어왔나?”는 활성 프로필의 관심 영역을 조회하며 후보가 모호하면 asking이다.
+
+함수명·필수 파라미터·기존 가격 호출 호환성은 미결이며 실행 schema/decoder/action allowlist를 이번 문서 변경으로 갱신하지 않는다. 현재 가격 함수에 지역 확인을 억지로 매핑하거나 네 번째 함수를 등록하지 않는다. 별도 schema 변경 시 내부 API·callback·자연어 E2E를 함께 변경해야 한다. 앱 context를 Gleo에 해석 전에 제공하는 기능도 구현된 것으로 가정하지 않는다.
+
+앱은 지역 확인의 typed 결과(아래 내부 API 확장안)를 callback으로 매핑한다. asking은 대상 명확화, fail은 유효 위치/필수 실행 조건 불충족, success는 실제 판정 완료(OUTSIDE도 정상 결과)에 사용한다. UNCERTAIN은 판정 불확실성을 명시하며 INSIDE로 바꾸지 않는다. 추천만 실패하면 지역 확인 결과와 추천 실패 상태를 함께 전달한다. 완료 여부·추천의 데이터 시각과 합성 여부도 유지한다. UI 전달은 domain 결과를 기존 MVI 경로로 반영하며 adapter→ViewModel 직접 호출을 추가하지 않는다.
+
 ## T-040 현재 등록 함수와 실제 저장
 
 현재 assets schema는 GET_AREA_PRICE_SUMMARY / SCRAP_APARTMENT / GET_REAL_ESTATE_BRIEFING이다. SAVE_INTEREST_AREA는 이전 debug 호출 호환을 위해 receiver/decoder에만 남는다. SCRAP_APARTMENT는 무인자이며 외부 단지 ID/프로필/좌표 주입을 거부한다. 앱 수신 시 확보한 context로 대상을 확정한다. 실제 로컬 저장 성공은 persisted=true, executionMode=LOCAL로 반환하고 dummy로 표시하지 않는다. timeout/예외도 LOCAL로 표시하며 저장 결과를 확인할 수 없을 때 ‘데이터 변경 없음’으로 단정하지 않는다. 모든 callback은 현재 silent다. [context](voice-context.md).

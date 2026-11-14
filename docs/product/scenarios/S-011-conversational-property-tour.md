@@ -24,13 +24,19 @@ task: T-039
 |---|---|---|---|---|
 | 1 | 이쪽 동네 집값이 얼마 정도야? | 지역·조건을 확정하고 최신 공개 실거래 평균/최고 거래를 음성 요약 | [F-010](../features/F-010-gleo-app-control.md), [F-002](../features/F-002-nearby-price-lookup.md) | 가격 질의 TC-009~TC-020 |
 | 2 | 이 동네 관심 지역으로 저장해 줘 | 활성 프로필에 지역을 영속 저장하고 실제 저장 지역 안내 | [F-011](../features/F-011-interest-area-booking.md) | SCR-012, TC-021~TC-028 |
-| 3 | 사전에 저장한 역세권에 진입 | 진입 이벤트, 별도 맞춤 추천, 가격 1위에 정적 왕관 | F-011, [F-003](../features/F-003-apartment-ranking.md), [F-004](../features/F-004-interest-conditions.md) | SCR-004/SCR-005, TC-029~TC-042 |
+| 3 | “Gleo, 여기가 광교중앙역 인근인 건가?” | 현재 위치와 지정 영역 비교, 관심 저장/진입 이력 확인, 별도 맞춤 추천과 실거래 1위 왕관 | [F-010](../features/F-010-gleo-app-control.md), F-011, [F-003](../features/F-003-apartment-ranking.md), [F-004](../features/F-004-interest-conditions.md) | SCR-004/SCR-005/SCR-009, TC-029~TC-042, TC-083~TC-090 |
 | 4 | P단 주차 후 후보를 비교 | 추천 목록과 동일 면적 가격 추이/입지 요약 | F-002, F-004 | [SCR-002](../../design/screens/SCR-002-apartment-detail.md), TC-043~TC-048 |
 | 5-A | 단지 출입구로 경로 안내 선택 | 기존 경로 교체 확인 후 NaviHelper 요청, 실제 안내 상태 반영 | [F-012](../features/F-012-apartment-navigation.md) | SCR-002, TC-049~TC-053 |
 | 5-B | 선택 단지 500m 반경 진입 | 카메라 자동 표시/기록 요구는 확장 연구로 보존. MVP 비활성 | [F-014](../features/F-014-camera-site-scan.md) | TC-054~TC-057 확장 Gate |
 | 6 | 다음날 관심 지역 새 소식 요청 | 새 실거래·청약·뉴스 요청형 브리핑 | [F-013](../features/F-013-area-daily-briefing.md) | SCR-013, TC-058~TC-067 |
 
-전체 [82개 테스트와 추적 표](../../testing/gleo-tour/README.md)는 CSV를 원본으로 관리한다. TC-*와 R-*는 해당 테스트 묶음의 로컬 추적 표기이고 저장소 기능/화면 ID를 대체하지 않는다.
+전체 [90개 테스트와 추적 표](../../testing/gleo-tour/README.md)는 CSV를 원본으로 관리한다. TC-*와 R-*는 해당 테스트 묶음의 로컬 추적 표기이고 저장소 기능/화면 ID를 대체하지 않는다.
+
+### STEP 3 요청형 지역 확인 예시
+
+관심 영역이 저장돼 있고 유효한 진입 이력이 확인된 경우: “네 맞습니다. 사전에 관심 지역으로 설정하신 광교중앙역 인근에 진입했습니다. 선호 조건에 부합하는 AA 아파트를 추천합니다.” 이는 사실 조건을 충족한 경우의 예시이며 고정 응답이 아니다. 내부 여부만 확인되면 “광교중앙역 인근입니다”로 답한다. 미저장·영역 밖·위치 불확실·추천 없음은 [F-010 R-AREA-CHECK](../features/F-010-gleo-app-control.md)의 분기를 따른다.
+
+지도·실거래 순위와 왕관은 기존 주행 화면에서 갱신하며 추천과 가격 순위를 구분한다. 이 요청으로 자동 Gleo 알림을 활성화하거나 주행 상세 화면을 열지 않는다. 외부 함수/실행 context 확장은 제안 단계이며 현재 dummy 구현 검증과 구분한다.
 
 ## 상태와 대체 흐름
 

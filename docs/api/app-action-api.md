@@ -92,6 +92,18 @@ domain UseCase는 입력 검증·필요 정보 판단 등 비즈니스 규칙을
 - 저장과 브리핑 호출이 기존 Room/설정/읽음 상태를 변경하지 않는다.
 - API 테스트는 Android Intent 없이 수행할 수 있다. Android Intent 성공을 자연어 E2E 성공으로 기록하지 않는다.
 
+## 요청형 지역 확인 API 확장 요구 — 미구현 계약
+
+[F-010 R-AREA-CHECK](../product/features/F-010-gleo-app-control.md)의 입력은 비교 대상 지역과 앱이 확보한 실행 context다. 기존 AppCallContext에 이미 전체 context가 구현됐다고 간주하지 않는다. 다음 정보의 구체 타입·포트·UseCase 명칭은 후속 구현 계획에서 확정한다.
+
+- 입력: 대상의 안정적 지역 ID/영역 정의, 수신 시점의 차량 위치·정확도·관측 시각, 활성 프로필·동의·UX 상태·요청 세대, 선호 조건과 조회 마감.
+- 결과: INSIDE/OUTSIDE/UNCERTAIN 및 이유, SAVED/NOT_SAVED/UNKNOWN, 동일 방문 진입 증거와 진입 시각(없으면 null), 추천 목록·근거·조회 상태, 실거래 순위·범위·기간·원천 시각, 요청·지역·스냅샷 식별 정보.
+- 실행: 대상 명확화 → context 확보·검증 → 영역 비교/저장·진입 이력 확인 → 추천·순위 조회 → typed 결과 반환. 위치는 실행 중 재해석하지 않고, 결과 반환/화면 적용 전 프로필·동의·세대 유효성을 확인한다. 본 요청 자체는 읽기 전용이다.
+- 반환: 대상 모호는 NeedsInput, 필수 위치 사용 불가는 Failure, OUTSIDE는 정상 판정, 위치는 유효하지만 경계가 불확실하면 UNCERTAIN. 추천 실패·빈 추천·순위 데이터 없음은 개별 상태로 구분한다. 응답 마감과 중복 방지는 기존 adapter 계약을 따른다.
+- 표시: 기존 MVI와 callback은 같은 확정 지역·조회 결과를 소비한다. 가격 순위는 F-002/F-003, 맞춤 추천은 F-004 규칙을 재사용하며 두 순위를 혼합하지 않는다.
+
+현재 3개 dummy UseCase와 schema는 이 확장 API를 구현한 것이 아니다. 실제 context 전달 방식·공간 판정 포트·원천 데이터·함수 교체 호환성은 후속 결정 사항이다.
+
 ## T-040 단지 스크랩 API
 
 `ScrapVoiceTargetUseCase(AppCallContext)` → `Outcome<ActionResult<VoiceScrapResult>>`. AppCallContext에는 nullable VoiceContextSnapshot을 추가했다. snapshot에는 revision·foreground·enabled·selectedApartmentId·Nudge·capturedAt이 있으며 DI의 앱 상태 포트에서 얻는다. wire/LLM 파라미터에서 공급하지 않는다.
