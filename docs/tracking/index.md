@@ -58,9 +58,10 @@
 | SCR-007 | screen | 스크랩 목록 | draft | `design/screens/SCR-007-scrap-list.md` | T-011 | F-008, S-008, S-009 |
 | SCR-008 | screen | 주행 요약 | draft | `design/screens/SCR-008-drive-summary.md` | T-011 | F-009, F-003, F-008, S-009 |
 | SCR-009 | screen | 주행 중 지도 모드 | draft | `design/screens/SCR-009-driving-map-mode.md` | T-011 | F-003, F-005, S-005, S-010 |
-| ADR-004 | decision | 지도 SDK 선정 | reserved | `decisions/ADR-004-map-sdk.md` | T-013 | - |
+| ADR-004 | decision | 지도 SDK 선정 | approved | `decisions/ADR-004-map-sdk.md` | T-013 | - |
 | SCR-010 | screen | 마이 페이지 | draft | `design/screens/SCR-010-my-page.md` | T-011 | F-004, F-008, S-002, S-008 |
 | ADR-005 | decision | 로컬 DB로 Room 채택 | approved | `decisions/ADR-005-room-local-db.md` | T-016 | - |
 | ADR-006 | decision | 국토부 실거래가 HTTP 연동 | draft | `decisions/ADR-006-molit-retrofit.md` | T-020 | - |
 | ADR-007 | decision | 주소 좌표 변환과 임시 기준 위치 | draft | `decisions/ADR-007-geocoding-reference.md` | T-021 | - |
 | ADR-008 | decision | Gradle 모듈 경계와 의존 방향 | draft | `decisions/ADR-008-gradle-module-boundaries.md` | T-022 | - |
+| ADR-009 | decision | UI 모듈 경계(designsystem, ui, feature) | approved | `decisions/ADR-009-ui-module-boundaries.md` | T-024 | - |

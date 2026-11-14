@@ -48,27 +48,6 @@
     <string name="interest_save_failed">저장하지 못했어요. 다시 시도해 주세요</string>
     <string name="interest_suggestions_failed">추천 동네를 불러오지 못했어요</string>
 
-    <string name="price_under_5">5억 이하</string>
-    <string name="price_5_10">5~10억</string>
-    <string name="price_10_15">10~15억</string>
-    <string name="price_15_20">15~20억</string>
-    <string name="price_over_20">20억 이상</string>
-    <string name="area_under_20">20평 미만</string>
-    <string name="area_20s">20평대</string>
-    <string name="area_30s">30평대</string>
-    <string name="area_over_40">40평 이상</string>
-    <string name="households_300">300세대 이상</string>
-    <string name="households_500">500세대 이상</string>
-    <string name="households_1000">1,000세대 이상</string>
-    <string name="households_300_short">300세대+</string>
-    <string name="households_500_short">500세대+</string>
-    <string name="households_1000_short">1,000세대+</string>
-    <string name="building_age_5">5년 이내</string>
-    <string name="building_age_10">10년 이내</string>
-    <string name="building_age_15">15년 이내</string>
-    <string name="building_age_5_short">준공 5년 이내</string>
-    <string name="building_age_10_short">준공 10년 이내</string>
-    <string name="building_age_15_short">준공 15년 이내</string>
 
     <!-- SCR-001 홈 -->
     <string name="home_title">임과 함께</string>
@@ -76,7 +55,6 @@
     <string name="home_my_page">마이 페이지</string>
     <string name="home_settings">설정</string>
     <string name="home_leader">대장 아파트</string>
-    <string name="rank_n">%d위</string>
     <string name="home_leader_meta">%1$d평 · %2$s 거래 · %3$s</string>
     <string name="home_rank_meta">%1$d평 · %2$s · %3$s</string>
     <string name="home_scrap_changes">스크랩 변동 %d건</string>
@@ -94,22 +72,15 @@
     <string name="scrap_rank_change">순위 변동</string>
 
     <!-- 공통 -->
-    <string name="back">뒤로</string>
 
     <!-- SCR-007 스크랩 목록 -->
     <string name="scrap_title">스크랩</string>
     <string name="scrap_filter_all">전체 %d</string>
     <string name="scrap_filter_changed">변동 있음 %d</string>
     <string name="scrap_item_meta">%1$s · %2$d평 · %3$s 스크랩</string>
-    <string name="scrap_badge_new_deal">새 실거래</string>
-    <string name="scrap_badge_price_up">가격 ▲ %s</string>
-    <string name="scrap_badge_price_down">가격 ▼ %s</string>
-    <string name="scrap_badge_rank_change">순위 변동</string>
 
     <!-- SCR-002 아파트 상세 -->
     <string name="detail_meta">%1$s %2$s · %3$s세대 · %4$d년</string>
-    <string name="detail_scrap">스크랩</string>
-    <string name="detail_scrapped">스크랩됨</string>
     <string name="detail_latest_price">최근 실거래가</string>
     <string name="detail_latest_meta">%1$d평 · %2$s · %3$d층</string>
     <string name="detail_delta_up">직전 대비 ▲ %s</string>
@@ -164,21 +135,6 @@
     <string name="summary_open_scraps">스크랩 목록 보기 ›</string>
 
     <!-- SCR-004, SCR-009, SCR-005 주행 중 -->
-    <string name="driving_mode_rank">순위</string>
-    <string name="driving_mode_map">지도</string>
-    <string name="driving_radius">반경 %dkm</string>
-    <string name="driving_badge">주행 중</string>
-    <string name="driving_leader">대장</string>
-    <string name="driving_list_title">반경 %dkm 순위</string>
-    <string name="driving_ahead">앞 %s</string>
-    <string name="driving_behind">뒤 %s</string>
-    <string name="driving_interest_meta">관심 매물 · %s</string>
-    <string name="driving_heading_up">진행 방향 ↑</string>
-    <string name="driving_map_note">지도 SDK 연결 전 간이 지도</string>
-    <string name="alert_leader_title">대장 아파트가 바뀌었어요</string>
-    <string name="alert_leader_change">%1$s → %2$s</string>
-    <string name="alert_leader_detail">최근 실거래가 %1$s · %2$s</string>
-    <string name="alert_speaking">음성 안내 중</string>
 
     <!-- 개발 빌드 전용 -->
     <string name="dev_label">개발용</string>
@@ -188,13 +144,4 @@
     <string name="dev_new_deals">새 실거래(스크랩)</string>
     <string name="dev_end_drive">주행 종료(요약)</string>
     <string name="dev_lookup_yeongtong">영통구 실거래 조회</string>
-    <string name="driving_trade_title">최근 1개월 실거래 TOP 3</string>
-    <string name="driving_trade_reference">영통구 · 삼성전자 수원 기준 10km</string>
-    <string name="driving_trade_loading">실거래를 불러오는 중이에요</string>
-    <string name="driving_trade_empty">기간과 반경에 맞는 거래가 없어요</string>
-    <string name="driving_trade_rank">순위</string>
-    <string name="driving_trade_apartment">단지 · 거래일 · 거리</string>
-    <string name="driving_trade_amount">거래금액</string>
-    <string name="driving_trade_basis">거래 총액순 · 개별 거래 기준\n차량 위치 연결 전 임시 기준점</string>
-    <string name="driving_sample_label">주행 미리보기 · 샘플 단지 데이터</string>
 </resources>

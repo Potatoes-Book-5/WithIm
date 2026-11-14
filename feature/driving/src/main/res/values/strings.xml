@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 주행 화면 SCR-004, SCR-005, SCR-009 -->
+    <string name="alert_leader_change">%1$s → %2$s</string>
+    <string name="alert_leader_detail">최근 실거래가 %1$s · %2$s</string>
+    <string name="alert_leader_title">대장 아파트가 바뀌었어요</string>
+    <string name="alert_speaking">음성 안내 중</string>
+    <string name="driving_ahead">앞 %s</string>
+    <string name="driving_badge">주행 중</string>
+    <string name="driving_behind">뒤 %s</string>
+    <string name="driving_heading_up">진행 방향 ↑</string>
+    <string name="driving_interest_meta">관심 매물 · %s</string>
+    <string name="driving_leader">대장</string>
+    <string name="driving_list_title">반경 %dkm 순위</string>
+    <string name="driving_map_note">지도를 불러올 수 없어 간이 지도로 표시</string>
+    <string name="driving_mode_map">지도</string>
+    <string name="driving_mode_rank">순위</string>
+    <string name="driving_radius">반경 %dkm</string>
+    <string name="driving_sample_label">주행 미리보기 · 샘플 단지 데이터</string>
+    <string name="driving_trade_title">최근 1개월 실거래 TOP 3</string>
+    <string name="driving_trade_reference">영통구 · 삼성전자 수원 기준 10km</string>
+    <string name="driving_trade_loading">실거래를 불러오는 중이에요</string>
+    <string name="driving_trade_empty">기간과 반경에 맞는 거래가 없어요</string>
+    <string name="driving_trade_rank">순위</string>
+    <string name="driving_trade_apartment">단지 · 거래일 · 거리</string>
+    <string name="driving_trade_amount">거래금액</string>
+    <string name="driving_trade_basis">거래 총액순 · 개별 거래 기준\n차량 위치 연결 전 임시 기준점</string>
+</resources>

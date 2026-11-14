@@ -33,7 +33,10 @@ fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)
     val currentKey = screenKey(state.stack.lastIndex, state.current)
     Box(Modifier.fillMaxSize()) {
         if (state.showDriving) {
-            DrivingRoute()
+            DrivingRoute(
+                viewModel = androidx.lifecycle.viewmodel.compose.viewModel<com.potatoes.book5.realestate.ui.driving.DrivingViewModel>(factory = AppViewModels.Factory),
+                naverMapAvailable = BuildConfig.NAVER_MAP_CLIENT_ID.isNotBlank(),
+            )
         } else {
             when (val screen = state.current) {
                 Screen.Loading -> Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
