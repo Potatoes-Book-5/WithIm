@@ -44,4 +44,4 @@
 | T-038 | feature | 시세 순위 조회 기간을 최근 3개월로 변경 | review | - | P1 | F-002, F-003, SCR-009 | T-037 |
 | T-039 | feature | Gleo adapter 모듈 통합 및 debug 음성 E2E | review | - | P1 | - | - |
 | T-040 | feature | Nudge와 앱 상태 기반 음성 실행 context | review | - | P1 | - | - |
-| T-041 | feature | 음성용 메모리 read model과 스크랩 빠른 조회 | todo | - | P1 | - | - |
+| T-041 | feature | 음성용 메모리 read model과 스크랩 빠른 조회 | review | - | P1 | - | - |

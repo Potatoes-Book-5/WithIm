@@ -109,3 +109,11 @@ domain UseCase는 입력 검증·필요 정보 판단 등 비즈니스 규칙을
 `ScrapVoiceTargetUseCase(AppCallContext)` → `Outcome<ActionResult<VoiceScrapResult>>`. AppCallContext에는 nullable VoiceContextSnapshot을 추가했다. snapshot에는 revision·foreground·enabled·selectedApartmentId·Nudge·capturedAt이 있으며 DI의 앱 상태 포트에서 얻는다. wire/LLM 파라미터에서 공급하지 않는다.
 
 repository 상세 조회 후 snapshot 세대를 재검증하고 Room ScrapRepository에 저장한다. 이미 저장됐으면 alreadySaved=true로 반환한다. 동일 UseCase의 ensure(id)는 배너 탭이 공유하는 멱등 명령이다. NeedsInput이면 fetch/저장하지 않는다. 가격·지역 저장·브리핑의 기존 dummy API와 분리한다. [전체 context 계약](voice-context.md).
+
+## T-041 준비된 데이터 읽기
+
+단지 스크랩은 `PreparedScrapReader.readScrapCandidate(id)`만 읽는다. 12개월 상세·세대수 API와 수집 Mutex에 접근하지 않는다. 준비된 최신 거래 baseline을 저장하며 이미 저장된 경우 cache miss여도 성공한다. 미준비는 DATA_NOT_READY, 5분 이상/미래 기준 시각은 STALE_DATA로 즉시 실패한다. 누락 세대수는 null로 저장한 뒤 기존 상세/갱신 경로에서 보강할 수 있다.
+
+core/data의 InMemoryPreparedMarket은 최대 256개 단지·8개 구 집계를 유지한다. 완료된 구 전체 배치는 빠진 단지를 제거하고, 부분 게시에는 수집 세대로 검증한 provenance를 사용한다. TTL 기준 sourceAsOf는 실제 응답 완료 시각이며 재표시로 늘리지 않는다. 조회용 모델은 영속 DB가 아니다.
+
+가격 집계 준비는 구 전체·달력 3개월·전용 80㎡ 이상 90㎡ 미만·해제 거래 제외 원본 평균이다. 식별자 없는 유효 거래도 표본에 포함하며 최고 단지 ID는 null일 수 있다. 원 단위 안전 변환과 큰 정수 누적을 사용한다. scope=DISTRICT로 3km 순위와 구별한다. 현재 가격 음성 API는 여전히 dummy이며 이 집계를 실제 응답에 연결하는 작업은 별도다.

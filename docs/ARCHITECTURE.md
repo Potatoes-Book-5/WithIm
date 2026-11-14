@@ -351,3 +351,9 @@ MarketRoundTracker(domain)는 공식 지역 코드가 연속 확인된 관측 �
 `app/vehicle/gleo`는 wire decode → domain AppAction UseCase → callback을 담당한다. 모델·포트·UseCase는 core/domain, 합성 repository는 core/data/src/debug, DI는 app의 variant별 GleoBindings에 둔다. debug만 schema asset·외부 receiver를 제공한다. [계약](api/gleo-intent-adapter.md), [E2E](testing/gleo-tour/e2e.md).
 
 T-040: app 상태·DrivingViewModel은 domain VoiceContextPort로 화면/Nudge 상태만 발행한다. core/data InMemoryVoiceContext가 process-local snapshot을 관리하고, adapter 진입점이 수신 시 동결한다. ScrapVoiceTargetUseCase는 core/domain에서 대상·실행 세대를 검증하고 domain repository 포트로 상세 조회 및 실제 스크랩을 처리한다. UI/vehicle은 서로 참조하지 않는다. 배너와 음성은 멱등 저장 객체를 공유한다.
+
+## 준비된 시장 데이터 read model
+
+[ADR-011](decisions/ADR-011-prepared-market-read-model.md): LiveMarketRepository가 완료된 원본 거래로 최소 저장 후보와 구 가격 집계를 준비한다. InMemoryPreparedMarket은 bounded immutable snapshot을 AtomicReference로 게시한다. domain PreparedScrapReader는 즉시 읽기만 허용한다. 음성·배너 저장은 네트워크 수집/지오코딩/12개월 상세/세대수 조회와 분리되며 Room 영속 저장만 수행한다. cold/stale는 빠른 명시적 실패다.
+
+Android 실행·계측 검증은 Pleos Connect에서만 수행한다. 일반 Phone AVD는 유효한 개발/실행 환경이 아니며 대체 검증으로 사용하지 않는다. JVM 단위 테스트와 Android APK 빌드는 기존 하네스로 검증한다.

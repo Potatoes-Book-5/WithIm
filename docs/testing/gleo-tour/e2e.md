@@ -60,3 +60,13 @@ T-040 최종 기록: headless emulator-5556에서 verify --device 통과(Android
 ## 실제 기기 사전 확인 갱신
 
 [2026-11-15 실제 Gleo 확인 기록](voice-e2e-20261115.md). 현재 Gleo는 ai.umos.ambientai로 확인됐다. 이전 단순 패키지명 검색 결과를 Gleo 부재로 해석하지 않는다. 실제 발화·스키마 승인·Nudge 스크랩은 여전히 미검증이다.
+
+## T-041 수집과 음성 읽기 분리 검증
+
+`./harness/gleo-e2e.sh`에 PreparedMarketE2ETest를 추가했다. fake 거래 공급자의 완료를 지연한 동안 새 후보가 미준비인지 확인하고, 완료 뒤 지오코딩이 대기하며 수집 Mutex가 점유된 상태에서 새 후보 1,000회 읽기가 1초 이내인지 검사한다. 이는 메모리 조회 부분의 계측이며 Gleo 전체 발화·LLM·DB 저장까지 1초를 보장하는 결과가 아니다. 로그 태그 PreparedMarketPerf에 실제 시간을 남긴다.
+
+VoiceScrapE2ETest는 cold read의 DATA_NOT_READY와 저장 없음, 준비된 데이터에서 실제 in-memory Room 저장, 캐시 eviction 뒤 이미 저장된 요청의 멱등 성공을 확인한다. 실제 network/keys/사용자 DB에 의존하지 않는다.
+
+Android 실행·계측 대상은 Pleos Connect로 제한한다. 하네스는 automotive 기능과 Pleos 핵심 차량 서비스 패키지를 사전 확인하며, 일반 Phone AVD·미확인 기기에서는 설치 전에 종료한다. ANDROID_SERIAL 지정 시 해당 기기만, 미지정 시 연결된 모든 온라인 기기를 검사한다. 이는 개발 환경 검사이며 앱의 차량 모델별 분기가 아니다.
+
+T-041 검증 범위: JVM 155개, debug/release 빌드·lint·release 테스트 컴파일·Android 계측 APK 빌드 통과. JVM 경합 테스트의 1,000회 읽기는 3ms였다. Pleos 기기에서 새 계측은 package/계측 서비스 불안정으로 미완료다. 이전 T-040 기기 통과 기록을 T-041의 기기 통과로 재사용하지 않는다. 일반 Phone AVD 시도는 유효 검증에서 제외한다. 안정적인 Pleos 환경에서 `./harness/gleo-e2e.sh`로 재검증한다.
