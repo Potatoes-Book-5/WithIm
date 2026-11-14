@@ -65,11 +65,14 @@ class DrivingViewModel(
                     fromDate = snapshot.periodStart ?: today.minusMonths(1),
                     toDate = snapshot.periodEnd ?: today,
                     loading = snapshot.loading,
+                    areaLabel = snapshot.neighborhoodName,
                     error = snapshot.error?.let { error -> when (error) {
                         DomainError.MissingApiKey -> "API 키 설정을 확인해 주세요"
                         DomainError.Offline -> "네트워크에 연결할 수 없어요"
                         DomainError.Timeout -> "조회 시간이 초과됐어요"
-                        else -> snapshot.referenceLabel ?: "실거래를 불러오지 못했어요"
+                        DomainError.InvalidResponse -> "시세 응답을 확인할 수 없어요"
+                        DomainError.ProviderRejected -> "데이터 제공처에서 요청을 거절했어요"
+                        else -> "실거래를 불러오지 못했어요"
                     } },
                 )))
             }
@@ -83,6 +86,8 @@ class DrivingViewModel(
                         currentName = change.current.apartment.name,
                         priceManwon = change.current.apartment.priceManwon,
                         distanceKm = change.current.distanceKm,
+                        kind = change.kind,
+                        districtName = change.districtName,
                     )
                 )
             }

@@ -34,3 +34,4 @@
 | T-028 | harness | 공공 API 키를 local.properties에서 읽도록 빌드 설정 변경 | review | - | P2 | - | - |
 | T-029 | feature | Pleos FusedLocation 콜백을 차량 위치 입력 포트에 연결하고 주행 지도에 반영 | review | - | P1 | F-001, SCR-009 | T-027 |
 | T-030 | feature | 주행 화면 실거래 순위를 SCR-004·SCR-009 와이어프레임대로 복원 | review | - | P1 | SCR-004, SCR-009 | T-023 |
+| T-031 | feature | 현재 구 3km 순위와 근거리 지도 및 지역 대장 기록 | review | - | P1 | F-002, F-003, F-009, SCR-009 | T-027, T-030 |

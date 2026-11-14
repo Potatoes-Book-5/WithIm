@@ -49,3 +49,10 @@ adb shell am broadcast -a com.potatoes.book5.realestate.DEBUG_LOCATION -n com.po
 
 - SDK `heading`과 `confidence`는 단위·기준이 공식 문서에 없어 넘기지 않는다. 그래서 `accuracyMeters`는 미제공(null)을 받도록 바꿨고, null이면 100m 정확도 기준을 적용하지 않는다. `LiveMarketRepository`의 사용 가능 위치 판정도 같은 규칙으로 맞췄다. 단위가 확인되면 실제 값을 넘긴다.
 
+
+
+## 개발 빌드의 현재 단지 접근 재현 (T-031)
+
+같은 DEBUG_LOCATION 액션에 approachLeader=true, apartmentName=현재 Top 3의 단지 이름을 전달하면 실제 조회 결과의 좌표로 60초 동안 직선 접근하고 90초 유지한다. 좌표를 추정하거나 파일·DB에 쓰지 않는다. 위치 동의의 기존 검증을 그대로 거치며 일반 좌표 입력을 보내면 접근 재현을 취소한다. 이름을 생략하면 현재 1위를 선택한다. 해당 단지가 현재 조회 결과에 없으면 이동하지 않는다. 실제 도로 경로와 Pleos GPS 연결을 검증하는 기능은 아니다.
+
+실제 Pleos 위치 콜백이 활성화된 환경에서는 SDK와 DEBUG_LOCATION이 같은 입력 포트에 쓸 수 있다. 접근 시연은 실제 GPS 콜백이 비활성인 환경에서만 사용·검증했으며 두 입력의 동시 우선순위는 보장하지 않는다.

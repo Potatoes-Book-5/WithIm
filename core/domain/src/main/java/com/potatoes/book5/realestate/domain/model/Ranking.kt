@@ -58,6 +58,8 @@ data class RankingSnapshot(
     val periodStart: LocalDate? = null,
     val periodEnd: LocalDate? = null,
     val referenceLabel: String? = null,
+    /** Confirmed district visit. Returning to a district starts a different round. */
+    val round: MarketRound? = null,
 ) {
     val leader: NearbyApartment? get() = top.firstOrNull()
 }
@@ -67,7 +69,13 @@ data class LeaderChange(
     val previous: Apartment,
     val current: NearbyApartment,
     val at: LocalDateTime,
+    val kind: LeaderEventKind = LeaderEventKind.REPLACED,
+    val districtName: String? = null,
 )
+
+data class MarketRound(val id: String, val districtCode: String, val districtName: String)
+
+enum class LeaderEventKind { DISCOVERED, REPLACED }
 
 enum class DrivingState { PARKED, DRIVING }
 

@@ -140,7 +140,8 @@ private fun Header(state: DrivingScreenState, onSelect: (DrivingMode) -> Unit) {
 
 @Composable
 private fun tradeCaption(state: DrivingScreenState): String {
-    val reference = state.referenceLabel ?: stringResource(R.string.driving_location_waiting)
+    val reference = listOfNotNull(state.referenceLabel, state.actualTrades?.areaLabel).joinToString(" · ")
+        .ifBlank { stringResource(R.string.driving_location_waiting) }
     val trades = state.actualTrades ?: return reference
     val format = DateTimeFormatter.ofPattern("MM.dd")
     return stringResource(R.string.driving_trade_period, reference, trades.fromDate.format(format), trades.toDate.format(format))
@@ -467,7 +468,9 @@ private fun LeaderAlertOverlay(alert: LeaderAlertUi) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     CrownIcon(size = 64.wpx)
                     Spacer(Modifier.width(28.wpx))
-                    Text(stringResource(R.string.alert_leader_title), style = MaterialTheme.typography.headlineLarge, modifier = Modifier.weight(1f))
+                    Text(stringResource(if (alert.kind == com.potatoes.book5.realestate.domain.model.LeaderEventKind.DISCOVERED)
+                        R.string.alert_leader_discovered else R.string.alert_leader_title),
+                        style = MaterialTheme.typography.headlineLarge, modifier = Modifier.weight(1f))
                     // TTS(F-006)는 아직 연결 전이라 표시만 한다.
                     SpeakerIcon(size = 48.wpx)
                     Spacer(Modifier.width(16.wpx))
@@ -475,7 +478,9 @@ private fun LeaderAlertOverlay(alert: LeaderAlertUi) {
                 }
                 Spacer(Modifier.height(28.wpx))
                 Text(
-                    stringResource(R.string.alert_leader_change, alert.previousName, alert.currentName),
+                    if (alert.kind == com.potatoes.book5.realestate.domain.model.LeaderEventKind.DISCOVERED)
+                        stringResource(R.string.alert_leader_discovered_name, alert.districtName.orEmpty(), alert.currentName)
+                    else stringResource(R.string.alert_leader_change, alert.previousName, alert.currentName),
                     style = MaterialTheme.typography.headlineSmall,
                 )
                 Spacer(Modifier.height(12.wpx))

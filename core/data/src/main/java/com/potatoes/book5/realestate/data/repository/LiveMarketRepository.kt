@@ -15,9 +15,11 @@ import com.potatoes.book5.realestate.domain.model.Neighborhood
 import com.potatoes.book5.realestate.domain.model.PricePoint
 import com.potatoes.book5.realestate.domain.model.PriceRange
 import com.potatoes.book5.realestate.domain.model.RankingSnapshot
+import com.potatoes.book5.realestate.domain.model.MarketRound
 import com.potatoes.book5.realestate.domain.model.TradePage
 import com.potatoes.book5.realestate.domain.model.VehiclePose
 import com.potatoes.book5.realestate.domain.policy.GeoMath
+import com.potatoes.book5.realestate.domain.policy.MarketRoundTracker
 import com.potatoes.book5.realestate.domain.port.AddressGeocoder
 import com.potatoes.book5.realestate.domain.port.ApartmentTradeRepository
 import com.potatoes.book5.realestate.domain.port.InterestRepository
@@ -74,9 +76,15 @@ class LiveMarketRepository(
         val to: LocalDate,
         val center: GeoPoint,
         val districts: List<MarketDistrict>,
+        val roundId: String,
     )
 
     private val mutex = Mutex()
+    private val roundTracker = MarketRoundTracker()
+    private val rounds = MutableStateFlow<MarketRound?>(null)
+    @Volatile private var referenceRound: MarketRound? = null
+    @Volatile private var requestGeneration = 0L
+    @Volatile private var locationEpoch = 0L
     private val todayAtStart = LocalDate.now(clock)
     @Volatile private var currentPose: VehiclePose = SAMSUNG_REFERENCE_POSE
     @Volatile private var currentLocationSource: LocationSource = LocationSource.VEHICLE
@@ -115,6 +123,9 @@ class LiveMarketRepository(
     private var lastAttempt: Instant? = null
     private var lastOutcome: Outcome<Unit>? = null
 
+    private fun currentRound(): MarketRound? = if (usingReference) referenceRound else rounds.value
+    private fun areaLabel(): String = currentRound()?.districtName ?: "지역 확인 중"
+
     override fun observeNearbyRanking(): Flow<RankingSnapshot> = combine(state, interestRepository.observe()) { market, interest ->
         val matches = if (interest == null || interest.isEmpty) emptyList() else market.located.filter {
             matchesInterest(interest, it.apartment, LocalDate.now(clock).year)
@@ -128,26 +139,47 @@ class LiveMarketRepository(
     }
 
     override suspend fun refresh(): Outcome<Unit> = mutex.withLock {
+        val generation = requestGeneration
         val now = clock.instant()
         val today = LocalDate.now(clock)
         val from = today.minusMonths(1)
         val pose = currentPose
+        val reference = usingReference
+        val source = currentLocationSource
         val previous = lastOutcome
         val last = lastAttempt
         val coverage = loadedCoverage
+        var round = currentRound()
+        if (round == null) {
+            val district = when (val resolved = districtResolver.districtAt(pose.location)) {
+                is Outcome.Failure -> return@withLock fail(resolved.error, generation)
+                is Outcome.Success -> resolved.value
+            }
+            districtNamesByCode = districtNamesByCode + (district.code to district.name)
+            if (generation != requestGeneration || reference != usingReference || source != currentLocationSource ||
+                GeoMath.distanceKm(pose.location, currentPose.location) >= RERANK_DISTANCE_KM) {
+                return@withLock Outcome.Success(Unit)
+            }
+            round = if (reference) {
+                MarketRound("reference:" + district.code, district.code, district.name).also { referenceRound = it }
+            } else {
+                // The continuous location collector owns the live district dwell timer.
+                return@withLock Outcome.Success(Unit)
+            }
+        }
+        val selectedRound = round
         if (previous != null && last != null && coverage?.from == from && coverage.to == today &&
+            coverage.districts.singleOrNull()?.code == selectedRound.districtCode &&
+            coverage.roundId == selectedRound.id &&
             GeoMath.distanceKm(coverage.center, pose.location) < RERANK_DISTANCE_KM && Duration.between(last, now) <
             if (previous is Outcome.Success) SUCCESS_TTL else FAILURE_TTL
         ) return@withLock previous
 
         state.value = state.value.copy(snapshot = state.value.snapshot.copy(loading = true, error = null))
         try {
-            val districts = when (val resolved = districtResolver.districts(pose.location, RADIUS_KM.toDouble())) {
-                is Outcome.Failure -> return@withLock fail(resolved.error)
-                is Outcome.Success -> resolved.value.distinctBy { it.code }
-            }
+            val districts = listOf(MarketDistrict(selectedRound.districtCode, selectedRound.districtName))
             if (districts.isEmpty() || districts.any { !it.code.matches(Regex("[0-9]{5}")) || it.name.isBlank() }) {
-                return@withLock fail(DomainError.InvalidResponse)
+                return@withLock fail(DomainError.InvalidResponse, generation)
             }
             districtNamesByCode = districtNamesByCode + districts.associate { it.code to it.name }
             val months = buildList {
@@ -167,7 +199,7 @@ class LiveMarketRepository(
             }
             val fetched = mutableMapOf<Pair<String, YearMonth>, List<ApartmentTrade>>()
             for ((key, response) in responses) when (response) {
-                is Outcome.Failure -> return@withLock fail(response.error)
+                is Outcome.Failure -> return@withLock fail(response.error, generation)
                 is Outcome.Success -> fetched[key] = response.value
             }
             val window = keys.flatMap { fetched[it] ?: monthRecords.getValue(it) }
@@ -182,21 +214,29 @@ class LiveMarketRepository(
             fetched.keys.forEach { monthFetchedAt[it] = clock.instant() }
             recentRecords = window
             representativeById = representatives.toMap()
-            loadedCoverage = LoadedCoverage(from, today, pose.location, districts)
-            when (val ranked = rankAtPose(pose, representatives, from, today)) {
-                is Outcome.Failure -> return@withLock fail(ranked.error)
+            loadedCoverage = LoadedCoverage(from, today, pose.location, districts, selectedRound.id)
+            when (val ranked = rankAtPose(pose, representatives, from, today, selectedRound, generation)) {
+                is Outcome.Failure -> return@withLock fail(ranked.error, generation)
                 is Outcome.Success -> Unit
             }
-            lastAttempt = clock.instant()
-            lastOutcome = Outcome.Success(Unit)
-            lastOutcome!!
+            if (generation == requestGeneration) {
+                lastAttempt = clock.instant()
+                lastOutcome = Outcome.Success(Unit)
+            }
+            Outcome.Success(Unit)
         } catch (cancelled: CancellationException) {
-            state.value = state.value.copy(snapshot = state.value.snapshot.copy(loading = false))
+            if (generation == requestGeneration) {
+                state.value = state.value.copy(snapshot = state.value.snapshot.copy(loading = false))
+            }
             throw cancelled
         }
     }
 
-    private fun fail(error: DomainError): Outcome<Unit> {
+    private fun fail(error: DomainError, generation: Long = requestGeneration): Outcome<Unit> {
+        if (generation != requestGeneration) return Outcome.Failure(error)
+        // Error categories only: never log request URLs, keys, addresses or coordinates.
+        android.util.Log.w("LiveMarket", "Market lookup failed: " + error.javaClass.simpleName +
+            if (error is DomainError.Http) " (" + error.statusCode + ")" else "")
         state.value = state.value.copy(snapshot = state.value.snapshot.copy(loading = false, error = error))
         lastAttempt = clock.instant()
         return Outcome.Failure(error).also { lastOutcome = it }
@@ -205,13 +245,55 @@ class LiveMarketRepository(
     /** Recenter on every fix; spatially throttle and cancel only superseded geocoding scans. */
     override suspend fun run() = coroutineScope {
         var rankJob: Job? = null
-        locationProvider.locations.collect { fix ->
-            currentLocationSource = fix.source
+        var districtJob: Job? = null
+        var lastDistrictCheck: Instant? = null
+        combine(locationProvider.locations, rounds) { fix, round -> fix to round }.collect { (fix, _) ->
             val livePose = fix.usablePose()
             val pose = livePose ?: SAMSUNG_REFERENCE_POSE
+            val sourceChanged = currentLocationSource != fix.source || usingReference != (livePose == null)
+            if (sourceChanged) {
+                locationEpoch++
+                roundTracker.interrupt()
+                districtJob?.cancel()
+                lastDistrictCheck = null
+            }
+            currentLocationSource = fix.source
             usingReference = livePose == null
             currentPose = pose
-            val known = verifiedCandidates.map { nearby(it.id, it.trade, it.point, pose) }
+            if (livePose == null) {
+                roundTracker.interrupt()
+                districtJob?.cancel()
+            } else if (districtJob?.isActive != true &&
+                (lastDistrictCheck == null || Duration.between(lastDistrictCheck, clock.instant()) >= DISTRICT_CHECK_INTERVAL)) {
+                lastDistrictCheck = clock.instant()
+                val epoch = locationEpoch
+                val districtGeneration = requestGeneration
+                districtJob = launch {
+                    val resolved = districtResolver.districtAt(livePose.location)
+                    if (epoch != locationEpoch) return@launch
+                    when (resolved) {
+                        is Outcome.Failure -> {
+                            roundTracker.interrupt()
+                            if (rounds.value == null) fail(resolved.error, districtGeneration)
+                        }
+                        is Outcome.Success -> {
+                            if (epoch == locationEpoch && !usingReference &&
+                                GeoMath.distanceKm(currentPose.location, livePose.location) < RERANK_DISTANCE_KM &&
+                                Duration.between(fix.observedAt, clock.instant()) <= MAX_FIX_AGE) {
+                                val district = resolved.value
+                                districtNamesByCode = districtNamesByCode + (district.code to district.name)
+                                rounds.value = roundTracker.observe(district, fix.observedAt!!)
+                            } else roundTracker.interrupt()
+                        }
+                    }
+                }
+            }
+            val round = currentRound()
+            val previousMarket = state.value
+            val roundChanged = previousMarket.snapshot.round?.id != round?.takeUnless { usingReference }?.id ||
+                (previousMarket.snapshot.vehicle == null) != usingReference
+            val known = verifiedCandidates.filter { it.trade.districtCode == round?.districtCode }
+                .map { nearby(it.id, it.trade, it.point, pose) }
                 .filter { it.distanceKm <= RADIUS_KM }
                 .sortedWith(compareByDescending<NearbyApartment> { it.apartment.priceManwon }
                     .thenByDescending { it.apartment.dealDate })
@@ -221,21 +303,24 @@ class LiveMarketRepository(
                 (GeoMath.distanceKm(previous.location, it.point) <= RADIUS_KM) !=
                     (GeoMath.distanceKm(pose.location, it.point) <= RADIUS_KM)
             }
-            val shouldRank = moved || boundaryCrossed
-            val previousSnapshot = state.value.snapshot
+            val shouldRank = moved || boundaryCrossed || roundChanged || sourceChanged
+            if (shouldRank) requestGeneration++
+            val generation = requestGeneration
+            val previousSnapshot = previousMarket.snapshot
             val previousError = previousSnapshot.error
-            state.value = MarketState(
+            state.compareAndSet(previousMarket, MarketState(
                 previousSnapshot.copy(
                     top = known.take(TOP_LIMIT), interestMatches = emptyList(), others = emptyList(),
-                    neighborhoodName = if (usingReference) SAMSUNG_AREA_LABEL else RADIUS_AREA_LABEL,
+                    neighborhoodName = areaLabel(),
                     vehicle = livePose,
                     mapCenter = pose,
                     loading = shouldRank || rankJob?.isActive == true || previousSnapshot.loading,
                     error = if (shouldRank) null else previousError,
                     referenceLabel = referenceLabel(fix.source),
+                    round = round.takeUnless { usingReference },
                 ),
                 known.take(MAX_MAP_PINS),
-            )
+            ))
             if (shouldRank) {
                 lastRequestedPose = pose
                 rankJob?.cancel()
@@ -244,6 +329,8 @@ class LiveMarketRepository(
                     val today = LocalDate.now(clock)
                     val coverage = loadedCoverage
                     if (coverage == null || coverage.from != today.minusMonths(1) || coverage.to != today ||
+                        coverage.districts.singleOrNull()?.code != currentRound()?.districtCode ||
+                        coverage.roundId != currentRound()?.id ||
                         GeoMath.distanceKm(coverage.center, pose.location) >= RERANK_DISTANCE_KM) {
                         when (refresh()) {
                             is Outcome.Failure -> return@launch
@@ -255,8 +342,9 @@ class LiveMarketRepository(
                         val representatives = representativeById.entries.map { it.key to it.value }
                             .sortedWith(compareByDescending<Pair<String, ApartmentTrade>> { it.second.priceManwon }
                                 .thenByDescending { it.second.contractDate })
-                        when (val ranked = rankAtPose(pose, representatives, from, today)) {
-                            is Outcome.Failure -> fail(ranked.error)
+                        val selectedRound = currentRound() ?: return@withLock
+                        when (val ranked = rankAtPose(pose, representatives, from, today, selectedRound, generation)) {
+                            is Outcome.Failure -> fail(ranked.error, generation)
                             is Outcome.Success -> Unit
                         }
                     }
@@ -268,7 +356,6 @@ class LiveMarketRepository(
     private fun VehicleLocationState.usablePose(): VehiclePose? {
         if (status != LocationStatus.AVAILABLE) return null
         val current = pose ?: return null
-        // FusedLocation은 정확도 단위가 문서에 없어 null(미제공)로 온다. 미제공이면 정확도 기준을 적용하지 않는다(T-029).
         val accuracy = accuracyMeters
         val observed = observedAt ?: return null
         val age = Duration.between(observed, clock.instant())
@@ -286,10 +373,13 @@ class LiveMarketRepository(
         representatives: List<Pair<String, ApartmentTrade>>,
         from: LocalDate,
         to: LocalDate,
+        round: MarketRound,
+        generation: Long,
     ): Outcome<Unit> {
         val located = linkedMapOf<String, NearbyApartment>()
         val top = mutableListOf<NearbyApartment>()
-        for ((id, trade) in representatives) {
+        val localRepresentatives = representatives.filter { it.second.districtCode == round.districtCode }
+        for ((id, trade) in localRepresentatives) {
             val found = when (val response = locate(id, trade, coordinateCache, pose)) {
                 is Outcome.Failure -> return response
                 is Outcome.Success -> response.value
@@ -301,7 +391,7 @@ class LiveMarketRepository(
         }
         val condition = interestRepository.get()
         val topIds = top.mapTo(mutableSetOf()) { it.apartment.id }
-        val remaining = representatives.filter { it.first !in topIds }
+        val remaining = localRepresentatives.filter { it.first !in topIds }
         val prioritized = if (condition == null || condition.isEmpty) remaining else
             remaining.filter { matchesInterest(condition, it.second, to.year) } +
                 remaining.filterNot { matchesInterest(condition, it.second, to.year) }
@@ -315,15 +405,17 @@ class LiveMarketRepository(
             } ?: continue
             if (found.distanceKm <= RADIUS_KM) located[id] = found
         }
-        verifiedCandidates = representatives.mapNotNull { (id, trade) ->
+        val candidates = localRepresentatives.mapNotNull { (id, trade) ->
             val address = trade.addressRequest() ?: return@mapNotNull null
             coordinateCache["${address.first}:${address.second}"]?.let { VerifiedCandidate(id, trade, it) }
         }
         val displayPose = currentPose
-        if (GeoMath.distanceKm(pose.location, displayPose.location) >= RERANK_DISTANCE_KM) {
+        if (generation != requestGeneration || currentRound()?.id != round.id ||
+            GeoMath.distanceKm(pose.location, displayPose.location) >= RERANK_DISTANCE_KM) {
             return Outcome.Success(Unit) // A newer significant move has its own scan.
         }
-        val displayed = verifiedCandidates.map { nearby(it.id, it.trade, it.point, displayPose) }
+        verifiedCandidates = candidates
+        val displayed = candidates.map { nearby(it.id, it.trade, it.point, displayPose) }
             .filter { it.distanceKm <= RADIUS_KM }
             .sortedWith(compareByDescending<NearbyApartment> { it.apartment.priceManwon }
                 .thenByDescending { it.apartment.dealDate })
@@ -331,12 +423,13 @@ class LiveMarketRepository(
         lastRequestedPose = displayPose
         state.value = MarketState(
             state.value.snapshot.copy(
-                neighborhoodName = if (usingReference) SAMSUNG_AREA_LABEL else RADIUS_AREA_LABEL,
+                neighborhoodName = areaLabel(),
                 radiusKm = RADIUS_KM,
                 top = displayed.take(TOP_LIMIT), interestMatches = emptyList(), others = emptyList(),
                 vehicle = displayPose.takeUnless { usingReference }, loading = false, error = null,
                 mapCenter = displayPose,
                 periodStart = from, periodEnd = to, referenceLabel = referenceLabel(currentLocationSource),
+                round = round.takeUnless { usingReference },
             ),
             displayed.take(MAX_MAP_PINS),
         )
@@ -412,7 +505,10 @@ class LiveMarketRepository(
         val records = mutableListOf<ApartmentTrade>()
         while (true) {
             val result = when (val response = tradeRepository.getTrades(districtCode, month, page, PAGE_SIZE)) {
-                is Outcome.Failure -> return response
+                is Outcome.Failure -> {
+                    android.util.Log.w("LiveMarket", "Trade fetch failed: " + response.error.javaClass.simpleName)
+                    return response
+                }
                 is Outcome.Success -> response.value
             }
             if (result.pageNumber != page || result.pageSize != PAGE_SIZE ||
@@ -441,7 +537,10 @@ class LiveMarketRepository(
                     null
                 } else return result
                 // ProviderRejected can also mean bad credentials; never turn it into an empty ranking.
-                else -> return result
+                else -> {
+                    android.util.Log.w("LiveMarket", "Address lookup failed: " + error.javaClass.simpleName)
+                    return result
+                }
             }
         }) ?: return Outcome.Success(null)
         return Outcome.Success(nearby(id, trade, point, pose))
@@ -542,14 +641,14 @@ class LiveMarketRepository(
     }
 
     private companion object {
-        const val RADIUS_AREA_LABEL = "현재 위치 반경 10km"
-        const val SAMSUNG_AREA_LABEL = "삼성전자 수원 본사 반경 10km"
+        const val RADIUS_AREA_LABEL = "현재 지역 반경 3km"
+        const val SAMSUNG_AREA_LABEL = "삼성전자 수원 본사 반경 3km"
         const val SAMSUNG_REFERENCE_LABEL = "삼성전자 수원 본사 기준 · 차량 위치 대기 중"
-        const val VEHICLE_REFERENCE_LABEL = "현재 차량 위치 · 반경 10km 실거래"
-        const val EMULATOR_REFERENCE_LABEL = "테스트 위치 · 반경 10km 실거래"
+        const val VEHICLE_REFERENCE_LABEL = "현재 차량 위치 · 현재 구 3km 실거래"
+        const val EMULATOR_REFERENCE_LABEL = "테스트 위치 · 현재 구 3km 실거래"
         // ADR-007: Vworld에서 삼성전자 수원 본사 주소를 변환한 WGS84 좌표.
         val SAMSUNG_REFERENCE_POSE = VehiclePose(GeoPoint(37.253841010127545, 127.0454691833884))
-        const val RADIUS_KM = 10
+        const val RADIUS_KM = 3
         const val TOP_LIMIT = 3
         const val MAX_MAP_PINS = 12
         const val MAX_EXTRA_GEOCODES = 18
@@ -563,5 +662,6 @@ class LiveMarketRepository(
         val SUCCESS_TTL: Duration = Duration.ofSeconds(60)
         val RECENT_MONTH_TTL: Duration = Duration.ofMinutes(5)
         val FAILURE_TTL: Duration = Duration.ofSeconds(10)
+        val DISTRICT_CHECK_INTERVAL: Duration = Duration.ofSeconds(5)
     }
 }

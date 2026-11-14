@@ -7,6 +7,7 @@ import org.xmlpull.v1.XmlPullParserFactory
 
 internal class InvalidGeocoderResponse : RuntimeException()
 internal class GeocoderProviderRejected : RuntimeException()
+internal class GeocoderAddressNotFound : RuntimeException()
 
 internal object VworldXmlParser {
     fun parse(input: InputStream): GeoCoordinates {
@@ -46,6 +47,7 @@ internal object VworldXmlParser {
             event = parser.nextToken()
         }
         if (status == null) throw InvalidGeocoderResponse()
+        if (status == "NOT_FOUND") throw GeocoderAddressNotFound()
         if (status != "OK") throw GeocoderProviderRejected()
         val x = longitude?.toDoubleOrNull() ?: throw InvalidGeocoderResponse()
         val y = latitude?.toDoubleOrNull() ?: throw InvalidGeocoderResponse()

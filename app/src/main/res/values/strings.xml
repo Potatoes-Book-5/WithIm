@@ -140,8 +140,9 @@
     <string name="summary_duration_hours">%1$d시간 %2$d분</string>
     <string name="summary_close">닫기</string>
     <string name="summary_final_ranking">최종 순위 · 반경 %dkm</string>
-    <string name="summary_leader_changes">대장 교체 %d회</string>
-    <string name="summary_no_leader_change">대장 교체 없음</string>
+    <string name="summary_trip_ranking">이번 주행 최고가 TOP 3</string>
+    <string name="summary_leader_changes">지역 대장 기록 %d건</string>
+    <string name="summary_no_leader_change">지역 대장 기록 없음</string>
     <string name="summary_passed">지나친 관심 매물 %d</string>
     <string name="summary_open_scraps">스크랩 목록 보기 ›</string>
     <string name="summary_open_catch_up">관심 매물 모아보기 ›</string>

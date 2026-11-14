@@ -44,6 +44,8 @@ data class DriveLeaderChangeEntity(
     @ColumnInfo(name = "at") val at: Long,
     @ColumnInfo(name = "apartment_id") val apartmentId: String,
     @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "kind", defaultValue = "'REPLACED'") val kind: String = "REPLACED",
+    @ColumnInfo(name = "district_name") val districtName: String? = null,
 )
 
 @Entity(
@@ -59,4 +61,35 @@ data class DrivePassedInterestEntity(
     @ColumnInfo(name = "price_manwon") val priceManwon: Long,
     /** 처음 지나친 시각. 목록 정렬 기준 */
     @ColumnInfo(name = "first_seen_at") val firstSeenAt: Long,
+)
+
+@Entity(
+    tableName = "drive_region_rounds",
+    primaryKeys = ["session_id", "round_id"],
+    foreignKeys = [ForeignKey(entity = DriveSessionEntity::class, parentColumns = ["id"],
+        childColumns = ["session_id"], onDelete = ForeignKey.CASCADE)],
+)
+data class DriveRegionRoundEntity(
+    @ColumnInfo(name = "session_id") val sessionId: Long,
+    @ColumnInfo(name = "round_id") val roundId: String,
+    @ColumnInfo(name = "district_code") val districtCode: String,
+    @ColumnInfo(name = "district_name") val districtName: String,
+    @ColumnInfo(name = "started_at") val startedAt: Long,
+    @ColumnInfo(name = "ended_at") val endedAt: Long? = null,
+)
+
+@Entity(
+    tableName = "drive_region_ranks",
+    primaryKeys = ["session_id", "round_id", "rank"],
+    foreignKeys = [ForeignKey(entity = DriveRegionRoundEntity::class,
+        parentColumns = ["session_id", "round_id"], childColumns = ["session_id", "round_id"],
+        onDelete = ForeignKey.CASCADE)],
+)
+data class DriveRegionRankEntity(
+    @ColumnInfo(name = "session_id") val sessionId: Long,
+    @ColumnInfo(name = "round_id") val roundId: String,
+    @ColumnInfo(name = "rank") val rank: Int,
+    @ColumnInfo(name = "apartment_id") val apartmentId: String,
+    @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "price_manwon") val priceManwon: Long,
 )

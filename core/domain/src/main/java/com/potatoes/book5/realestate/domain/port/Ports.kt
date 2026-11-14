@@ -97,6 +97,10 @@ interface DriveRecordRepository {
     /** 최종 Top 3를 덮어쓰고, 관심 매물은 더하거나 더 가까운 거리로 바꾸고, 마지막 기록 시각을 갱신한다. */
     suspend fun recordSnapshot(sessionId: Long, at: LocalDateTime, top: List<DriveRank>, passed: List<PassedInterest>)
     suspend fun recordLeaderChange(sessionId: Long, change: DriveLeaderChange)
+    suspend fun recordRound(
+        sessionId: Long, at: LocalDateTime,
+        round: com.potatoes.book5.realestate.domain.model.MarketRound, top: List<DriveRank>,
+    )
     /**
      * 세션을 닫는다. 순위 기록이 없으면 지운다.
      * @param endedAt null이면 마지막 기록 시각으로 닫는다.

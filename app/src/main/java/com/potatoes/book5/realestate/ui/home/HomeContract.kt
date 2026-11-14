@@ -27,7 +27,7 @@ data class InterestCardUi(
 data class HomeState(
     val isLoading: Boolean = true,
     val neighborhoodName: String = "",
-    val radiusKm: Int = 10,
+    val radiusKm: Int = 3,
     val dataAsOf: LocalDateTime? = null,
     val periodStart: LocalDate? = null,
     val periodEnd: LocalDate? = null,

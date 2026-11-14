@@ -4,6 +4,7 @@ import com.potatoes.book5.realestate.domain.error.Outcome
 import com.potatoes.book5.realestate.domain.model.DriveLeaderChange
 import com.potatoes.book5.realestate.domain.model.DriveRank
 import com.potatoes.book5.realestate.domain.model.DriveSummary
+import com.potatoes.book5.realestate.domain.model.LeaderEventKind
 import com.potatoes.book5.realestate.domain.model.DrivingState
 import com.potatoes.book5.realestate.domain.model.PassedInterest
 import com.potatoes.book5.realestate.domain.port.ApartmentRepository
@@ -49,32 +50,44 @@ class DriveSessionRecorder(
     suspend fun run() {
         repository.openSessionId()?.let { finish(it, endedAt = null) }
         var lastLeaderId: String? = null
+        var lastRoundId: String? = null
         drivingStateProvider.drivingState.distinctUntilChanged().collectLatest { state ->
             when (state) {
                 DrivingState.DRIVING -> {
                     // 주차 전에 눌린 종료 신호가 다음 주차를 바로 끝내지 않게 비운다.
                     endSignal.tryReceive()
                     var sessionId = repository.openSessionId()
-                    if (sessionId == null) lastLeaderId = null
+                    if (sessionId == null) {
+                        lastLeaderId = null
+                        lastRoundId = null
+                    }
                     rankingRepository.observeNearbyRanking().collect { snapshot ->
                         if (snapshot.vehicle == null) {
-                            lastLeaderId = null
                             return@collect
                         }
-                        if (snapshot.top.isEmpty() || snapshot.loading || snapshot.error != null) return@collect
+                        if (snapshot.loading || snapshot.error != null) return@collect
+                        if (snapshot.top.isEmpty() && sessionId == null) return@collect
                         val at = now()
                         val id = sessionId ?: repository.startSession(at, snapshot.radiusKm).also { sessionId = it }
+                        val top = snapshot.top.mapIndexed { i, n -> DriveRank(i + 1, n.apartment.id, n.apartment.name, n.apartment.priceManwon) }
+                        snapshot.round?.let { repository.recordRound(id, at, it, top) }
                         repository.recordSnapshot(
                             sessionId = id,
                             at = at,
-                            top = snapshot.top.mapIndexed { i, n -> DriveRank(i + 1, n.apartment.id, n.apartment.name, n.apartment.priceManwon) },
+                            top = top,
                             passed = snapshot.interestMatches.map { PassedInterest(it.apartment.id, it.apartment.name, it.distanceKm, it.apartment.priceManwon) },
                         )
-                        val leader = snapshot.top.first().apartment
-                        if (lastLeaderId != null && lastLeaderId != leader.id) {
-                            repository.recordLeaderChange(id, DriveLeaderChange(at, leader.id, leader.name))
+                        val newRound = snapshot.round?.id != lastRoundId
+                        if (newRound) lastLeaderId = null
+                        val leader = snapshot.leader?.apartment
+                        if (leader != null && ((snapshot.round != null && lastLeaderId == null) ||
+                                (lastLeaderId != null && lastLeaderId != leader.id))) {
+                            repository.recordLeaderChange(id, DriveLeaderChange(at, leader.id, leader.name,
+                                if (lastLeaderId == null) LeaderEventKind.DISCOVERED else LeaderEventKind.REPLACED,
+                                snapshot.round?.districtName))
                         }
-                        lastLeaderId = leader.id
+                        lastRoundId = snapshot.round?.id
+                        if (leader != null) lastLeaderId = leader.id
                     }
                 }
                 DrivingState.PARKED -> {

@@ -25,10 +25,12 @@
     <string name="driving_map_unavailable">지도를 불러올 수 없어요</string>
     <string name="driving_mode_map">지도</string>
     <string name="driving_mode_rank">순위</string>
-    <string name="driving_radius">반경 %dkm</string>
+    <string name="driving_radius">검색 반경 %dkm</string>
     <string name="driving_live_label">%s</string>
     <string name="driving_location_waiting">현재 위치 확인 중</string>
     <string name="driving_trade_period">%1$s · %2$s~%3$s 계약</string>
     <string name="driving_trade_loading">실거래를 불러오는 중이에요</string>
     <string name="driving_trade_empty">기간과 반경에 맞는 거래가 없어요</string>
+    <string name="alert_leader_discovered">새 지역의 대장을 발견했어요</string>
+    <string name="alert_leader_discovered_name">%1$s · %2$s</string>
 </resources>

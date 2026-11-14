@@ -47,6 +47,9 @@ class FakeDriveRecordRepository : DriveRecordRepository {
 
     override suspend fun recordLeaderChange(sessionId: Long, change: DriveLeaderChange) = edit(sessionId) { it.copy(changes = it.changes + change) }
 
+    override suspend fun recordRound(sessionId: Long, at: LocalDateTime,
+        round: com.potatoes.book5.realestate.domain.model.MarketRound, top: List<DriveRank>) = Unit
+
     override suspend fun finishSession(sessionId: Long, endedAt: LocalDateTime?): Boolean {
         val s = sessions.value[sessionId] ?: return false
         if (s.top.isEmpty()) {

@@ -134,10 +134,11 @@ private fun durationText(duration: Duration): String {
 
 @Composable
 private fun FinalRanking(summary: DriveSummary, onOpen: (String) -> Unit) {
-    Text(text = stringResource(R.string.summary_final_ranking, summary.radiusKm), style = MaterialTheme.typography.titleMedium)
+    Text(text = stringResource(if (summary.rounds.isEmpty()) R.string.summary_final_ranking else R.string.summary_trip_ranking,
+        summary.radiusKm), style = MaterialTheme.typography.titleMedium)
     Spacer(Modifier.height(24.wpx))
     Column(verticalArrangement = Arrangement.spacedBy(16.wpx)) {
-        summary.finalTop.forEach { RankRow(it, onClick = { onOpen(it.apartmentId) }) }
+        summary.tripTop.forEach { RankRow(it, onClick = { onOpen(it.apartmentId) }) }
     }
 }
 
@@ -207,7 +208,7 @@ private fun LeaderTimeline(changes: List<DriveLeaderChange>) {
                 modifier = Modifier.width(128.wpx),
             )
             Text(
-                text = change.name,
+                text = listOfNotNull(change.districtName, change.name).joinToString(" · "),
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = if (last) FontWeight.Bold else FontWeight.Normal),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

@@ -28,7 +28,7 @@
 | ID | 종류 | 제목 | 상태 | 경로 | 생성 작업 | 관련 ID |
 |---|---|---|---|---|---|---|
 | F-001 | feature | 차량 위치 획득 | draft | `product/features/F-001-vehicle-location.md` | T-009 | S-001, S-006, SCR-001, SCR-004 |
-| F-002 | feature | 반경 10km 시세 조회 | draft | `product/features/F-002-nearby-price-lookup.md` | T-009 | S-001, S-006, SCR-001, SCR-004 |
+| F-002 | feature | 현재 구 3km 시세 조회 | draft | `product/features/F-002-nearby-price-lookup.md` | T-009 | S-001, S-006, SCR-001, SCR-004 |
 | F-003 | feature | 아파트 가격 순위 경쟁 | draft | `product/features/F-003-apartment-ranking.md` | T-009 | S-001, S-005, S-010, S-009, SCR-001, SCR-004, SCR-005, SCR-008 |
 | F-004 | feature | 관심 조건 설정 | draft | `product/features/F-004-interest-conditions.md` | T-009 | S-002, SCR-003, SCR-006 |
 | F-005 | feature | 관심 매물 근접 판정 | draft | `product/features/F-005-proximity-matching.md` | T-009 | S-003, SCR-005 |

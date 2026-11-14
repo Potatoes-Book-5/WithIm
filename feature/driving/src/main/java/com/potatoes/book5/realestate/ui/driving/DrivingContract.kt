@@ -1,6 +1,7 @@
 package com.potatoes.book5.realestate.ui.driving
 
 import com.potatoes.book5.realestate.domain.model.VehiclePose
+import com.potatoes.book5.realestate.domain.model.LeaderEventKind
 import com.potatoes.book5.realestate.ui.common.MapPointUi
 import com.potatoes.book5.realestate.ui.common.RankItemUi
 import java.time.LocalDate
@@ -11,6 +12,7 @@ data class DrivingTradeRankingUi(
     val toDate: LocalDate,
     val loading: Boolean = true,
     val error: String? = null,
+    val areaLabel: String? = null,
 )
 
 /** 주행 중 화면의 보기. RANK = SCR-004, MAP = SCR-009 */
@@ -28,6 +30,8 @@ data class LeaderAlertUi(
     val currentName: String,
     val priceManwon: Long,
     val distanceKm: Double,
+    val kind: LeaderEventKind = LeaderEventKind.REPLACED,
+    val districtName: String? = null,
 ) : DrivingAlertUi
 
 /** SCR-005 관심 매물 상단 배너(A안, T-025) */
@@ -49,7 +53,7 @@ enum class ScrapButtonState { IDLE, SAVING, SAVED }
 
 data class DrivingScreenState(
     val mode: DrivingMode = DrivingMode.RANK,
-    val radiusKm: Int = 10,
+    val radiusKm: Int = 3,
     val ranking: List<RankItemUi> = emptyList(),
     val interestMatches: List<MapPointUi> = emptyList(),
     val others: List<MapPointUi> = emptyList(),
