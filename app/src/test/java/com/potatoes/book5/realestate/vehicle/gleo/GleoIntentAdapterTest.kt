@@ -1,6 +1,5 @@
 package com.potatoes.book5.realestate.vehicle.gleo
 
-import com.potatoes.book5.realestate.data.sample.gleo.*
 import com.potatoes.book5.realestate.domain.model.appaction.AppCallContext
 import com.potatoes.book5.realestate.domain.usecase.*
 import kotlinx.coroutines.test.runTest
@@ -9,9 +8,9 @@ import org.junit.Test
 
 class GleoIntentAdapterTest {
     private fun adapter(sent: MutableList<GleoCallback>) = GleoIntentAdapter(
-        GetAreaPriceSummaryUseCase(DummyAreaPriceSummaryRepository()),
-        SaveInterestAreaUseCase(DummyInterestAreaRepository()),
-        GetDailyBriefingUseCase(DummyDailyBriefingRepository()),
+        GetAreaPriceSummaryUseCase(FakeAreaPriceSummaryRepository()),
+        SaveInterestAreaUseCase(FakeInterestAreaRepository()),
+        GetDailyBriefingUseCase(FakeDailyBriefingRepository()),
         { sent += it }, { AppCallContext("r", "s", "synthetic-profile") },
     )
     @Test fun dispatchesAllThreeActionsAndDoesNotClaimSaved() = runTest {
