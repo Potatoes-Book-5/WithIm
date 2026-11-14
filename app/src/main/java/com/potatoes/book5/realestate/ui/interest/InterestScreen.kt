@@ -26,12 +26,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.potatoes.book5.realestate.R
 import com.potatoes.book5.realestate.domain.model.AreaRange
+import com.potatoes.book5.realestate.domain.model.BuildingAge
+import com.potatoes.book5.realestate.domain.model.HouseholdMin
 import com.potatoes.book5.realestate.domain.model.PriceRange
 import com.potatoes.book5.realestate.ui.common.MicIcon
 import com.potatoes.book5.realestate.ui.common.PillButton
 import com.potatoes.book5.realestate.ui.common.PillStyle
 import com.potatoes.book5.realestate.ui.common.SelectChip
 import com.potatoes.book5.realestate.ui.common.labelRes
+import com.potatoes.book5.realestate.ui.common.shortLabelRes
 import com.potatoes.book5.realestate.ui.theme.KingOfRealEstateTheme
 import com.potatoes.book5.realestate.ui.theme.wpx
 
@@ -46,7 +49,7 @@ fun InterestScreen(state: InterestState, onIntent: (InterestIntent) -> Unit) {
         // Landscape 창에서는 조건 이름을 왼쪽 열에, Portrait 창에서는 칩 위에 둔다.
         val wide = maxWidth >= 1200.wpx
         Column(Modifier.fillMaxSize().padding(horizontal = 48.wpx)) {
-            Header(onSkip = { onIntent(InterestIntent.Skip) }, skipEnabled = !state.isSaving)
+            Header(onSkip = { onIntent(InterestIntent.Skip) }, skipEnabled = !state.isSaving, editing = state.editing)
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -108,6 +111,38 @@ fun InterestScreen(state: InterestState, onIntent: (InterestIntent) -> Unit) {
                         }
                     }
                 }
+                Divider()
+                ConditionGroup(
+                    title = stringResource(R.string.interest_households),
+                    hint = stringResource(R.string.interest_single_hint),
+                    wide = wide,
+                ) {
+                    ChipFlow {
+                        HouseholdMin.entries.forEach { min ->
+                            SelectChip(
+                                label = stringResource(min.labelRes()),
+                                selected = min == state.selectedHouseholds,
+                                onClick = { onIntent(InterestIntent.SelectHouseholds(min)) },
+                            )
+                        }
+                    }
+                }
+                Divider()
+                ConditionGroup(
+                    title = stringResource(R.string.interest_building_age),
+                    hint = stringResource(R.string.interest_single_hint),
+                    wide = wide,
+                ) {
+                    ChipFlow {
+                        BuildingAge.entries.forEach { age ->
+                            SelectChip(
+                                label = stringResource(age.labelRes()),
+                                selected = age == state.selectedBuildingAge,
+                                onClick = { onIntent(InterestIntent.SelectBuildingAge(age)) },
+                            )
+                        }
+                    }
+                }
             }
             Footer(state = state, onSave = { onIntent(InterestIntent.Save) })
         }
@@ -115,7 +150,7 @@ fun InterestScreen(state: InterestState, onIntent: (InterestIntent) -> Unit) {
 }
 
 @Composable
-private fun Header(onSkip: () -> Unit, skipEnabled: Boolean) {
+private fun Header(onSkip: () -> Unit, skipEnabled: Boolean, editing: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -132,7 +167,7 @@ private fun Header(onSkip: () -> Unit, skipEnabled: Boolean) {
             )
         }
         PillButton(
-            text = stringResource(R.string.interest_skip),
+            text = stringResource(if (editing) R.string.interest_cancel else R.string.interest_skip),
             onClick = onSkip,
             style = PillStyle.Ghost,
             enabled = skipEnabled,
@@ -225,6 +260,8 @@ private fun summaryText(state: InterestState): String {
         if (state.selectedAreas.isNotEmpty()) {
             add(AreaRange.entries.filter { it in state.selectedAreas }.map { stringResource(it.labelRes()) }.joinToString(", "))
         }
+        state.selectedHouseholds?.let { add(stringResource(it.shortLabelRes())) }
+        state.selectedBuildingAge?.let { add(stringResource(it.shortLabelRes())) }
     }
     return parts.joinToString(" · ")
 }

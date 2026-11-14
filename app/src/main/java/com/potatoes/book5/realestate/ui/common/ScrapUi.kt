@@ -1,6 +1,14 @@
 package com.potatoes.book5.realestate.ui.common
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.ui.semantics.Role
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -97,5 +105,38 @@ fun StarIcon(filled: Boolean, size: Dp = 44.wpx, color: Color = MaterialTheme.co
         }
         path.close()
         drawPath(path, color, style = if (filled) Fill else Stroke(width = 3.wpx.toPx(), join = StrokeJoin.Round))
+    }
+}
+
+/** 스크랩 / 스크랩됨 토글 버튼(SCR-002, SCR-008). */
+@Composable
+fun ScrapToggleButton(
+    scrapped: Boolean,
+    enabled: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
+    Surface(
+        modifier = modifier
+            .heightIn(min = MinTouchHeight)
+            .toggleable(value = scrapped, enabled = enabled, role = Role.Switch, onValueChange = { onToggle() }),
+        shape = CircleShape,
+        color = colors.background,
+        contentColor = colors.onSurface,
+        border = BorderStroke(3.wpx, colors.outline),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 32.wpx),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            StarIcon(filled = scrapped, color = if (scrapped) colors.primary else colors.onSurface)
+            Spacer(Modifier.width(20.wpx))
+            Text(
+                text = stringResource(if (scrapped) R.string.detail_scrapped else R.string.detail_scrap),
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
     }
 }

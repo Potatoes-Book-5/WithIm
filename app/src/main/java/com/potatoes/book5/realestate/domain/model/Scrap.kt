@@ -38,6 +38,10 @@ data class Scrap(
     val last: PriceRecord,
     val lastCheckedAt: LocalDateTime,
     val change: PriceChange?,
+    /** 단지 세대수. 모르면 null(마이 페이지 오각형, T-017) */
+    val households: Int? = null,
+    /** 준공연도. 모르면 null */
+    val builtYear: Int? = null,
 ) {
     val hasUnseenChange: Boolean get() = change?.seen == false
 }

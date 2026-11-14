@@ -20,3 +20,6 @@
 | T-014 | feature | 온보딩 화면 구현(SCR-006 동의, SCR-003 관심 조건) | review | - | P0 | SCR-006, SCR-003 | - |
 | T-015 | feature | 홈·주행 화면 구현(SCR-001, SCR-004, SCR-009, SCR-005) | review | - | P0 | SCR-001, SCR-004, SCR-009, SCR-005 | T-014 |
 | T-016 | feature | 스크랩 기능 구현(SCR-007, SCR-002, Room 저장) | review | - | P0 | SCR-007, SCR-002, ADR-005 | T-015 |
+| T-017 | feature | 마이 페이지 구현(SCR-010) | review | - | P1 | SCR-010 | T-016 |
+| T-018 | feature | 주행 요약 구현(SCR-008) | review | - | P1 | SCR-008 | T-016 |
+| T-019 | feature | 설정 수정 모드 구현(SCR-006) | review | - | P1 | SCR-006 | T-014 |

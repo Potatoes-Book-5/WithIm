@@ -73,6 +73,8 @@ class ToggleScrapUseCase(
                 last = record,
                 lastCheckedAt = at,
                 change = null,
+                households = detail.households,
+                builtYear = detail.builtYear,
             )
         )
         return true
@@ -94,9 +96,17 @@ class RefreshScrapChangesUseCase(
     private val apartmentRepository: ApartmentRepository,
     private val now: () -> LocalDateTime = LocalDateTime::now,
 ) {
+    /** v1에서 저장한 스크랩은 세대수·준공연도가 없으므로 상세에서 채운다(T-017). 실패하면 그대로 둔다. */
+    private suspend fun withComplexInfo(scrap: Scrap): Scrap {
+        if (scrap.households != null && scrap.builtYear != null) return scrap
+        val detail = (apartmentRepository.detail(scrap.apartmentId) as? Outcome.Success)?.value ?: return scrap
+        return scrap.copy(households = detail.households, builtYear = detail.builtYear)
+    }
+
     suspend operator fun invoke(): Int {
         var changed = 0
-        scrapRepository.getAll().forEach { scrap ->
+        scrapRepository.getAll().forEach { stored ->
+            val scrap = withComplexInfo(stored)
             val latest = (apartmentRepository.latestDeal(scrap.apartmentId) as? Outcome.Success)?.value ?: return@forEach
             val at = now()
             val detected = ScrapChangePolicy.detect(scrap.last, latest)

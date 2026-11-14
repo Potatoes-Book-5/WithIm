@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +29,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,9 +40,8 @@ import com.potatoes.book5.realestate.domain.model.PricePoint
 import com.potatoes.book5.realestate.domain.model.ScrapChangeKind
 import com.potatoes.book5.realestate.ui.common.BackButton
 import com.potatoes.book5.realestate.ui.common.ChangeBadge
-import com.potatoes.book5.realestate.ui.common.MinTouchHeight
 import com.potatoes.book5.realestate.ui.common.PillButton
-import com.potatoes.book5.realestate.ui.common.StarIcon
+import com.potatoes.book5.realestate.ui.common.ScrapToggleButton
 import com.potatoes.book5.realestate.ui.common.formatAmount
 import com.potatoes.book5.realestate.ui.common.formatCount
 import com.potatoes.book5.realestate.ui.common.formatDealDate
@@ -82,7 +79,8 @@ fun DetailScreen(state: DetailState, onIntent: (DetailIntent) -> Unit) {
                 Spacer(Modifier.height(32.wpx))
                 PillButton(text = stringResource(R.string.detail_retry), onClick = { onIntent(DetailIntent.Retry) })
             }
-            else -> Message(stringResource(R.string.detail_loading))
+            // 불러오는 중에는 비워 둔다.
+            else -> Unit
         }
     }
 }
@@ -107,38 +105,11 @@ private fun AppBar(state: DetailState, onIntent: (DetailIntent) -> Unit) {
             }
         }
         if (state.detail != null) {
-            ScrapToggle(
+            ScrapToggleButton(
                 scrapped = state.isScrapped,
                 enabled = !state.isToggling,
                 onToggle = { onIntent(DetailIntent.ToggleScrap) },
-            )
-        }
-    }
-}
-
-@Composable
-private fun ScrapToggle(scrapped: Boolean, enabled: Boolean, onToggle: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Surface(
-        modifier = Modifier
-            .width(340.wpx)
-            .heightIn(min = MinTouchHeight)
-            .toggleable(value = scrapped, enabled = enabled, role = Role.Switch, onValueChange = { onToggle() }),
-        shape = CircleShape,
-        color = colors.background,
-        contentColor = colors.onSurface,
-        border = BorderStroke(3.wpx, colors.outline),
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 40.wpx),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            StarIcon(filled = scrapped)
-            Spacer(Modifier.width(24.wpx))
-            Text(
-                text = stringResource(if (scrapped) R.string.detail_scrapped else R.string.detail_scrap),
-                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.width(340.wpx),
             )
         }
     }

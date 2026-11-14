@@ -41,7 +41,7 @@ task: T-011
 | 프레임 | 상태 | 와이어프레임 |
 |---|---|---|
 | SCR-002/landscape/parked | 기본, 변동 있음 | [SCR-002_landscape_parked.svg](../wireframes/SCR-002_landscape_parked.svg) |
-| SCR-002/landscape/loading | 불러오는 중 | 작성 필요 |
+| SCR-002/landscape/loading | 불러오는 중 | 빈 화면(디자인 불필요, 2026-11-14 결정) |
 
 해당 없는 상태는 위 표에서 제외했습니다. 모든 프레임은 light, dark 테마를 각각 만듭니다.
 

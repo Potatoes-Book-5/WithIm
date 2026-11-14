@@ -2,6 +2,8 @@ package com.potatoes.book5.realestate.data.local
 
 import android.content.SharedPreferences
 import com.potatoes.book5.realestate.domain.model.AreaRange
+import com.potatoes.book5.realestate.domain.model.BuildingAge
+import com.potatoes.book5.realestate.domain.model.HouseholdMin
 import com.potatoes.book5.realestate.domain.model.ConsentSettings
 import com.potatoes.book5.realestate.domain.model.InterestCondition
 import com.potatoes.book5.realestate.domain.model.Neighborhood
@@ -9,6 +11,10 @@ import com.potatoes.book5.realestate.domain.model.PriceRange
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
 import com.potatoes.book5.realestate.domain.port.InterestRepository
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
 /**
@@ -52,6 +58,11 @@ class PreferenceInterestRepository(
     private val io: CoroutineDispatcher,
 ) : InterestRepository {
 
+    /** 저장할 때마다 올려 observe()가 다시 읽게 한다. */
+    private val version = MutableStateFlow(0)
+
+    override fun observe(): Flow<InterestCondition?> = version.map { get() }
+
     override suspend fun get(): InterestCondition? = withContext(io) {
         if (!prefs.getBoolean(KEY_SAVED, false)) return@withContext null
         InterestCondition(
@@ -61,6 +72,10 @@ class PreferenceInterestRepository(
                 .mapNotNull { name -> PriceRange.entries.firstOrNull { it.name == name } }.toSet(),
             areaRanges = prefs.getStringSet(KEY_AREAS, emptySet()).orEmpty()
                 .mapNotNull { name -> AreaRange.entries.firstOrNull { it.name == name } }.toSet(),
+            minHouseholds = prefs.getString(KEY_HOUSEHOLDS, null)
+                ?.let { name -> HouseholdMin.entries.firstOrNull { it.name == name } },
+            maxBuildingAge = prefs.getString(KEY_BUILDING_AGE, null)
+                ?.let { name -> BuildingAge.entries.firstOrNull { it.name == name } },
         )
     }
 
@@ -71,7 +86,22 @@ class PreferenceInterestRepository(
             .putStringSet(KEY_NEIGHBORHOODS, condition.neighborhoods.map(::encodeNeighborhood).toSet())
             .putStringSet(KEY_PRICES, condition.priceRanges.map { it.name }.toSet())
             .putStringSet(KEY_AREAS, condition.areaRanges.map { it.name }.toSet())
+            .putString(KEY_HOUSEHOLDS, condition.minHouseholds?.name)
+            .putString(KEY_BUILDING_AGE, condition.maxBuildingAge?.name)
             .apply()
+        version.update { it + 1 }
+    }
+
+    override suspend fun clear() = withContext(io) {
+        prefs.edit()
+            .putBoolean(KEY_SAVED, false)
+            .remove(KEY_NEIGHBORHOODS)
+            .remove(KEY_PRICES)
+            .remove(KEY_AREAS)
+            .remove(KEY_HOUSEHOLDS)
+            .remove(KEY_BUILDING_AGE)
+            .apply()
+        version.update { it + 1 }
     }
 
     override suspend fun markSkipped() = withContext(io) {
@@ -94,5 +124,7 @@ class PreferenceInterestRepository(
         const val KEY_NEIGHBORHOODS = "interest_neighborhoods"
         const val KEY_PRICES = "interest_prices"
         const val KEY_AREAS = "interest_areas"
+        const val KEY_HOUSEHOLDS = "interest_households"
+        const val KEY_BUILDING_AGE = "interest_building_age"
     }
 }

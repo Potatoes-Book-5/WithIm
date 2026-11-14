@@ -70,13 +70,8 @@ fun HomeScreen(state: HomeState, onIntent: (HomeIntent) -> Unit) {
                     state.followers.forEach { item ->
                         RankRow(item, onClick = { onIntent(HomeIntent.OpenApartment(item.id)) }, modifier = Modifier.weight(200f))
                     }
-                } else {
-                    Text(
-                        text = stringResource(R.string.home_loading),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
                 }
+                // 불러오는 중에는 비워 둔다.
             }
             Column(
                 modifier = Modifier.weight(1f).fillMaxHeight(),

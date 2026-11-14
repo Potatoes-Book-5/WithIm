@@ -5,6 +5,7 @@ import com.potatoes.book5.realestate.data.local.PreferenceConsentRepository
 import com.potatoes.book5.realestate.data.local.PreferenceInterestRepository
 import com.potatoes.book5.realestate.data.local.SampleNeighborhoodRepository
 import com.potatoes.book5.realestate.data.sample.SampleRankingRepository
+import com.potatoes.book5.realestate.data.local.RoomDriveRecordRepository
 import com.potatoes.book5.realestate.data.local.RoomScrapRepository
 import com.potatoes.book5.realestate.data.local.db.AppDatabase
 import com.potatoes.book5.realestate.data.sample.SampleApartmentRepository
@@ -16,10 +17,21 @@ import com.potatoes.book5.realestate.domain.port.VehicleSimulation
 import com.potatoes.book5.realestate.domain.usecase.GetInterestConditionUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetNeighborhoodSuggestionsUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetOnboardingStepUseCase
+import com.potatoes.book5.realestate.domain.usecase.DeleteUserDataUseCase
+import com.potatoes.book5.realestate.domain.usecase.DriveSessionRecorder
+import com.potatoes.book5.realestate.domain.usecase.GetConsentUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetApartmentDetailUseCase
+import com.potatoes.book5.realestate.domain.usecase.MarkDriveSummarySeenUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveDriveSummaryUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveScrappedIdsUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveUnseenDriveSummaryUseCase
+import com.potatoes.book5.realestate.domain.usecase.SimulateDriveEndUseCase
+import com.potatoes.book5.realestate.domain.usecase.ToggleScrapByIdUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetScrapUseCase
 import com.potatoes.book5.realestate.domain.usecase.MarkScrapChangeSeenUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveInterestConditionUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveIsScrappedUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveMyPageUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveScrapSummaryUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveScrapsUseCase
 import com.potatoes.book5.realestate.domain.usecase.RefreshScrapChangesUseCase
@@ -50,6 +62,7 @@ class AppContainer(context: Context) {
     private val database = AppDatabase.create(context)
     private val scrapRepository: ScrapRepository = RoomScrapRepository(database.scrapDao())
     private val apartmentRepository = SampleApartmentRepository()
+    private val driveRecordRepository = RoomDriveRecordRepository(database)
     private val drivingStateProvider = SimulatedDrivingStateProvider()
 
     private val vehicleSimulation = object : VehicleSimulation {
@@ -80,4 +93,19 @@ class AppContainer(context: Context) {
     val markScrapChangeSeen = MarkScrapChangeSeenUseCase(scrapRepository)
     val refreshScrapChanges = RefreshScrapChangesUseCase(scrapRepository, apartmentRepository)
     val simulateNewDeals = SimulateNewDealsUseCase(apartmentRepository, refreshScrapChanges)
+
+    val observeInterestCondition = ObserveInterestConditionUseCase(interestRepository)
+    val observeMyPage = ObserveMyPageUseCase(interestRepository, scrapRepository)
+
+    /** 앱 프로세스 동안 주행 세션을 기록한다. RealEstateApplication이 시작한다. */
+    val driveSessionRecorder = DriveSessionRecorder(drivingStateProvider, rankingRepository, driveRecordRepository)
+    val observeDriveSummary = ObserveDriveSummaryUseCase(driveRecordRepository)
+    val observeUnseenDriveSummary = ObserveUnseenDriveSummaryUseCase(driveRecordRepository)
+    val markDriveSummarySeen = MarkDriveSummarySeenUseCase(driveRecordRepository)
+    val observeScrappedIds = ObserveScrappedIdsUseCase(scrapRepository)
+    val toggleScrapById = ToggleScrapByIdUseCase(apartmentRepository, toggleScrap)
+    val simulateDriveEnd = SimulateDriveEndUseCase(vehicleSimulation, driveSessionRecorder)
+
+    val getConsent = GetConsentUseCase(consentRepository)
+    val deleteUserData = DeleteUserDataUseCase(interestRepository, scrapRepository, driveRecordRepository)
 }

@@ -22,7 +22,11 @@ import com.potatoes.book5.realestate.ui.theme.wpx
 @Composable
 fun InterestRoute(
     onOpenHome: () -> Unit,
-    viewModel: InterestViewModel = viewModel(factory = AppViewModels.Factory),
+    editing: Boolean = false,
+    viewModel: InterestViewModel = viewModel(
+        factory = AppViewModels.Factory,
+        extras = AppViewModels.extrasWith(AppViewModels.INTEREST_EDITING_KEY, editing),
+    ),
 ) {
     val state by viewModel.state.collectAsStateWithAppLifecycle()
     val snackbar = remember { SnackbarHostState() }

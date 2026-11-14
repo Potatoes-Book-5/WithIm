@@ -58,14 +58,9 @@ fun ScrapListScreen(state: ScrapListState, onIntent: (ScrapListIntent) -> Unit) 
     ) {
         AppBar(state, onIntent)
         val items = state.visibleItems
-        when {
-            state.isLoading -> Unit
-            state.items.isEmpty() -> EmptyState(
-                title = stringResource(R.string.scrap_empty_title),
-                description = stringResource(R.string.scrap_empty_desc),
-            )
-            items.isEmpty() -> EmptyState(title = stringResource(R.string.scrap_changed_empty), description = null)
-            else -> LazyColumn(
+        // 불러오는 중이거나 보여 줄 스크랩이 없으면 비워 둔다.
+        if (!state.isLoading && items.isNotEmpty()) {
+            LazyColumn(
                 modifier = Modifier.fillMaxWidth().weight(1f),
                 contentPadding = PaddingValues(top = 32.wpx, bottom = 48.wpx),
                 verticalArrangement = Arrangement.spacedBy(16.wpx),
@@ -178,26 +173,6 @@ private fun ScrapRow(item: ScrapItemUi, onClick: () -> Unit) {
                 style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.End,
                 modifier = Modifier.widthIn(min = 300.wpx),
-            )
-        }
-    }
-}
-
-@Composable
-private fun androidx.compose.foundation.layout.ColumnScope.EmptyState(title: String, description: String?) {
-    Column(
-        modifier = Modifier.fillMaxWidth().weight(1f),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(text = title, style = MaterialTheme.typography.titleLarge)
-        if (description != null) {
-            Spacer(Modifier.height(16.wpx))
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
             )
         }
     }

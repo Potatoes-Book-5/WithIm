@@ -5,7 +5,7 @@ import com.potatoes.book5.realestate.domain.model.ConsentSettings
 import com.potatoes.book5.realestate.domain.model.DrivingState
 import com.potatoes.book5.realestate.domain.model.PriceChange
 import com.potatoes.book5.realestate.domain.model.ScrapChangeKind
-import com.potatoes.book5.realestate.domain.usecase.GetInterestConditionUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveInterestConditionUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveLeaderChangesUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveNearbyRankingUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveScrapSummaryUseCase
@@ -95,7 +95,7 @@ class HomeDrivingTest {
                     )
                 )
             ),
-            GetInterestConditionUseCase(FakeInterestRepository()),
+            ObserveInterestConditionUseCase(FakeInterestRepository()),
         )
         runCurrent()
         assertEquals(listOf(1, 2, 3), vm.state.value.ranking.map { it.rank })
@@ -104,8 +104,11 @@ class HomeDrivingTest {
         assertEquals(2, vm.state.value.scrap?.changedCount)
         assertEquals("단지-z", vm.state.value.scrap?.firstChangedName)
 
+        // 관심 조건 카드와 마이 페이지 버튼은 모두 마이 페이지로 간다(SCR-010 진입 경로).
         vm.onIntent(HomeIntent.OpenInterest)
-        assertEquals(HomeEffect.Navigate(Screen.Interest), vm.effect.first())
+        assertEquals(HomeEffect.Navigate(Screen.MyPage), vm.effect.first())
+        vm.onIntent(HomeIntent.OpenMyPage)
+        assertEquals(HomeEffect.Navigate(Screen.MyPage), vm.effect.first())
         vm.onIntent(HomeIntent.OpenApartment("a"))
         assertEquals(HomeEffect.Navigate(Screen.Detail("a")), vm.effect.first())
         // 변동이 있으면 '변동 있음' 필터로 연다.
@@ -113,6 +116,10 @@ class HomeDrivingTest {
         assertEquals(HomeEffect.Navigate(Screen.Scraps(changedOnly = true)), vm.effect.first())
         vm.onIntent(HomeIntent.OpenScraps)
         assertEquals(HomeEffect.Navigate(Screen.Scraps()), vm.effect.first())
+        vm.onIntent(HomeIntent.OpenSettings)
+        assertEquals(HomeEffect.Navigate(Screen.Settings), vm.effect.first())
+        vm.onIntent(HomeIntent.OpenDriveSummary)
+        assertEquals(HomeEffect.Navigate(Screen.DriveSummary()), vm.effect.first())
     }
 
     @Test

@@ -30,6 +30,8 @@ class RoomScrapRepository(
 
     override suspend fun upsert(scrap: Scrap) = dao.upsert(scrap.toEntity(zone))
 
+    override suspend fun deleteAll() = dao.deleteAll()
+
     override suspend fun delete(apartmentId: String) = dao.delete(apartmentId)
 
     override suspend fun markChangeSeen(apartmentId: String) = dao.markChangeSeen(apartmentId)
@@ -54,6 +56,8 @@ internal fun ScrapEntity.toDomain(zone: ZoneId): Scrap = Scrap(
                 seen = changeSeen,
             )
         },
+    households = households,
+    builtYear = builtYear,
 )
 
 internal fun Scrap.toEntity(zone: ZoneId): ScrapEntity = ScrapEntity(
@@ -71,6 +75,8 @@ internal fun Scrap.toEntity(zone: ZoneId): ScrapEntity = ScrapEntity(
     changeDeltaManwon = change?.deltaManwon,
     changeDetectedAt = change?.detectedAt?.toEpochMilli(zone),
     changeSeen = change?.seen ?: true,
+    households = households,
+    builtYear = builtYear,
 )
 
 private fun Long.toDateTime(zone: ZoneId): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(this), zone)
