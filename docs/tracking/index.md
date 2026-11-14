@@ -61,3 +61,12 @@
 | ADR-004 | decision | 지도 SDK 선정 | reserved | `decisions/ADR-004-map-sdk.md` | T-013 | - |
 | SCR-010 | screen | 마이 페이지 | draft | `design/screens/SCR-010-my-page.md` | T-011 | F-004, F-008, S-002, S-008 |
 | ADR-005 | decision | 로컬 DB로 Room 채택 | approved | `decisions/ADR-005-room-local-db.md` | T-016 | - |
+| F-010 | feature | Gleo 대화형 앱 제어 | reserved | `product/features/F-010-gleo-app-control.md` | T-020 | - |
+| F-011 | feature | 관심 지역 저장과 진입 알림 | reserved | `product/features/F-011-interest-area-booking.md` | T-020 | - |
+| F-012 | feature | 단지 방문 내비게이션 | reserved | `product/features/F-012-apartment-navigation.md` | T-020 | - |
+| F-013 | feature | 관심 지역 데일리 브리핑 | reserved | `product/features/F-013-area-daily-briefing.md` | T-020 | - |
+| F-014 | feature | 차량 카메라 현장 스캔 | reserved | `product/features/F-014-camera-site-scan.md` | T-020 | - |
+| S-011 | scenario | 신혼부부 대화형 모빌리티 임장 | reserved | `product/scenarios/S-011-conversational-property-tour.md` | T-020 | - |
+| SCR-011 | screen | 관심 지역 목록 | reserved | `design/screens/SCR-011-interest-area-list.md` | T-020 | - |
+| SCR-012 | screen | 데일리 브리핑 | reserved | `design/screens/SCR-012-daily-briefing.md` | T-020 | - |
+| ADR-006 | decision | Gleo Intent 어댑터와 App API 경계 | reserved | `decisions/ADR-006-gleo-intent-adapter.md` | T-021 | - |

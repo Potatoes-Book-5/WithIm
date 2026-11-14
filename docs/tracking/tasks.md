@@ -23,3 +23,5 @@
 | T-017 | feature | 마이 페이지 구현(SCR-010) | review | - | P1 | SCR-010 | T-016 |
 | T-018 | feature | 주행 요약 구현(SCR-008) | review | - | P1 | SCR-008 | T-016 |
 | T-019 | feature | 설정 수정 모드 구현(SCR-006) | review | - | P1 | SCR-006 | T-014 |
+| T-020 | docs | 최신 main 기반 Gleo 명세 이관 | todo | - | P1 | - | - |
+| T-021 | feature | Gleo Intent 어댑터와 dummy App API 구현 | todo | - | P1 | - | - |
