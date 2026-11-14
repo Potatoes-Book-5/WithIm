@@ -6,7 +6,10 @@ import com.potatoes.book5.realestate.domain.model.HouseholdMin
 import com.potatoes.book5.realestate.domain.model.InterestCondition
 import com.potatoes.book5.realestate.domain.model.Neighborhood
 import com.potatoes.book5.realestate.domain.model.PriceRange
-import com.potatoes.book5.realestate.fakes.scrapOf
+import com.potatoes.book5.realestate.domain.model.PriceRecord
+import com.potatoes.book5.realestate.domain.model.Scrap
+import java.time.LocalDate
+import java.time.LocalDateTime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -77,4 +80,15 @@ class ConditionMatchPolicyTest {
         assertEquals(5.0, match.scores[MatchAxis.HOUSEHOLDS]!!, 1e-9)
         assertEquals(5.0, match.scores[MatchAxis.PRICE]!!, 1e-9)
     }
+}
+
+/** app 테스트의 fakes.scrapOf와 같은 기본값. 정책의 internal 함수를 같은 모듈에서 검사하려고 domain 테스트로 옮겼다. */
+private fun scrapOf(
+    id: String,
+    price: Long = 150_000,
+    date: LocalDate = LocalDate.of(2026, 10, 1),
+    scrappedAt: LocalDateTime = LocalDateTime.of(2026, 10, 2, 9, 0),
+): Scrap {
+    val record = PriceRecord(price, date)
+    return Scrap(id, "단지-$id", "정자동", 34, scrappedAt, record, record, scrappedAt, null)
 }
