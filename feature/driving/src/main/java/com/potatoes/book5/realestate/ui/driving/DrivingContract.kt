@@ -5,13 +5,11 @@ import com.potatoes.book5.realestate.ui.common.MapPointUi
 import com.potatoes.book5.realestate.ui.common.RankItemUi
 import java.time.LocalDate
 
-data class DrivingTradeUi(val name: String, val priceManwon: Long, val contractDate: LocalDate, val distanceKm: Double)
-
+/** 순위 카드·목록이 쓰는 실거래 조회 기간과 상태. 순위 자체는 [DrivingScreenState.ranking]에 있다(T-030). */
 data class DrivingTradeRankingUi(
     val fromDate: LocalDate,
     val toDate: LocalDate,
     val loading: Boolean = true,
-    val rows: List<DrivingTradeUi> = emptyList(),
     val error: String? = null,
 )
 

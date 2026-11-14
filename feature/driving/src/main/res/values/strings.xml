@@ -28,14 +28,7 @@
     <string name="driving_radius">반경 %dkm</string>
     <string name="driving_live_label">%s</string>
     <string name="driving_location_waiting">현재 위치 확인 중</string>
-    <string name="driving_trade_title">최근 1개월 실거래 TOP 3</string>
-    <string name="driving_trade_reference">현재 위치 기준 10km</string>
-    <string name="driving_trade_reference_samsung">삼성전자 수원 본사 기준 10km</string>
+    <string name="driving_trade_period">%1$s · %2$s~%3$s 계약</string>
     <string name="driving_trade_loading">실거래를 불러오는 중이에요</string>
     <string name="driving_trade_empty">기간과 반경에 맞는 거래가 없어요</string>
-    <string name="driving_trade_rank">순위</string>
-    <string name="driving_trade_apartment">단지 · 거래일 · 거리</string>
-    <string name="driving_trade_amount">거래금액</string>
-    <string name="driving_trade_basis">단지별 최근 1개월 최고 거래 총액순\n현재 위치 기준 직선거리</string>
-    <string name="driving_trade_basis_samsung">단지별 최근 1개월 최고 거래 총액순\n삼성전자 수원 본사 기준 직선거리</string>
 </resources>

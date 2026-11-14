@@ -43,6 +43,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.potatoes.book5.realestate.feature.driving.R
@@ -60,6 +61,8 @@ import com.potatoes.book5.realestate.ui.common.formatPrice
 import com.potatoes.book5.realestate.ui.common.formatPriceShort
 import com.potatoes.book5.realestate.ui.theme.KingOfRealEstateTheme
 import com.potatoes.book5.realestate.ui.theme.wpx
+import com.potatoes.book5.realestate.ui.theme.wsp
+import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 
 /**
@@ -69,30 +72,27 @@ import java.time.LocalDate
  */
 @Composable
 fun DrivingScreen(state: DrivingScreenState, onIntent: (DrivingIntent) -> Unit, naverMapAvailable: Boolean = false) {
+    // 와이어프레임 여백: SCR-004는 좌우·아래 48, 위 36 / SCR-009는 좌우·위·아래 32, 위 28(px, 2560×1440 기준)
+    val map = state.mode == DrivingMode.MAP
+    val side = if (map) 32.wpx else 48.wpx
     Box(
         Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
     ) {
-        Column(Modifier.fillMaxSize().padding(horizontal = 48.wpx)) {
+        Column(Modifier.fillMaxSize().padding(start = side, end = side, top = if (map) 28.wpx else 36.wpx, bottom = side)) {
             Header(state = state, onSelect = { onIntent(DrivingIntent.SelectMode(it)) })
-            Row(Modifier.weight(1f).fillMaxWidth().padding(top = 24.wpx, bottom = 48.wpx), horizontalArrangement = Arrangement.spacedBy(32.wpx)) {
-                Column(Modifier.weight(0.57f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(16.wpx)) {
-                    Text(state.referenceLabel?.let { stringResource(R.string.driving_live_label, it) }
-                        ?: stringResource(R.string.driving_location_waiting), style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    BoxWithConstraints(Modifier.weight(1f)) {
-                        when (state.mode) {
-                            DrivingMode.RANK -> if (maxWidth < 1500.wpx) {
-                                Column(verticalArrangement = Arrangement.spacedBy(20.wpx)) {
-                                    state.ranking.forEach { RankListRow(it) }
-                                }
-                            } else RankCards(state.ranking)
-                            DrivingMode.MAP -> DrivingMap(state, naverMapAvailable, Modifier.fillMaxSize())
+            BoxWithConstraints(Modifier.weight(1f).fillMaxWidth().padding(top = if (map) 28.wpx else 40.wpx)) {
+                when (state.mode) {
+                    DrivingMode.RANK -> when {
+                        state.ranking.isEmpty() -> TradeStatePanel(state.actualTrades, Modifier.fillMaxSize())
+                        maxWidth < 1500.wpx -> Column(verticalArrangement = Arrangement.spacedBy(20.wpx)) {
+                            state.ranking.forEach { RankListRow(it) }
                         }
+                        else -> RankCards(state.ranking)
                     }
+                    DrivingMode.MAP -> MapWithList(state, naverMapAvailable)
                 }
-                DrivingTradeTable(state.actualTrades, state.vehicle != null, Modifier.weight(0.43f).fillMaxHeight())
             }
         }
         when (val alert = state.alert) {
@@ -103,12 +103,11 @@ fun DrivingScreen(state: DrivingScreenState, onIntent: (DrivingIntent) -> Unit, 
     }
 }
 
+/** 상단: `순위 | 지도` 전환, 반경, 실거래 기준·기간, 주행 중 배지(SCR-004, SCR-009) */
 @Composable
 private fun Header(state: DrivingScreenState, onSelect: (DrivingMode) -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 36.wpx),
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         ModeToggle(selected = state.mode, onSelect = onSelect)
@@ -117,8 +116,18 @@ private fun Header(state: DrivingScreenState, onSelect: (DrivingMode) -> Unit) {
             text = stringResource(R.string.driving_radius, state.radiusKm),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.width(24.wpx))
+        // 와이어프레임에는 없지만 실거래 기준 위치와 계약일 범위를 밝혀야 한다(SCR-004 현재 실거래 표시 범위).
+        Text(
+            text = tradeCaption(state),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f),
         )
+        Spacer(Modifier.width(24.wpx))
         Surface(shape = CircleShape, color = MaterialTheme.colorScheme.onSurface, contentColor = MaterialTheme.colorScheme.surface) {
             Text(
                 text = stringResource(R.string.driving_badge),
@@ -127,6 +136,37 @@ private fun Header(state: DrivingScreenState, onSelect: (DrivingMode) -> Unit) {
             )
         }
     }
+}
+
+@Composable
+private fun tradeCaption(state: DrivingScreenState): String {
+    val reference = state.referenceLabel ?: stringResource(R.string.driving_location_waiting)
+    val trades = state.actualTrades ?: return reference
+    val format = DateTimeFormatter.ofPattern("MM.dd")
+    return stringResource(R.string.driving_trade_period, reference, trades.fromDate.format(format), trades.toDate.format(format))
+}
+
+/** 순위가 비어 있을 때 조회 중, 오류, 빈 결과를 구분해 보여 준다. 임의의 값으로 채우지 않는다. */
+@Composable
+private fun TradeStatePanel(trades: DrivingTradeRankingUi?, modifier: Modifier = Modifier) {
+    Surface(modifier, shape = RoundedCornerShape(32.wpx), color = MaterialTheme.colorScheme.surfaceVariant) {
+        Box(Modifier.padding(44.wpx), contentAlignment = Alignment.Center) {
+            TradeStateText(trades)
+        }
+    }
+}
+
+@Composable
+private fun TradeStateText(trades: DrivingTradeRankingUi?) {
+    Text(
+        text = when {
+            trades == null || trades.loading -> stringResource(R.string.driving_trade_loading)
+            trades.error != null -> trades.error
+            else -> stringResource(R.string.driving_trade_empty)
+        },
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 /** 순위 | 지도 전환. 주행 화면의 유일한 터치 동작이다(SCR-004, 주행 중 허용 여부는 T-001). */
@@ -146,7 +186,13 @@ private fun ModeToggle(selected: DrivingMode, onSelect: (DrivingMode) -> Unit) {
                     contentColor = if (isSelected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurfaceVariant,
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Text(text = stringResource(label), style = MaterialTheme.typography.labelLarge)
+                        Text(
+                            text = stringResource(label),
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontSize = 38.wsp,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                            ),
+                        )
                     }
                 }
             }
@@ -154,7 +200,7 @@ private fun ModeToggle(selected: DrivingMode, onSelect: (DrivingMode) -> Unit) {
     }
 }
 
-/** SCR-004 Landscape: Top 3 가로 카드 */
+/** SCR-004 Landscape: Top 3 가로 카드(518×912, 간격 24) */
 @Composable
 private fun RankCards(ranking: List<RankItemUi>) {
     Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(24.wpx)) {
@@ -177,14 +223,19 @@ private fun RankCards(ranking: List<RankItemUi>) {
                     } else {
                         Text(
                             stringResource(CoreUiR.string.rank_n, item.rank),
-                            style = MaterialTheme.typography.headlineSmall,
+                            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     Column {
                         Text(item.name, style = MaterialTheme.typography.headlineMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                        Spacer(Modifier.height(24.wpx))
-                        Text(formatPrice(item.priceManwon), style = MaterialTheme.typography.displayMedium.copy(fontSize = MaterialTheme.typography.displayLarge.fontSize * 0.75f), maxLines = 1)
+                        Spacer(Modifier.height(48.wpx))
+                        Text(
+                            formatPrice(item.priceManwon),
+                            style = MaterialTheme.typography.displayLarge.copy(fontSize = 72.wsp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
                     }
                 }
             }
@@ -192,6 +243,30 @@ private fun RankCards(ranking: List<RankItemUi>) {
     }
 }
 
+/** SCR-009 Landscape(시안 D): 왼쪽 지도, 오른쪽 520 너비 순위 목록과 관심 매물 카드 */
+@Composable
+private fun MapWithList(state: DrivingScreenState, naverMapAvailable: Boolean) {
+    Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(32.wpx)) {
+        DrivingMap(state, naverMapAvailable, Modifier.weight(1f).fillMaxHeight())
+        Column(Modifier.width(520.wpx).fillMaxHeight()) {
+            Text(stringResource(R.string.driving_list_title, state.radiusKm), style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(24.wpx))
+            if (state.ranking.isEmpty()) {
+                TradeStateText(state.actualTrades)
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(20.wpx)) {
+                    state.ranking.forEach { RankListRow(it) }
+                }
+            }
+            state.interestMatches.firstOrNull()?.let {
+                Spacer(Modifier.height(28.wpx))
+                InterestRow(it)
+            }
+        }
+    }
+}
+
+/** SCR-009 순위 목록 행(520×176) */
 @Composable
 private fun RankListRow(item: RankItemUi) {
     val leader = item.rank == 1
@@ -199,24 +274,52 @@ private fun RankListRow(item: RankItemUi) {
         modifier = Modifier.fillMaxWidth().height(176.wpx),
         shape = RoundedCornerShape(28.wpx),
         color = if (leader) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                contentColor = MaterialTheme.colorScheme.onSurface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
         border = if (leader) BorderStroke(3.wpx, MaterialTheme.colorScheme.primary) else null,
     ) {
-        Row(Modifier.padding(horizontal = 28.wpx), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(start = 30.wpx, end = 32.wpx), verticalAlignment = Alignment.CenterVertically) {
             RankBadge(rank = item.rank, size = 60.wpx)
-            Column(Modifier.weight(1f).padding(start = 24.wpx)) {
-                Text(item.name, style = MaterialTheme.typography.titleSmall.copy(fontWeight = MaterialTheme.typography.titleLarge.fontWeight), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Column(Modifier.weight(1f).padding(start = 26.wpx, end = 16.wpx)) {
+                Text(item.name, style = MaterialTheme.typography.titleSmall.copy(fontSize = 38.wsp, fontWeight = FontWeight.Bold),
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text(
                     text = directionText(item),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Text(
                 text = formatPriceShort(item.priceManwon),
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = MaterialTheme.typography.headlineLarge.fontWeight),
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
                 color = if (leader) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             )
+        }
+    }
+}
+
+/** SCR-009 관심 매물 카드(흰 바탕, 강조색 테두리) */
+@Composable
+private fun InterestRow(point: MapPointUi) {
+    Surface(
+        modifier = Modifier.fillMaxWidth().height(176.wpx),
+        shape = RoundedCornerShape(28.wpx),
+        color = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(3.wpx, MaterialTheme.colorScheme.primary),
+    ) {
+        Row(Modifier.padding(start = 30.wpx, end = 32.wpx), verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(60.wpx), contentAlignment = Alignment.Center) {
+                Icon(Icons.Filled.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(60.wpx))
+            }
+            Column(Modifier.weight(1f).padding(start = 26.wpx)) {
+                Text(point.name, style = MaterialTheme.typography.titleSmall.copy(fontSize = 38.wsp, fontWeight = FontWeight.Bold),
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = stringResource(R.string.driving_interest_meta, directionText(point.isAhead, point.distanceKm, point.directionKnown)),
+                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
         }
     }
 }
@@ -393,6 +496,8 @@ private fun LeaderAlertOverlay(alert: LeaderAlertUi) {
     }
 }
 
+private val previewTrades = DrivingTradeRankingUi(LocalDate.of(2026, 10, 14), LocalDate.of(2026, 11, 14), loading = false)
+
 private val previewRanking = listOf(
     RankItemUi("a", 1, "새솔 리버뷰", 245_000, 34, LocalDate.of(2026, 10, 21), 2.4, 25.0),
     RankItemUi("b", 2, "은행나무 파크", 221_000, 38, LocalDate.of(2026, 9, 30), 4.1, -40.0),
@@ -403,7 +508,7 @@ private val previewRanking = listOf(
 @Composable
 private fun DrivingRankPreview() {
     KingOfRealEstateTheme(darkTheme = false) {
-        DrivingScreen(DrivingScreenState(ranking = previewRanking), onIntent = {})
+        DrivingScreen(DrivingScreenState(ranking = previewRanking, actualTrades = previewTrades, referenceLabel = "현재 차량 위치 · 반경 10km 실거래"), onIntent = {})
     }
 }
 
@@ -415,6 +520,7 @@ private fun DrivingMapPreview() {
             DrivingScreenState(
                 mode = DrivingMode.MAP,
                 ranking = previewRanking,
+                actualTrades = previewTrades,
                 interestMatches = listOf(MapPointUi("h", "한빛마을 1단지", 1.2, -70.0)),
             ),
             onIntent = {},

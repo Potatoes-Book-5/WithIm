@@ -33,3 +33,4 @@
 | T-027 | feature | 앱 전체 부동산 샘플을 실거래 데이터로 전환 | review | - | P1 | F-001, F-002, F-003, SCR-001, SCR-009 | T-023, T-024 |
 | T-028 | harness | 공공 API 키를 local.properties에서 읽도록 빌드 설정 변경 | review | - | P2 | - | - |
 | T-029 | feature | Pleos FusedLocation 콜백을 차량 위치 입력 포트에 연결하고 주행 지도에 반영 | review | - | P1 | F-001, SCR-009 | T-027 |
+| T-030 | feature | 주행 화면 실거래 순위를 SCR-004·SCR-009 와이어프레임대로 복원 | review | - | P1 | SCR-004, SCR-009 | T-023 |
