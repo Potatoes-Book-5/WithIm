@@ -1,24 +1,35 @@
 package com.potatoes.book5.realestate.ui
 
+import androidx.compose.runtime.Composable
+import androidx.lifecycle.HasDefaultViewModelProviderFactory
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.MutableCreationExtras
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.potatoes.book5.realestate.RealEstateApplication
 import com.potatoes.book5.realestate.di.AppContainer
 import com.potatoes.book5.realestate.ui.consent.ConsentViewModel
+import com.potatoes.book5.realestate.ui.detail.DetailViewModel
 import com.potatoes.book5.realestate.ui.driving.DrivingViewModel
 import com.potatoes.book5.realestate.ui.home.HomeViewModel
 import com.potatoes.book5.realestate.ui.interest.InterestViewModel
+import com.potatoes.book5.realestate.ui.scrap.ScrapFilter
+import com.potatoes.book5.realestate.ui.scrap.ScrapListViewModel
 
 /** AppContainer에서 ViewModel을 만든다. */
 object AppViewModels {
+    /** 화면 인자. 내비게이션 라이브러리 도입 전까지 CreationExtras로 넘긴다. */
+    val APARTMENT_ID_KEY = object : CreationExtras.Key<String> {}
+    val SCRAP_FILTER_KEY = object : CreationExtras.Key<ScrapFilter> {}
+
     val Factory: ViewModelProvider.Factory = viewModelFactory {
         initializer {
             val c = container()
-            AppViewModel(c.getOnboardingStep, c.observeDrivingState, c.simulateDriving, c.simulateAreaChange)
+            AppViewModel(c.getOnboardingStep, c.observeDrivingState, c.refreshScrapChanges, c.simulateDriving, c.simulateAreaChange, c.simulateNewDeals)
         }
         initializer { ConsentViewModel(container().saveConsent) }
         initializer {
@@ -33,12 +44,34 @@ object AppViewModels {
         }
         initializer {
             val c = container()
-            HomeViewModel(c.observeNearbyRanking, c.getScrapSummary, c.getInterestCondition)
+            HomeViewModel(c.observeNearbyRanking, c.observeScrapSummary, c.getInterestCondition)
         }
         initializer {
             val c = container()
             DrivingViewModel(createSavedStateHandle(), c.observeNearbyRanking, c.observeLeaderChanges)
         }
+        initializer {
+            ScrapListViewModel(this[SCRAP_FILTER_KEY] ?: ScrapFilter.ALL, container().observeScraps)
+        }
+        initializer {
+            val c = container()
+            DetailViewModel(
+                apartmentId = checkNotNull(this[APARTMENT_ID_KEY]) { "apartmentId is required" },
+                getApartmentDetail = c.getApartmentDetail,
+                getScrap = c.getScrap,
+                observeIsScrapped = c.observeIsScrapped,
+                toggleScrap = c.toggleScrap,
+                markScrapChangeSeen = c.markScrapChangeSeen,
+            )
+        }
+    }
+
+    /** 현재 ViewModelStoreOwner의 기본 extras에 화면 인자를 더한다. */
+    @Composable
+    fun <T> extrasWith(key: CreationExtras.Key<T>, value: T): CreationExtras {
+        val base = (LocalViewModelStoreOwner.current as? HasDefaultViewModelProviderFactory)
+            ?.defaultViewModelCreationExtras ?: CreationExtras.Empty
+        return MutableCreationExtras(base).apply { set(key, value) }
     }
 
     private fun CreationExtras.container(): AppContainer =

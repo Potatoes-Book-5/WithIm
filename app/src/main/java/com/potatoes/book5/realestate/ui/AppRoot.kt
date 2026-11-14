@@ -13,35 +13,53 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.potatoes.book5.realestate.BuildConfig
 import com.potatoes.book5.realestate.ui.common.collectAsStateWithAppLifecycle
 import com.potatoes.book5.realestate.ui.consent.ConsentRoute
+import com.potatoes.book5.realestate.ui.detail.DetailRoute
 import com.potatoes.book5.realestate.ui.dev.DevControls
 import com.potatoes.book5.realestate.ui.driving.DrivingRoute
 import com.potatoes.book5.realestate.ui.home.HomeRoute
 import com.potatoes.book5.realestate.ui.interest.InterestRoute
+import com.potatoes.book5.realestate.ui.scrap.ScrapListRoute
 
 @Composable
 fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)) {
     val state by viewModel.state.collectAsStateWithAppLifecycle()
-    BackHandler(enabled = state.interestOpenedFromHome) { viewModel.onIntent(AppIntent.Back) }
+    val onBack = { viewModel.onIntent(AppIntent.Back) }
+    val open: (Screen) -> Unit = { viewModel.onIntent(AppIntent.Open(it)) }
+    // 주행 중에는 화면 이동을 막고, 주차 중에만 스택을 되돌린다.
+    BackHandler(enabled = state.canGoBack && !state.showDriving, onBack = onBack)
+    val stores = rememberScreenStores(state.stack)
+    val currentKey = screenKey(state.stack.lastIndex, state.current)
     Box(Modifier.fillMaxSize()) {
-        when (state.destination) {
-            Destination.LOADING -> Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
-            Destination.CONSENT -> ConsentRoute(
-                onOpenInterestConditions = { viewModel.onIntent(AppIntent.ConsentFinishedWithLocation) },
-                onOpenHome = { viewModel.onIntent(AppIntent.OnboardingFinished) },
-            )
-            Destination.INTEREST -> InterestRoute(onOpenHome = { viewModel.onIntent(AppIntent.OnboardingFinished) })
-            Destination.HOME -> if (state.showDriving) {
-                DrivingRoute()
-            } else {
-                HomeRoute(onOpenInterestConditions = { viewModel.onIntent(AppIntent.OpenInterestFromHome) })
+        if (state.showDriving) {
+            DrivingRoute()
+        } else {
+            when (val screen = state.current) {
+                Screen.Loading -> Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))
+                Screen.Consent -> ConsentRoute(
+                    onOpenInterestConditions = { viewModel.onIntent(AppIntent.ConsentFinishedWithLocation) },
+                    onOpenHome = { viewModel.onIntent(AppIntent.OnboardingFinished) },
+                )
+                Screen.Interest -> InterestRoute(onOpenHome = { viewModel.onIntent(AppIntent.OnboardingFinished) })
+                Screen.Home -> HomeRoute(onOpen = open)
+                is Screen.Scraps -> ProvideScreenStore(stores, currentKey) {
+                    ScrapListRoute(
+                        changedOnly = screen.changedOnly,
+                        onOpenDetail = { open(Screen.Detail(it)) },
+                        onBack = onBack,
+                    )
+                }
+                is Screen.Detail -> ProvideScreenStore(stores, currentKey) {
+                    DetailRoute(apartmentId = screen.apartmentId, onBack = onBack)
+                }
             }
         }
-        // 실제 주행 상태 연동 전까지 개발 빌드에서만 주행을 흉내 낸다.
-        if (BuildConfig.DEBUG && state.destination == Destination.HOME) {
+        // 실제 주행 상태 연동 전까지 개발 빌드에서만 주행과 시세 변동을 흉내 낸다.
+        if (BuildConfig.DEBUG && state.onboardingDone) {
             DevControls(
                 driving = state.showDriving,
                 onSetDriving = { viewModel.onIntent(AppIntent.DevSetDriving(it)) },
                 onNextArea = { viewModel.onIntent(AppIntent.DevMoveToNextArea) },
+                onPublishNewDeals = { viewModel.onIntent(AppIntent.DevPublishNewDeals) },
                 modifier = Modifier.align(Alignment.TopCenter),
             )
         }

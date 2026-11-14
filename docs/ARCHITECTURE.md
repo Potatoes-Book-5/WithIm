@@ -40,8 +40,9 @@ Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용�
 | 사용 가능 | Compose UI, Material3, `lifecycle-viewmodel`, `lifecycle-viewmodel-savedstate`, `lifecycle-runtime-ktx` | 그대로 사용 |
 | 사용 중 (T-014에서 추가) | `lifecycle-viewmodel-compose`, `lifecycle-runtime-compose` | 기존 `lifecycle` 버전 재사용. Compose UI가 1.7.8로 올라감 |
 | 사용 중 (T-014에서 직접 선언) | `kotlinx-coroutines-android`, 테스트용 `kotlinx-coroutines-test` | 1.7.3 고정 |
+| 사용 중 (T-016, [ADR-005](decisions/ADR-005-room-local-db.md)) | Room 2.6.1(`room-runtime`, `room-ktx`, `room-compiler`), KSP 2.0.0-1.0.24 | 스크랩 저장. 스키마는 `app/schemas/`에 내보내 커밋 |
 | 사용 시 활성화 | Pleos Vehicle, TextToSpeech, SpeechToText, FusedLocation | [sdk-usage-map.md](platform/sdk-usage-map.md) 먼저 갱신 |
-| ADR 필요 | 내비게이션, DI 프레임워크, HTTP, 로컬 DB, DataStore | 도입 전에 ADR 작성 |
+| ADR 필요 | 내비게이션, DI 프레임워크, HTTP, 그 밖의 로컬 DB, DataStore | 도입 전에 ADR 작성 |
 
 ## 계층과 의존 방향
 
@@ -75,7 +76,9 @@ com.potatoes.book5.realestate/
 ├── RealEstateApplication.kt     # AppContainer 보유
 ├── di/AppContainer.kt
 ├── ui/
-│   ├── AppRoot.kt, AppViewModel.kt  # 화면 전환, 주행 상태
+│   ├── AppRoot.kt, AppViewModel.kt  # 화면 스택, 주행 상태
+│   ├── AppViewModels.kt         # ViewModel 팩토리, 화면 인자(CreationExtras)
+│   ├── ScreenStores.kt          # 스택 항목별 ViewModelStore
 │   ├── theme/                   # 색상, 글꼴, wpx·wsp 단위
 │   ├── common/                  # 공통 컴포넌트, 형식, 아이콘
 │   ├── home/                    # SCR-001
@@ -88,15 +91,19 @@ com.potatoes.book5.realestate/
 │   ├── interest/                # SCR-003
 │   ├── driving/                 # SCR-004, SCR-009, SCR-005
 │   ├── dev/                     # 개발 빌드 전용 시뮬레이션 버튼
-│   └── (예정) detail/, scrap/, mypage/, summary/
+│   ├── scrap/                   # SCR-007
+│   ├── detail/                  # SCR-002
+│   └── (예정) mypage/, summary/
 ├── domain/
-│   ├── model/                   # Apartment, RankingSnapshot, InterestCondition, DrivingState
+│   ├── model/                   # Apartment, RankingSnapshot, InterestCondition, DrivingState, Scrap, ApartmentDetail
+│   ├── policy/                  # 스크랩 변동 판단 등 순수 규칙
 │   ├── error/                   # DomainError, Outcome
 │   ├── port/                    # 외부 의존 인터페이스
 │   └── usecase/                 # 대장 교체 감지 등 비즈니스 규칙 포함
 ├── data/
-│   ├── local/                   # SharedPreferences 저장소
-│   ├── sample/                  # 실거래가 API(T-005) 연결 전 샘플 순위·스크랩
+│   ├── local/                   # SharedPreferences 저장소, Room 스크랩 저장소
+│   │   └── db/                  # Room Entity, DAO, AppDatabase
+│   ├── sample/                  # 실거래가 API(T-005) 연결 전 샘플 순위·단지 상세·실거래
 │   └── (예정) remote/, mapper/
 └── vehicle/
     ├── simulation/              # 주행 규제 연동(DI-001) 전 개발용 주행 상태

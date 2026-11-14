@@ -32,6 +32,39 @@ task: T-009
 | 출력 | 스크랩 목록 | 단지, 스크랩 시각, 마지막 확인 값 |
 | 출력 | 변동 목록 | 단지, 변동 종류, 이전 값, 현재 값 |
 
+## 저장 데이터 설계
+
+Room 테이블 `scraps`에 단지당 한 행을 저장한다(ADR-005). 서버로 보내지 않는다.
+
+| 필드 | 타입 | 설명 |
+|---|---|---|
+| `apartment_id` | 문자열, 기본 키 | 단지 ID. 데이터 출처(T-005)가 정해지면 단지 코드 |
+| `name` | 문자열 | 단지명 |
+| `neighborhood` | 문자열 | 동 이름 |
+| `area_pyeong` | 정수 | 스크랩 당시 대표 거래 평형 |
+| `scrapped_at` | 시각(epoch ms) | 스크랩한 시각. 목록 정렬 기준 |
+| `baseline_price_manwon` | 정수 | 스크랩 당시 최근 실거래가(만원) |
+| `baseline_deal_date` | 날짜(epoch day) | 스크랩 당시 최근 거래일 |
+| `last_price_manwon` | 정수 | 마지막으로 확인한 최근 실거래가 |
+| `last_deal_date` | 날짜 | 마지막으로 확인한 최근 거래일 |
+| `last_checked_at` | 시각 | 마지막 변동 확인 시각 |
+| `change_kind` | 문자열, 선택 | `NEW_DEAL`, `PRICE_UP`, `PRICE_DOWN`, `RANK_CHANGE` |
+| `change_delta_manwon` | 정수, 선택 | 직전 확인 값 대비 가격 차이 |
+| `change_detected_at` | 시각, 선택 | 변동을 발견한 시각 |
+| `change_seen` | 불리언 | 사용자가 확인했는지(규칙 5) |
+
+### 변동 판단
+
+앱 실행 시(규칙 4) 스크랩마다 최신 실거래를 조회해 마지막 확인 값과 비교한다.
+
+1. 최근 거래일이 더 늦으면 `NEW_DEAL`, 가격 차이를 `change_delta_manwon`에 기록
+2. 거래일은 같고 가격만 다르면 `PRICE_UP` 또는 `PRICE_DOWN`
+3. 같으면 변동 없음. 기존 변동 표시는 유지
+4. 변동을 기록하면 마지막 확인 값을 최신 값으로 바꾸고 `change_seen`을 거짓으로 둔다.
+5. 사용자가 상세 화면을 열면 `change_seen`을 참으로 바꾼다.
+
+`RANK_CHANGE`는 순위 데이터(F-003) 연결 후 판단한다.
+
 ## 상태별 동작
 
 | 상태 | 동작 |

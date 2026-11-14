@@ -6,61 +6,85 @@ import com.potatoes.book5.realestate.domain.model.DrivingState
 import com.potatoes.book5.realestate.domain.model.OnboardingStep
 import com.potatoes.book5.realestate.domain.usecase.GetOnboardingStepUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveDrivingStateUseCase
+import com.potatoes.book5.realestate.domain.usecase.RefreshScrapChangesUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateAreaChangeUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateDrivingUseCase
+import com.potatoes.book5.realestate.domain.usecase.SimulateNewDealsUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** 앱 전체에서 보여 줄 화면. 내비게이션 라이브러리 도입 전까지 상태로 전환한다. */
-enum class Destination { LOADING, CONSENT, INTEREST, HOME }
+/** 앱 화면. 내비게이션 라이브러리 도입 전까지 화면 스택으로 전환한다. */
+sealed interface Screen {
+    data object Loading : Screen
+    data object Consent : Screen
+    data object Interest : Screen
+    data object Home : Screen
+    /** SCR-007. changedOnly면 '변동 있음' 필터로 연다. */
+    data class Scraps(val changedOnly: Boolean = false) : Screen
+    /** SCR-002 */
+    data class Detail(val apartmentId: String) : Screen
+}
 
 data class AppState(
-    val destination: Destination = Destination.LOADING,
-    /** 홈에서 관심 조건 화면을 열었으면 뒤로 가기로 홈에 돌아간다. */
-    val interestOpenedFromHome: Boolean = false,
+    val stack: List<Screen> = listOf(Screen.Loading),
     val drivingState: DrivingState = DrivingState.PARKED,
 ) {
-    /** 홈 단계에서 주행 중이면 주행 화면(SCR-004·009)을 보여 준다(S-005). */
-    val showDriving: Boolean get() = destination == Destination.HOME && drivingState == DrivingState.DRIVING
+    val current: Screen get() = stack.last()
+    val canGoBack: Boolean get() = stack.size > 1
+
+    /** 온보딩을 마쳤는지. 홈이 스택 맨 아래에 있으면 마친 것이다. */
+    val onboardingDone: Boolean get() = stack.first() == Screen.Home
+
+    /** 온보딩 이후 주행 중이면 어느 화면에 있었든 주행 화면을 보여 준다(S-005). 주차하면 원래 화면으로 돌아간다. */
+    val showDriving: Boolean get() = onboardingDone && drivingState == DrivingState.DRIVING
 }
 
 sealed interface AppIntent {
     data object ConsentFinishedWithLocation : AppIntent
     data object OnboardingFinished : AppIntent
-    data object OpenInterestFromHome : AppIntent
+    data class Open(val screen: Screen) : AppIntent
     data object Back : AppIntent
     /** 개발 빌드 전용 시뮬레이션 */
     data class DevSetDriving(val driving: Boolean) : AppIntent
     data object DevMoveToNextArea : AppIntent
+    data object DevPublishNewDeals : AppIntent
 }
 
 sealed interface AppResult {
     data class StartAt(val step: OnboardingStep) : AppResult
-    data class Show(val destination: Destination, val fromHome: Boolean = false) : AppResult
+    data class Reset(val stack: List<Screen>) : AppResult
+    data class Push(val screen: Screen) : AppResult
+    data object Pop : AppResult
     data class DrivingChanged(val state: DrivingState) : AppResult
 }
 
 internal fun reduceApp(state: AppState, result: AppResult): AppState = when (result) {
     is AppResult.StartAt -> state.copy(
-        destination = when (result.step) {
-            OnboardingStep.CONSENT -> Destination.CONSENT
-            OnboardingStep.INTEREST -> Destination.INTEREST
-            OnboardingStep.DONE -> Destination.HOME
-        },
-        interestOpenedFromHome = false,
+        stack = listOf(
+            when (result.step) {
+                OnboardingStep.CONSENT -> Screen.Consent
+                OnboardingStep.INTEREST -> Screen.Interest
+                OnboardingStep.DONE -> Screen.Home
+            }
+        ),
     )
-    is AppResult.Show -> state.copy(destination = result.destination, interestOpenedFromHome = result.fromHome)
+    is AppResult.Reset -> state.copy(stack = result.stack)
+    // 같은 화면을 연달아 쌓지 않는다.
+    is AppResult.Push -> if (state.current == result.screen) state else state.copy(stack = state.stack + result.screen)
+    AppResult.Pop -> if (state.canGoBack) state.copy(stack = state.stack.dropLast(1)) else state
     is AppResult.DrivingChanged -> state.copy(drivingState = result.state)
 }
 
 class AppViewModel(
     private val getOnboardingStep: GetOnboardingStepUseCase,
     private val observeDrivingState: ObserveDrivingStateUseCase,
+    private val refreshScrapChanges: RefreshScrapChangesUseCase,
     private val simulateDriving: SimulateDrivingUseCase,
     private val simulateAreaChange: SimulateAreaChangeUseCase,
+    private val simulateNewDeals: SimulateNewDealsUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AppState())
@@ -69,16 +93,19 @@ class AppViewModel(
     init {
         viewModelScope.launch { apply(AppResult.StartAt(getOnboardingStep())) }
         viewModelScope.launch { observeDrivingState().collect { apply(AppResult.DrivingChanged(it)) } }
+        // 앱을 실행할 때 스크랩 단지의 변동을 확인한다(F-008 규칙 4).
+        viewModelScope.launch { refreshScrapChanges() }
     }
 
     fun onIntent(intent: AppIntent) {
         when (intent) {
-            AppIntent.ConsentFinishedWithLocation -> apply(AppResult.Show(Destination.INTEREST))
-            AppIntent.OnboardingFinished -> apply(AppResult.Show(Destination.HOME))
-            AppIntent.OpenInterestFromHome -> apply(AppResult.Show(Destination.INTEREST, fromHome = true))
-            AppIntent.Back -> if (_state.value.interestOpenedFromHome) apply(AppResult.Show(Destination.HOME))
+            AppIntent.ConsentFinishedWithLocation -> apply(AppResult.Reset(listOf(Screen.Interest)))
+            AppIntent.OnboardingFinished -> apply(AppResult.Reset(listOf(Screen.Home)))
+            is AppIntent.Open -> apply(AppResult.Push(intent.screen))
+            AppIntent.Back -> apply(AppResult.Pop)
             is AppIntent.DevSetDriving -> simulateDriving(intent.driving)
             AppIntent.DevMoveToNextArea -> simulateAreaChange()
+            AppIntent.DevPublishNewDeals -> viewModelScope.launch { simulateNewDeals() }
         }
     }
 

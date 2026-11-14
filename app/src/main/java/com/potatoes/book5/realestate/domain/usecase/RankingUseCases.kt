@@ -4,11 +4,9 @@ import com.potatoes.book5.realestate.domain.model.Apartment
 import com.potatoes.book5.realestate.domain.model.DrivingState
 import com.potatoes.book5.realestate.domain.model.LeaderChange
 import com.potatoes.book5.realestate.domain.model.RankingSnapshot
-import com.potatoes.book5.realestate.domain.model.ScrapSummary
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
 import com.potatoes.book5.realestate.domain.port.DrivingStateProvider
 import com.potatoes.book5.realestate.domain.port.RankingRepository
-import com.potatoes.book5.realestate.domain.port.ScrapRepository
 import com.potatoes.book5.realestate.domain.port.VehicleSimulation
 import java.time.Duration
 import java.time.LocalDateTime
@@ -18,10 +16,6 @@ import kotlinx.coroutines.flow.flow
 
 class ObserveNearbyRankingUseCase(private val rankingRepository: RankingRepository) {
     operator fun invoke(): Flow<RankingSnapshot> = rankingRepository.observeNearbyRanking()
-}
-
-class GetScrapSummaryUseCase(private val scrapRepository: ScrapRepository) {
-    suspend operator fun invoke(): ScrapSummary = scrapRepository.summary()
 }
 
 class ObserveDrivingStateUseCase(private val provider: DrivingStateProvider) {
