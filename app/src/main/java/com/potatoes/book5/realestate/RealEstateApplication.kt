@@ -23,4 +23,7 @@ class RealEstateApplication : Application() {
         }
         container.fusedLocationBridge.start(appScope)
     }
+    fun launchGleoRequest(intent: android.content.Intent, receivedAtMillis: Long) = appScope.launch {
+        container.gleoIntentHandler?.handle(intent, receivedAtMillis)
+    }
 }

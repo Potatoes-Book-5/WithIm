@@ -42,3 +42,4 @@
 | T-036 | fix | 이동 중 조회 취소 감소와 실거래 메모리 캐시 재사용 개선 | review | - | P1 | F-002, F-003, SCR-009 | T-031 |
 | T-037 | feature | 지도 탭에 실거래 상위 5개 단지 표시 | review | - | P1 | F-003, SCR-009 | T-031 |
 | T-038 | feature | 시세 순위 조회 기간을 최근 3개월로 변경 | review | - | P1 | F-002, F-003, SCR-009 | T-037 |
+| T-039 | feature | Gleo adapter 모듈 통합 및 debug 음성 E2E | review | - | P1 | - | - |

@@ -149,4 +149,5 @@ class AppContainer(context: Context) {
             if (liveNeighborhoods != condition.neighborhoods) interestRepository.save(condition.copy(neighborhoods = liveNeighborhoods))
         }
     }
+    val gleoIntentHandler by lazy { GleoBindings.create(context) }
 }

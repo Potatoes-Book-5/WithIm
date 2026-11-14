@@ -267,6 +267,8 @@ class LiveMarketRepository(
     }
 
     /** Opt-in diagnostics contain only sequence numbers and counts, never locations or request URLs. */
+    // Both calls use the same literal; AGP 8.8 lint reports a false positive here.
+    @android.annotation.SuppressLint("LogTagMismatch")
     private fun traceLookup(message: String) {
         if (android.util.Log.isLoggable("LiveMarketRequest", android.util.Log.DEBUG)) {
             android.util.Log.d("LiveMarketRequest", message)

@@ -26,7 +26,7 @@ run bash harness/check-docs.sh
 run bash harness/check-registry.sh
 
 if [ "$mode" != "--docs" ]; then
-  run ./gradlew assembleDebug testDebugUnitTest lintDebug
+  run ./gradlew :core:domain:test assembleDebug testDebugUnitTest lintDebug
 fi
 
 if [ "$mode" = "--device" ]; then

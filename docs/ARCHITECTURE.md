@@ -91,7 +91,7 @@ flowchart TD
 
 ### 현재 실거래 데이터 흐름 (T-027)
 
-`app/vehicle/location/VehicleLocationInput`은 친구가 연결할 Pleos 위치 콜백의 입력 브리지다. `updateLocation(pose, accuracyMeters, observedAt, source)`로 받은 좌표를 `VehicleLocationProvider` 포트에 전달한다. 이 앱은 GPS 센서를 직접 읽거나 위치 권한을 요청하지 않는다. 브리지는 위치 동의, 정확도 100m 이하, 관측 시각 30초 이내를 확인한다. 개발 빌드의 경로 주입은 `EMULATOR_ROUTE` 출처로 구분한다. `app`이 `LiveMarketRepository.run`을 시작하고, 데이터 계층은 현재 위치 10km 경계 상자와 교차하는 시군구를 Vworld `LT_C_ADSIGG_INFO`에서 조회한 뒤 각 시군구의 최근 1개월 국토부 거래와 Vworld 주소 좌표를 조합한다. 실제 거래 좌표로 10km를 다시 거른다. 조회기간·시군구별 월별 원본은 메모리에서 재사용하며 Vworld 좌표를 DB에 저장하지 않는다. 유효 위치 갱신마다 현재 위치·지도 중심을 반영하고, 500m 이상 이동하거나 10km 포함 경계가 바뀌면 순위를 다시 평가한다.
+`app/vehicle/location/VehicleLocationInput`은 친구가 연결할 Pleos 위치 콜백의 입력 브리지다. `updateLocation(pose, accuracyMeters, observedAt, source)`로 받은 좌표를 `VehicleLocationProvider` 포트에 전달한다. 이 앱은 GPS 센서를 직접 읽거나 위치 권한을 요청하지 않는다. 브리지는 위치 동의, 정확도 100m 이하, 관측 시각 30초 이내를 확인한다. 개발 빌드의 경로 주입은 `EMULATOR_ROUTE` 출처로 구분한다. `app`이 `LiveMarketRepository.run`을 시작하고, 데이터 계층은 현재 위치가 속한 시군구를 Vworld `LT_C_ADSIGG_INFO`에서 조회한 뒤 각 시군구의 최근 달력 3개월 국토부 거래와 Vworld 주소 좌표를 조합한다. 실제 거래 좌표로 3km를 다시 거른다. 조회기간·시군구별 월별 원본은 메모리에서 재사용하며 Vworld 좌표를 DB에 저장하지 않는다. 유효 위치 갱신마다 현재 위치·지도 중심을 반영하고, 500m 이상 이동하거나 3km 포함 경계가 바뀌면 순위를 다시 평가한다.
 
 홈, `:feature:driving`의 지도·순위, 상세, 관심 동네, 스크랩, 주행 기록은 같은 실제 단지 ID와 거래 흐름을 사용한다. 국토부 응답에 없는 세대수 등은 `null`과 `정보 없음`으로 유지한다. 전달 위치에 진행 방향이 없으면 지도는 북쪽을 위로 표시하고 앞·뒤를 추정하지 않는다. 주행 상태는 AAOS 기어(`GEAR_SELECTION`)로 정하고, 수동 주행 상태 전환은 기어를 읽지 못할 때와 개발 빌드에서만 쓴다(T-034). 조회 범위는 전달 위치 주변의 시군구로 동적으로 정한다.
 
@@ -345,3 +345,7 @@ King-of-real-estate/
 ### T-031 지역 순위
 
 MarketRoundTracker(domain)는 공식 지역 코드가 연속 확인된 관측 시각으로 30초 전환을 판정한다. LiveMarketRepository(data)는 현재 구 안 3km의 실제 거래만 선정한다. 지도 축척은 feature/driving에서 독립적으로 근거리 배율(최소 줌 18.5)로 유지한다. 주행 기록은 Room v4의 지역 방문·최고가 기록을 사용하며 기존 기록을 보존한다. SDK 환경과 차량 위치 입력 포트는 변경하지 않는다.
+
+## Gleo 앱 호출
+
+`app/vehicle/gleo`는 wire decode → domain AppAction UseCase → callback을 담당한다. 모델·포트·UseCase는 core/domain, 합성 repository는 core/data/src/debug, DI는 app의 variant별 GleoBindings에 둔다. debug만 schema asset·외부 receiver를 제공한다. [계약](api/gleo-intent-adapter.md), [E2E](testing/gleo-tour/e2e.md).

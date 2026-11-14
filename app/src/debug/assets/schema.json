@@ -1,0 +1,78 @@
+{
+  "packageName": "com.potatoes.book5.realestate",
+  "appDescription": "A development-only synthetic real estate demo. All prices and briefing items are fictional; saving areas does not persist data.",
+  "version": "0.1.0",
+  "actionCalls": [
+    {
+      "type": "function",
+      "function": {
+        "name": "GET_AREA_PRICE_SUMMARY",
+        "description": "Returns fictional synthetic test prices only, never real market prices. Named real areas are unsupported.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "target": {
+              "type": "string",
+              "enum": [
+                "CURRENT_LOCATION",
+                "LAST_REFERENCED_AREA",
+                "NAMED_AREA"
+              ],
+              "description": "The source of the target area: the current vehicle location, an explicitly referenced earlier area, or a named area."
+            },
+            "areaQuery": {
+              "type": "string",
+              "description": "The name of the requested area when the target is NAMED_AREA."
+            }
+          },
+          "required": [
+            "target"
+          ]
+        },
+        "component": "service"
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "SAVE_INTEREST_AREA",
+        "description": "Simulates saving an area but does not persist anything. Always reports that no area was saved.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "target": {
+              "type": "string",
+              "enum": [
+                "CURRENT_LOCATION",
+                "LAST_REFERENCED_AREA",
+                "NAMED_AREA"
+              ],
+              "description": "The source of the target area: the current vehicle location, an explicitly referenced earlier area, or a named area."
+            },
+            "areaQuery": {
+              "type": "string",
+              "description": "The name of the requested area when the target is NAMED_AREA."
+            }
+          },
+          "required": [
+            "target"
+          ]
+        },
+        "component": "service"
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "GET_REAL_ESTATE_BRIEFING",
+        "description": "Returns three fictional test briefing items, never live news or housing announcements.",
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        },
+        "component": "service"
+      }
+    }
+  ]
+}

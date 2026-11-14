@@ -54,3 +54,7 @@ T-027은 SDK 위치 획득을 구현하지 않고 [차량 위치 입력](locatio
 - 수동 변속기 차량의 주행 완료 기준. P가 없어 지금은 기어로 판정하지 않고 대체 흐름(개발용 수동 전환)을 따른다
 - 차량 서비스 재연결 때 이벤트 순서
 - 주행 중(D)에는 플랫폼이 DO 미선언 앱을 `주행 중에는 사용할 수 없습니다` 화면으로 가린다. 앱은 DO를 선언했다(T-035)
+
+## Gleo debug 통합
+
+T-039: SDK 추가 없이 Android broadcast를 app/vehicle/gleo에 격리한다. debug assets/schema.json·GleoActionReceiver로 3개 합성 action을 받고 APP_ACTION_RESPONSE로 반환한다. release에는 외부 진입점이 없다. 설치 버전의 schema 승인·음성 동작은 [E2E](../testing/gleo-tour/e2e.md)에서 확인한다.

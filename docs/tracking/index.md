@@ -66,3 +66,12 @@
 | ADR-008 | decision | Gradle 모듈 경계와 의존 방향 | draft | `decisions/ADR-008-gradle-module-boundaries.md` | T-022 | - |
 | ADR-009 | decision | UI 모듈 경계(designsystem, ui, feature) | approved | `decisions/ADR-009-ui-module-boundaries.md` | T-024 | - |
 | SCR-011 | screen | 주차 후 관심 매물 모아보기 | draft | `design/screens/SCR-011-interest-catch-up.md` | T-026 | F-009, F-008, F-005, S-009 |
+| F-010 | feature | Gleo 음성 앱 제어 | draft | `product/features/F-010-gleo-app-control.md` | T-039 | - |
+| F-011 | feature | 관심 지역 저장 | draft | `product/features/F-011-interest-area-booking.md` | T-039 | - |
+| F-012 | feature | 아파트 내비게이션 | draft | `product/features/F-012-apartment-navigation.md` | T-039 | - |
+| F-013 | feature | 지역 데일리 브리핑 | draft | `product/features/F-013-area-daily-briefing.md` | T-039 | - |
+| F-014 | feature | 카메라 임장 스캔 | draft | `product/features/F-014-camera-site-scan.md` | T-039 | - |
+| S-011 | scenario | 대화형 부동산 임장 | draft | `product/scenarios/S-011-conversational-property-tour.md` | T-039 | - |
+| ADR-010 | decision | Gleo Intent adapter | draft | `decisions/ADR-010-gleo-intent-adapter.md` | T-039 | - |
+| SCR-012 | screen | 관심 지역 목록 | draft | `design/screens/SCR-012-interest-area-list.md` | T-039 | - |
+| SCR-013 | screen | 데일리 브리핑 | draft | `design/screens/SCR-013-daily-briefing.md` | T-039 | - |
