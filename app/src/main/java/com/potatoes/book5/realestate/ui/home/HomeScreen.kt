@@ -72,7 +72,7 @@ fun HomeScreen(state: HomeState, onIntent: (HomeIntent) -> Unit) {
                         RankRow(item, onClick = { onIntent(HomeIntent.OpenApartment(item.id)) }, modifier = Modifier.weight(200f))
                     }
                 }
-                // 불러오는 중에는 비워 둔다.
+                // 초기 로딩과 빈 결과는 기존 화면처럼 카드 영역을 비운다.
             }
             Column(
                 modifier = Modifier.weight(1f).fillMaxHeight(),
@@ -106,13 +106,29 @@ private fun AppBar(state: HomeState, onIntent: (HomeIntent) -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(text = stringResource(R.string.home_title), style = MaterialTheme.typography.headlineLarge)
             val asOf = state.dataAsOf
-            if (asOf != null) {
-                Text(
-                    text = stringResource(R.string.home_subtitle, state.neighborhoodName, state.radiusKm, formatDataAsOf(asOf)),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+            val start = state.periodStart
+            val end = state.periodEnd
+            val summary = if (asOf != null) {
+                stringResource(R.string.home_subtitle, state.neighborhoodName, state.radiusKm, formatDataAsOf(asOf))
+            } else when {
+                state.isLoading -> stringResource(R.string.home_loading)
+                state.error != null -> stringResource(R.string.home_error)
+                else -> stringResource(R.string.home_empty)
             }
+            val period = if (start != null && end != null) "${start.monthValue}.${start.dayOfMonth}~${end.monthValue}.${end.dayOfMonth}" else null
+            val status = when {
+                state.error != null && asOf != null -> stringResource(R.string.home_error_previous)
+                state.isLoading && asOf != null -> stringResource(R.string.home_loading_previous)
+                else -> null
+            }
+            val subtitle = listOfNotNull(summary, state.referenceLabel, period, status).joinToString(" · ")
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
         PillButton(
             text = stringResource(R.string.home_my_page),

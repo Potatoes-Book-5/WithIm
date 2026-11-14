@@ -37,8 +37,8 @@ object AppViewModels {
         initializer {
             val c = container()
             AppViewModel(
-                c.getOnboardingStep, c.observeDrivingState, c.refreshScrapChanges, c.simulateDriving, c.simulateAreaChange,
-                c.simulateNewDeals, c.observeUnseenDriveSummary, c.simulateDriveEnd, c.getSamsungReferenceTrades,
+                c.getOnboardingStep, c.observeDrivingState, c.refreshScrapChanges, c.simulateDriving,
+                c.observeUnseenDriveSummary, c.simulateDriveEnd, c.refreshMarket,
             )
         }
         initializer {
@@ -58,12 +58,13 @@ object AppViewModels {
         }
         initializer {
             val c = container()
-            HomeViewModel(c.observeNearbyRanking, c.observeScrapSummary, c.observeInterestCondition)
+            HomeViewModel(c.observeNearbyRanking, c.observeScrapSummary, c.observeInterestCondition,
+                onRefresh = { c.refreshMarket() })
         }
         initializer {
             val c = container()
             DrivingViewModel(
-                createSavedStateHandle(), c.observeNearbyRanking, c.observeLeaderChanges, c.getSamsungTradeRanking,
+                createSavedStateHandle(), c.observeNearbyRanking, c.observeLeaderChanges, c.refreshMarket,
                 c.observeInterestAlerts, c.toggleScrapById,
             )
         }

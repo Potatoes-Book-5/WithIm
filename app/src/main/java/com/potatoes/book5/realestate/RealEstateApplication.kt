@@ -15,6 +15,11 @@ class RealEstateApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        appScope.launch { container.driveSessionRecorder.run() }
+        appScope.launch {
+            container.prepareRealData()
+            launch { container.marketRepository.run() }
+            launch { container.refreshScrapChanges() }
+            container.driveSessionRecorder.run()
+        }
     }
 }

@@ -4,19 +4,15 @@ import android.content.Context
 import com.potatoes.book5.realestate.BuildConfig
 import com.potatoes.book5.realestate.data.remote.MolitRepositoryFactory
 import com.potatoes.book5.realestate.data.remote.VworldGeocoderFactory
+import com.potatoes.book5.realestate.data.remote.VworldDistrictResolverFactory
 import com.potatoes.book5.realestate.domain.usecase.GetApartmentTradesUseCase
-import com.potatoes.book5.realestate.domain.usecase.GetYeongtongTradeFeedUseCase
-import com.potatoes.book5.realestate.domain.usecase.GeocodeYeongtongTradeUseCase
-import com.potatoes.book5.realestate.domain.usecase.GetSamsungReferenceTradesUseCase
-import com.potatoes.book5.realestate.domain.usecase.GetSamsungTradeRankingUseCase
 import com.potatoes.book5.realestate.data.local.PreferenceConsentRepository
 import com.potatoes.book5.realestate.data.local.PreferenceInterestRepository
-import com.potatoes.book5.realestate.data.local.SampleNeighborhoodRepository
-import com.potatoes.book5.realestate.data.sample.SampleRankingRepository
+import com.potatoes.book5.realestate.data.repository.LiveMarketRepository
+import com.potatoes.book5.realestate.data.local.LegacySampleCleanup
 import com.potatoes.book5.realestate.data.local.RoomDriveRecordRepository
 import com.potatoes.book5.realestate.data.local.RoomScrapRepository
 import com.potatoes.book5.realestate.data.local.db.AppDatabase
-import com.potatoes.book5.realestate.data.sample.SampleApartmentRepository
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
 import com.potatoes.book5.realestate.domain.port.InterestRepository
 import com.potatoes.book5.realestate.domain.port.NeighborhoodRepository
@@ -43,7 +39,7 @@ import com.potatoes.book5.realestate.domain.usecase.ObserveMyPageUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveScrapSummaryUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveScrapsUseCase
 import com.potatoes.book5.realestate.domain.usecase.RefreshScrapChangesUseCase
-import com.potatoes.book5.realestate.domain.usecase.SimulateNewDealsUseCase
+import com.potatoes.book5.realestate.domain.usecase.RefreshMarketUseCase
 import com.potatoes.book5.realestate.domain.usecase.ToggleScrapUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveDrivingStateUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveInterestMatchAlertsUseCase
@@ -51,7 +47,6 @@ import com.potatoes.book5.realestate.domain.usecase.ObserveLeaderChangesUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveNearbyRankingUseCase
 import com.potatoes.book5.realestate.domain.usecase.SaveConsentUseCase
 import com.potatoes.book5.realestate.domain.usecase.SaveInterestConditionUseCase
-import com.potatoes.book5.realestate.domain.usecase.SimulateAreaChangeUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateDrivingUseCase
 import com.potatoes.book5.realestate.domain.usecase.SkipInterestConditionUseCase
 import com.potatoes.book5.realestate.vehicle.simulation.SimulatedDrivingStateProvider
@@ -66,32 +61,28 @@ class AppContainer(context: Context) {
     val getApartmentTrades: GetApartmentTradesUseCase by lazy {
         GetApartmentTradesUseCase(MolitRepositoryFactory.create(BuildConfig.MOLIT_API_KEY))
     }
-    val getYeongtongTradeFeed by lazy { GetYeongtongTradeFeedUseCase(MolitRepositoryFactory.create(BuildConfig.MOLIT_API_KEY)) }
-    val geocodeYeongtongTrade by lazy {
-        GeocodeYeongtongTradeUseCase(VworldGeocoderFactory.create(BuildConfig.VWORLD_API_KEY))
-    }
-    val getSamsungReferenceTrades by lazy {
-        GetSamsungReferenceTradesUseCase(getYeongtongTradeFeed, geocodeYeongtongTrade)
-    }
-    val getSamsungTradeRanking by lazy {
-        GetSamsungTradeRankingUseCase(getYeongtongTradeFeed, geocodeYeongtongTrade)
-    }
     private val prefs = context.getSharedPreferences("im_with_you", Context.MODE_PRIVATE)
 
     private val consentRepository: ConsentRepository = PreferenceConsentRepository(prefs, Dispatchers.IO)
-    val vehicleLocationProvider by lazy { VehicleLocationInput(consentRepository) }
+    val consentChanges get() = consentRepository.observe()
     private val interestRepository: InterestRepository = PreferenceInterestRepository(prefs, Dispatchers.IO)
-    private val neighborhoodRepository: NeighborhoodRepository = SampleNeighborhoodRepository()
-    private val rankingRepository = SampleRankingRepository()
+    val vehicleLocationProvider by lazy { VehicleLocationInput(consentRepository) }
+    val marketRepository by lazy {
+        LiveMarketRepository(MolitRepositoryFactory.create(BuildConfig.MOLIT_API_KEY),
+            VworldGeocoderFactory.create(BuildConfig.VWORLD_API_KEY), interestRepository, vehicleLocationProvider,
+            VworldDistrictResolverFactory.create(BuildConfig.VWORLD_API_KEY))
+    }
+    private val neighborhoodRepository get() = marketRepository
+    private val rankingRepository get() = marketRepository
     private val database = AppDatabase.create(context)
     private val scrapRepository: ScrapRepository = RoomScrapRepository(database.scrapDao())
-    private val apartmentRepository = SampleApartmentRepository()
+    private val apartmentRepository get() = marketRepository
     private val driveRecordRepository = RoomDriveRecordRepository(database)
     private val drivingStateProvider = SimulatedDrivingStateProvider()
 
     private val vehicleSimulation = object : VehicleSimulation {
         override fun setDriving(driving: Boolean) = drivingStateProvider.setDriving(driving)
-        override fun moveToNextArea() = rankingRepository.moveToNextArea()
+        override fun moveToNextArea() = Unit
     }
 
     val getOnboardingStep = GetOnboardingStepUseCase(consentRepository, interestRepository)
@@ -107,7 +98,7 @@ class AppContainer(context: Context) {
     val observeInterestAlerts = ObserveInterestMatchAlertsUseCase(rankingRepository, consentRepository, scrapRepository)
 
     val simulateDriving = SimulateDrivingUseCase(vehicleSimulation)
-    val simulateAreaChange = SimulateAreaChangeUseCase(vehicleSimulation)
+    val refreshMarket = RefreshMarketUseCase(marketRepository)
 
     val observeScraps = ObserveScrapsUseCase(scrapRepository)
     val observeScrapSummary = ObserveScrapSummaryUseCase(scrapRepository)
@@ -117,7 +108,6 @@ class AppContainer(context: Context) {
     val toggleScrap = ToggleScrapUseCase(scrapRepository)
     val markScrapChangeSeen = MarkScrapChangeSeenUseCase(scrapRepository)
     val refreshScrapChanges = RefreshScrapChangesUseCase(scrapRepository, apartmentRepository)
-    val simulateNewDeals = SimulateNewDealsUseCase(apartmentRepository, refreshScrapChanges)
 
     val observeInterestCondition = ObserveInterestConditionUseCase(interestRepository)
     val observeMyPage = ObserveMyPageUseCase(interestRepository, scrapRepository)
@@ -133,4 +123,12 @@ class AppContainer(context: Context) {
 
     val getConsent = GetConsentUseCase(consentRepository)
     val deleteUserData = DeleteUserDataUseCase(interestRepository, scrapRepository, driveRecordRepository)
+
+    suspend fun prepareRealData() {
+        LegacySampleCleanup(database)()
+        interestRepository.get()?.let { condition ->
+            val liveNeighborhoods = condition.neighborhoods.filterNot { it.code.startsWith("sample-") }.toSet()
+            if (liveNeighborhoods != condition.neighborhoods) interestRepository.save(condition.copy(neighborhoods = liveNeighborhoods))
+        }
+    }
 }

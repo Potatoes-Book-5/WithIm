@@ -32,6 +32,7 @@ class ObserveInterestMatchAlertsUseCase(
 
     operator fun invoke(): Flow<InterestMatchAlert> = flow {
         rankingRepository.observeNearbyRanking().collect { snapshot ->
+            if (snapshot.loading || snapshot.error != null) return@collect
             val near = snapshot.interestMatches.filter { it.distanceKm <= alertDistanceKm }
             if (near.isEmpty()) return@collect
             if (consentRepository.get()?.interestAlertEnabled != true) return@collect

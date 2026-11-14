@@ -1,35 +1,30 @@
 package com.potatoes.book5.realestate.ui.driving
 
 import androidx.lifecycle.SavedStateHandle
+import com.potatoes.book5.realestate.domain.error.DomainError
 import com.potatoes.book5.realestate.domain.error.Outcome
-import com.potatoes.book5.realestate.domain.model.AddressKind
 import com.potatoes.book5.realestate.domain.model.Apartment
 import com.potatoes.book5.realestate.domain.model.ApartmentDetail
 import com.potatoes.book5.realestate.domain.model.ConsentSettings
 import com.potatoes.book5.realestate.domain.model.Deal
-import com.potatoes.book5.realestate.domain.model.GeoCoordinates
 import com.potatoes.book5.realestate.domain.model.NearbyApartment
+import com.potatoes.book5.realestate.domain.model.Neighborhood
 import com.potatoes.book5.realestate.domain.model.RankingSnapshot
 import com.potatoes.book5.realestate.domain.model.Scrap
-import com.potatoes.book5.realestate.domain.model.TradePage
-import com.potatoes.book5.realestate.domain.port.AddressGeocoder
 import com.potatoes.book5.realestate.domain.port.ApartmentRepository
-import com.potatoes.book5.realestate.domain.port.ApartmentTradeRepository
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
+import com.potatoes.book5.realestate.domain.port.MarketRepository
 import com.potatoes.book5.realestate.domain.port.RankingRepository
-import com.potatoes.book5.realestate.domain.port.ScrapRepository
-import com.potatoes.book5.realestate.domain.usecase.GeocodeYeongtongTradeUseCase
-import com.potatoes.book5.realestate.domain.usecase.GetSamsungTradeRankingUseCase
-import com.potatoes.book5.realestate.domain.usecase.GetYeongtongTradeFeedUseCase
-import com.potatoes.book5.realestate.domain.usecase.ObserveInterestMatchAlertsUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveLeaderChangesUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveNearbyRankingUseCase
+import com.potatoes.book5.realestate.domain.usecase.RefreshMarketUseCase
+import com.potatoes.book5.realestate.domain.port.ScrapRepository
+import com.potatoes.book5.realestate.domain.usecase.ObserveInterestMatchAlertsUseCase
 import com.potatoes.book5.realestate.domain.usecase.ToggleScrapByIdUseCase
 import com.potatoes.book5.realestate.domain.usecase.ToggleScrapUseCase
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -54,20 +49,16 @@ import org.junit.Test
 @OptIn(ExperimentalCoroutinesApi::class)
 class DrivingViewModelTest {
 
-    private fun emptyTradeRanking() = GetSamsungTradeRankingUseCase(
-        GetYeongtongTradeFeedUseCase(object : ApartmentTradeRepository {
-            override suspend fun getTrades(
-                districtCode: String,
-                contractMonth: YearMonth,
-                pageNumber: Int,
-                pageSize: Int,
-            ): Outcome<TradePage> = Outcome.Success(TradePage(emptyList(), pageNumber, pageSize, 0))
-        }),
-        GeocodeYeongtongTradeUseCase(object : AddressGeocoder {
-            override suspend fun geocode(address: String, kind: AddressKind): Outcome<GeoCoordinates> =
-                error("Empty trade feed must not request coordinates")
-        }),
-    )
+    private fun emptyMarketRefresh() = RefreshMarketUseCase(object : MarketRepository {
+        override fun observeNearbyRanking(): Flow<RankingSnapshot> = MutableStateFlow(snapshotOf())
+        override suspend fun detail(apartmentId: String): Outcome<ApartmentDetail> =
+            Outcome.Failure(DomainError.Invalid("unknown-apartment"))
+        override suspend fun latestDeal(apartmentId: String): Outcome<Deal> =
+            Outcome.Failure(DomainError.Invalid("unknown-apartment"))
+        override suspend fun suggestions(): Outcome<List<Neighborhood>> = Outcome.Success(emptyList())
+        override suspend fun refresh(): Outcome<Unit> = Outcome.Success(Unit)
+        override suspend fun run() = Unit
+    })
 
     private val dispatcher = StandardTestDispatcher()
 
@@ -116,7 +107,7 @@ class DrivingViewModelTest {
             handle,
             ObserveNearbyRankingUseCase(ranking),
             ObserveLeaderChangesUseCase(ranking, consent, Duration.ZERO),
-            emptyTradeRanking(),
+            emptyMarketRefresh(),
             ObserveInterestMatchAlertsUseCase(ranking, consent, scraps),
             ToggleScrapByIdUseCase(apartments, ToggleScrapUseCase(scraps)),
         )
