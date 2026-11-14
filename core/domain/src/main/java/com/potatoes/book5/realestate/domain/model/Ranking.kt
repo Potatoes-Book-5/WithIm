@@ -49,8 +49,10 @@ data class RankingSnapshot(
     val others: List<NearbyApartment>,
     /** 실거래 데이터 기준 시각 */
     val dataAsOf: LocalDateTime,
-    /** 스냅샷 기준 차량 위치. 위치를 모르면 null이고 지도는 간이 지도로 대체한다(SCR-009). */
+    /** 확인된 차량 위치. 임시 조회 기준에서는 null이며 차량 마커와 근접 알림에 쓰지 않는다. */
     val vehicle: VehiclePose? = null,
+    /** 지도와 거리 계산의 기준점. 임시 기준일 때도 차량 위치와 구분해 전달한다. */
+    val mapCenter: VehiclePose? = null,
     val loading: Boolean = false,
     val error: DomainError? = null,
     val periodStart: LocalDate? = null,

@@ -55,8 +55,10 @@ data class DrivingScreenState(
     val ranking: List<RankItemUi> = emptyList(),
     val interestMatches: List<MapPointUi> = emptyList(),
     val others: List<MapPointUi> = emptyList(),
-    /** 지도 중심이 되는 차량 위치. null이면 간이 지도로 그린다. */
+    /** 확인된 차량 위치. 임시 조회 기준에서는 null이다. */
     val vehicle: VehiclePose? = null,
+    /** 지도 중심. 차량 위치가 없어도 삼성전자 임시 기준을 전달한다. */
+    val mapCenter: VehiclePose? = null,
     val alert: DrivingAlertUi? = null,
     val actualTrades: DrivingTradeRankingUi? = null,
     val referenceLabel: String? = null,
@@ -78,6 +80,7 @@ sealed interface DrivingResult {
         val interestMatches: List<MapPointUi>,
         val others: List<MapPointUi>,
         val vehicle: VehiclePose? = null,
+        val mapCenter: VehiclePose? = null,
         val referenceLabel: String? = null,
     ) : DrivingResult
     data class ModeSelected(val mode: DrivingMode) : DrivingResult
