@@ -43,7 +43,8 @@ Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용�
 | 사용 중 (T-016, [ADR-005](decisions/ADR-005-room-local-db.md)) | Room 2.6.1(`room-runtime`, `room-ktx`, `room-compiler`, 테스트용 `room-testing`), KSP 2.0.0-1.0.24 | 스크랩 저장. 스키마는 `core/data/schemas/`에 내보내 커밋하고, 버전을 올리면 마이그레이션 기기 테스트를 추가 |
 | 사용 중 (T-013, [ADR-004](decisions/ADR-004-map-sdk.md)) | 네이버 지도 SDK 3.24.1(`com.naver.maps:map-sdk`) | 주행 지도 모드. `:feature:driving`에서만 쓰고 `AndroidView`로 감싼다. 키는 `local.properties`의 `naver.map.clientId` |
 | 사용 중 (T-029) | Pleos FusedLocation 1.1.3(`ai.pleos.playground:FusedLocation`) | 차량 위치. `:app`의 `vehicle/location/PleosFusedLocationBridge`에서만 호출하고 `VehicleLocationInput`(`VehicleLocationProvider` 포트)에 넣는다([location-input.md](platform/location-input.md)) |
-| 사용 시 활성화 | Pleos Vehicle, TextToSpeech, SpeechToText | [sdk-usage-map.md](platform/sdk-usage-map.md) 먼저 갱신 |
+| 사용 중 (T-035, T-034) | 플랫폼 선택 라이브러리 `android.car`(`useLibrary`, 매니페스트 `uses-library required=false`) | `CarUxRestrictionsManager`, `CarPropertyManager` `GEAR_SELECTION`. compileSdk·minSdk·targetSdk는 그대로 |
+| 사용 시 활성화 | TextToSpeech, SpeechToText | [sdk-usage-map.md](platform/sdk-usage-map.md) 먼저 갱신 |
 | ADR 필요 | 내비게이션, DI 프레임워크, 그 밖의 로컬 DB, DataStore | 도입 전에 ADR 작성. HTTP는 [ADR-006](decisions/ADR-006-molit-retrofit.md)에서 결정 |
 
 ## 계층과 의존 방향
@@ -52,7 +53,7 @@ Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용�
 flowchart LR
     UI[ui<br/>Compose + MVI] --> Domain[domain<br/>UseCase, Model, Policy, Port]
     Data[data<br/>Repository 구현] --> Domain
-    Vehicle[vehicle<br/>VehicleLocationInput, 향후 Pleos 어댑터] --> Domain
+    Vehicle[vehicle<br/>VehicleLocationInput, CarGearSource, Pleos·AAOS 어댑터] --> Domain
     DI[di<br/>AppContainer] --> UI
     DI --> Data
     DI --> Vehicle
@@ -92,7 +93,7 @@ flowchart TD
 
 `app/vehicle/location/VehicleLocationInput`은 친구가 연결할 Pleos 위치 콜백의 입력 브리지다. `updateLocation(pose, accuracyMeters, observedAt, source)`로 받은 좌표를 `VehicleLocationProvider` 포트에 전달한다. 이 앱은 GPS 센서를 직접 읽거나 위치 권한을 요청하지 않는다. 브리지는 위치 동의, 정확도 100m 이하, 관측 시각 30초 이내를 확인한다. 개발 빌드의 경로 주입은 `EMULATOR_ROUTE` 출처로 구분한다. `app`이 `LiveMarketRepository.run`을 시작하고, 데이터 계층은 현재 위치 10km 경계 상자와 교차하는 시군구를 Vworld `LT_C_ADSIGG_INFO`에서 조회한 뒤 각 시군구의 최근 1개월 국토부 거래와 Vworld 주소 좌표를 조합한다. 실제 거래 좌표로 10km를 다시 거른다. 조회기간·시군구별 월별 원본은 메모리에서 재사용하며 Vworld 좌표를 DB에 저장하지 않는다. 유효 위치 갱신마다 현재 위치·지도 중심을 반영하고, 500m 이상 이동하거나 10km 포함 경계가 바뀌면 순위를 다시 평가한다.
 
-홈, `:feature:driving`의 지도·순위, 상세, 관심 동네, 스크랩, 주행 기록은 같은 실제 단지 ID와 거래 흐름을 사용한다. 국토부 응답에 없는 세대수 등은 `null`과 `정보 없음`으로 유지한다. 전달 위치에 진행 방향이 없으면 지도는 북쪽을 위로 표시하고 앞·뒤를 추정하지 않는다. Pleos 차량 위치 SDK 콜백은 아직 연결되지 않았으며, 수동 주행 상태 전환은 개발용이다. 조회 범위는 전달 위치 주변의 시군구로 동적으로 정한다.
+홈, `:feature:driving`의 지도·순위, 상세, 관심 동네, 스크랩, 주행 기록은 같은 실제 단지 ID와 거래 흐름을 사용한다. 국토부 응답에 없는 세대수 등은 `null`과 `정보 없음`으로 유지한다. 전달 위치에 진행 방향이 없으면 지도는 북쪽을 위로 표시하고 앞·뒤를 추정하지 않는다. 주행 상태는 AAOS 기어(`GEAR_SELECTION`)로 정하고, 수동 주행 상태 전환은 기어를 읽지 못할 때와 개발 빌드에서만 쓴다(T-034). 조회 범위는 전달 위치 주변의 시군구로 동적으로 정한다.
 
 ## 모듈과 패키지 구조
 
@@ -145,7 +146,8 @@ sealed interface Outcome<out T> {
 - SDK 타입은 이 패키지 밖으로 노출하지 않습니다.
 - 호출 전에 지원 여부를 확인하고, 미지원이면 `DomainError.Unsupported`를 반환합니다(CP-001, CP-004).
 - 차량 모델명으로 분기하지 않습니다(CP-006).
-- 주행 규제 상태는 `CarUxRestrictionsManager`에서 받아 `DrivingState`로 변환합니다(DI-001).
+- 주행 중·주행 완료(`DrivingState`)는 AAOS `CarPropertyManager`의 `GEAR_SELECTION`으로 정합니다(API-002. Pleos Vehicle SDK `Gear`는 deprecated). `vehicle/gear/CarGearSource`가 `GearStateSource` 포트로 기어를 넘기고, domain `GearDrivingStateProvider`가 P는 주차, 그 밖의 기어는 주행 중으로 바꿉니다. 기어를 읽지 못하면 개발용 수동 전환을 따릅니다(T-034).
+- 앱은 `MainActivity`에 DO를 선언합니다. `vehicle/restriction/CarUxRestrictionSource`가 `CarUxRestrictionsManager` 규제 상태를 `UxRestrictionSource` 포트로 넘기고, `AppState`는 기어 주행 중이거나 규제 중이면 주행 화면만, 온보딩 전이면 주차 안내만 보여 줍니다(DI-001, DI-002, T-035).
 - 오디오 포커스 획득과 상실 처리는 `AlertSpeaker` 구현 안에 둡니다(AF-001).
 
 ## MVI

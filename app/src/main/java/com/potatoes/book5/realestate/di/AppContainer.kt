@@ -53,11 +53,17 @@ import com.potatoes.book5.realestate.domain.usecase.SkipInterestConditionUseCase
 import com.potatoes.book5.realestate.vehicle.location.PleosFusedLocationBridge
 import com.potatoes.book5.realestate.vehicle.simulation.SimulatedDrivingStateProvider
 import com.potatoes.book5.realestate.vehicle.location.VehicleLocationInput
+import com.potatoes.book5.realestate.domain.usecase.GearDrivingStateProvider
+import com.potatoes.book5.realestate.vehicle.gear.CarGearSource
+import com.potatoes.book5.realestate.vehicle.restriction.CarUxRestrictionSource
+import com.potatoes.book5.realestate.domain.usecase.ObserveUxRestrictedUseCase
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 /**
  * 구현체를 수동으로 조립한다(docs/ARCHITECTURE.md 의존성 주입).
- * 실거래가 API, 지도 SDK, 주행 규제가 연결되면 아래 샘플·시뮬레이션 구현만 교체한다.
+ * 주행 상태는 AAOS 기어(GEAR_SELECTION)로 정하고, 기어를 읽지 못하면 개발용 수동 전환을 따른다(T-034).
  */
 class AppContainer(context: Context) {
     val getApartmentTrades: GetApartmentTradesUseCase by lazy {
@@ -83,10 +89,15 @@ class AppContainer(context: Context) {
     private val scrapRepository: ScrapRepository = RoomScrapRepository(database.scrapDao())
     private val apartmentRepository get() = marketRepository
     private val driveRecordRepository = RoomDriveRecordRepository(database)
-    private val drivingStateProvider = SimulatedDrivingStateProvider()
+    /** 개발 빌드의 수동 전환. 기어를 읽지 못하는 환경의 대체 흐름이기도 하다(T-034). */
+    private val simulatedDrivingState = SimulatedDrivingStateProvider()
+    /** 컨테이너는 프로세스 동안 산다. 기어 연결을 주행 기록과 화면이 함께 쓰게 공유하는 범위다. */
+    private val vehicleScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    /** 기어(AAOS GEAR_SELECTION) P면 주행 완료, 그 밖의 기어면 주행 중(T-034). */
+    private val drivingStateProvider = GearDrivingStateProvider(CarGearSource(context), simulatedDrivingState, vehicleScope)
 
     private val vehicleSimulation = object : VehicleSimulation {
-        override fun setDriving(driving: Boolean) = drivingStateProvider.setDriving(driving)
+        override fun setDriving(driving: Boolean) = simulatedDrivingState.setDriving(driving)
         override fun moveToNextArea() = Unit
     }
 
@@ -99,6 +110,8 @@ class AppContainer(context: Context) {
 
     val observeNearbyRanking = ObserveNearbyRankingUseCase(rankingRepository)
     val observeDrivingState = ObserveDrivingStateUseCase(drivingStateProvider)
+    /** 플랫폼 주행 규제(T-035). 규제 중에는 DO 화면만 보여 준다. */
+    val observeUxRestricted = ObserveUxRestrictedUseCase(CarUxRestrictionSource(context))
     val observeLeaderChanges = ObserveLeaderChangesUseCase(rankingRepository, consentRepository)
     val observeInterestAlerts = ObserveInterestMatchAlertsUseCase(rankingRepository, consentRepository, scrapRepository)
 

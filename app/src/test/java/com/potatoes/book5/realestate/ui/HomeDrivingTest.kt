@@ -54,6 +54,28 @@ class HomeDrivingTest {
     }
 
     @Test
+    fun `플랫폼 주행 규제가 켜지면 기어와 관계없이 주행 화면만 보여 준다`() {
+        val home = AppState(stack = listOf(Screen.Home, Screen.MyPage))
+        val restricted = reduceApp(home, AppResult.UxRestrictionChanged(true))
+        assertEquals(true, restricted.showDriving)
+        assertEquals(false, reduceApp(restricted, AppResult.UxRestrictionChanged(false)).showDriving)
+    }
+
+    @Test
+    fun `온보딩 중 주행이 시작되면 동의·조건 화면 대신 주차 안내를 보여 준다`() {
+        val consent = AppState(stack = listOf(Screen.Consent))
+        assertEquals(false, consent.showParkFirst)
+        val driving = reduceApp(consent, AppResult.DrivingChanged(DrivingState.DRIVING))
+        assertEquals(true, driving.showParkFirst)
+        assertEquals(false, driving.showDriving)
+        assertEquals(true, reduceApp(consent, AppResult.UxRestrictionChanged(true)).showParkFirst)
+        // 온보딩 단계를 읽기 전에는 로딩 화면을 그대로 둔다.
+        assertEquals(false, AppState(drivingState = DrivingState.DRIVING).showParkFirst)
+        // 주차하면 온보딩 화면으로 돌아간다.
+        assertEquals(false, reduceApp(driving, AppResult.DrivingChanged(DrivingState.PARKED)).showParkFirst)
+    }
+
+    @Test
     fun `홈은 순위와 스크랩 요약을 불러오고 준비 중인 화면은 안내한다`() = runTest(dispatcher) {
         val ranking = FakeRankingRepository(snapshotOf("a", "b", "c"))
         val vm = HomeViewModel(

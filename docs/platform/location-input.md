@@ -49,7 +49,13 @@ adb shell am broadcast -a com.potatoes.book5.realestate.DEBUG_LOCATION -n com.po
 
 - SDK `heading`과 `confidence`는 단위·기준이 공식 문서에 없어 넘기지 않는다. 그래서 `accuracyMeters`는 미제공(null)을 받도록 바꿨고, null이면 100m 정확도 기준을 적용하지 않는다. `LiveMarketRepository`의 사용 가능 위치 판정도 같은 규칙으로 맞췄다. 단위가 확인되면 실제 값을 넘긴다.
 
+### 에뮬레이터에서 FusedLocation 위치 바꾸기(T-035 확인)
 
+Pleos 이미지 에뮬레이터(connect v2.1.0)의 FusedLocation 서비스는 에뮬레이터 GPS 위치를 전달한다. 기본 위치는 미국 팰로앨토 부근이라 국내 실거래가 없다. 아래처럼 바꾸면 개발용 브로드캐스트 없이 `VEHICLE` 출처로 들어온다. 경도, 위도 순서다. 좌표는 검토 경로의 삼성전자 수원 본사 부근이다.
+
+```bash
+adb emu geo fix 127.0547 37.2585
+```
 
 ## 개발 빌드의 현재 단지 접근 재현 (T-031)
 

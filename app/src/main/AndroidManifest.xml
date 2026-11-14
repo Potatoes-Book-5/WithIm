@@ -9,6 +9,8 @@
     -->
     <!-- FusedLocation 위치 수신(F-001, T-029). protection level dangerous라 SCR-006 동의 저장 후 런타임에 요청한다. -->
     <uses-permission android:name="pleos.car.permission.FUSED_LOCATION" />
+    <!-- 기어 상태(AAOS GEAR_SELECTION, T-034). normal 보호 수준이라 런타임 요청이 없다. -->
+    <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
 
     <application
         android:name=".RealEstateApplication"
@@ -18,6 +20,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.KingOfRealEstate">
+        <!-- CarUxRestrictionsManager(T-035). 차량이 아닌 기기에서도 설치되도록 선택 라이브러리로 둔다. -->
+        <uses-library
+            android:name="android.car"
+            android:required="false" />
         <!-- 네이버 지도 Client ID(ADR-004). 값은 local.properties에서 빌드 때 채운다. -->
         <meta-data
             android:name="com.naver.maps.map.NCP_KEY_ID"
@@ -25,6 +31,13 @@
         <activity
             android:name=".MainActivity"
             android:exported="true">
+            <!--
+                주행 중에도 순위·지도 주행 화면(SCR-004, SCR-009)을 보여 주려고 DO를 선언한다(T-035, DR-001, 사용자 결정).
+                화면이 한 액티비티라 앱이 규제 상태를 받아 주행 화면 외 기능을 직접 막는다(DI-002, AppState.showDriving·showParkFirst).
+            -->
+            <meta-data
+                android:name="distractionOptimized"
+                android:value="true" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

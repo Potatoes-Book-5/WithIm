@@ -29,7 +29,7 @@ fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)
     val onBack = { viewModel.onIntent(AppIntent.Back) }
     val open: (Screen) -> Unit = { viewModel.onIntent(AppIntent.Open(it)) }
     // 주행 중에는 화면 이동을 막고, 주차 중에만 스택을 되돌린다.
-    BackHandler(enabled = state.canGoBack && !state.showDriving, onBack = onBack)
+    BackHandler(enabled = state.canGoBack && !state.showDriving && !state.showParkFirst, onBack = onBack)
     val stores = rememberScreenStores(state.stack)
     val currentKey = screenKey(state.stack.lastIndex, state.current)
     Box(Modifier.fillMaxSize()) {
@@ -38,6 +38,9 @@ fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)
                 viewModel = androidx.lifecycle.viewmodel.compose.viewModel<com.potatoes.book5.realestate.ui.driving.DrivingViewModel>(factory = AppViewModels.Factory),
                 naverMapAvailable = BuildConfig.NAVER_MAP_CLIENT_ID.isNotBlank(),
             )
+        } else if (state.showParkFirst) {
+            // DO 선언 앱이라 주행 중 동의·조건 입력 화면은 앱이 직접 막는다(T-035).
+            ParkFirstScreen()
         } else {
             when (val screen = state.current) {
                 Screen.Loading -> Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background))

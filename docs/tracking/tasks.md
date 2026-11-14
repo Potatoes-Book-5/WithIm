@@ -37,3 +37,5 @@
 | T-031 | feature | 현재 구 3km 순위와 근거리 지도 및 지역 대장 기록 | review | - | P1 | F-002, F-003, F-009, SCR-009 | T-027, T-030 |
 | T-032 | feature | PR 23 최신 버전 에뮬레이터 설치와 실행 확인 | done | - | P1 | - | - |
 | T-033 | feature | 공동주택 API로 아파트 상세 세대수 연결 | review | - | P1 | SCR-002, F-008 | T-027 |
+| T-034 | feature | 차량 기어 상태로 주행 중과 주행 완료(P) 판정 | review | - | P1 | F-009, S-005, S-009, SCR-008 | - |
+| T-035 | feature | 주행 화면 DO 선언과 CarUxRestrictions 적용 | review | - | P1 | F-007, S-005, SCR-004, SCR-009 | T-034 |

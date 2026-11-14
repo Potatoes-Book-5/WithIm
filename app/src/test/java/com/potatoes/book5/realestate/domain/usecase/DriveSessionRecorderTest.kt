@@ -71,6 +71,24 @@ class DriveSessionRecorderTest {
     }
 
     @Test
+    fun `기본 설정에서는 기어 P가 되는 즉시 주차 시각으로 닫는다`() = runTest {
+        val job = launch {
+            DriveSessionRecorder(
+                provider, ranking, repo,
+                now = { LocalDateTime.of(2026, 11, 14, 10, 0).plusSeconds(testScheduler.currentTime / 1000) },
+            ).run()
+        }
+        runCurrent()
+        driving.value = DrivingState.DRIVING
+        runCurrent()
+        advanceTimeBy(5.minutes.inWholeMilliseconds)
+        driving.value = DrivingState.PARKED
+        runCurrent()
+        assertEquals(LocalDateTime.of(2026, 11, 14, 10, 5), session().endedAt)
+        job.cancel()
+    }
+
+    @Test
     fun `주차 후 3분 안에 다시 달리면 같은 세션을 이어 간다`() = runTest {
         val job = launch { recorder().run() }
         driving.value = DrivingState.DRIVING
