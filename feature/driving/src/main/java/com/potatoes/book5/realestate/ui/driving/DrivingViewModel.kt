@@ -29,7 +29,6 @@ class DrivingViewModel(
     private val getTradeRanking: GetSamsungTradeRankingUseCase,
     private val observeInterestAlerts: ObserveInterestMatchAlertsUseCase,
     private val toggleScrapById: ToggleScrapByIdUseCase,
-    private val alertDurationMillis: Long = ALERT_DURATION_MILLIS,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -108,11 +107,11 @@ class DrivingViewModel(
         }
     }
 
-    /** 화면 알림은 자동으로 닫는다(F-006 규칙 3, 제안값 8초). TTS 연동은 이후 작업이다. */
+    /** 화면 알림은 자동으로 닫는다(F-006 규칙 3). TTS 연동은 이후 작업이다. */
     private fun show(alert: DrivingAlertUi) {
         apply(DrivingResult.AlertShown(alert))
         viewModelScope.launch {
-            delay(alertDurationMillis)
+            delay(durationOf(alert))
             apply(DrivingResult.AlertExpired(alert.key))
         }
     }
@@ -150,7 +149,15 @@ class DrivingViewModel(
     }
 
     companion object {
-        const val ALERT_DURATION_MILLIS = 8_000L
+        /** 대장 교체 알림 표시 시간(F-006 규칙 3, 2026-11-14 사용자 결정 10초) */
+        const val LEADER_ALERT_DURATION_MILLIS = 10_000L
+        /** 관심 매물 배너 표시 시간(F-006 규칙 3, 제안값 8초) */
+        const val INTEREST_ALERT_DURATION_MILLIS = 8_000L
+
+        fun durationOf(alert: DrivingAlertUi): Long = when (alert) {
+            is LeaderAlertUi -> LEADER_ALERT_DURATION_MILLIS
+            is InterestAlertUi -> INTEREST_ALERT_DURATION_MILLIS
+        }
         private const val KEY_MODE = "driving_mode"
     }
 }

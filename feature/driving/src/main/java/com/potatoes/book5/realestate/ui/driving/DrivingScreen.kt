@@ -22,6 +22,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -48,6 +49,7 @@ import com.potatoes.book5.realestate.feature.driving.R
 import com.potatoes.book5.realestate.core.ui.R as CoreUiR
 import com.potatoes.book5.realestate.ui.common.CrownIcon
 import com.potatoes.book5.realestate.ui.common.MapPointUi
+import com.potatoes.book5.realestate.ui.common.MicIcon
 import com.potatoes.book5.realestate.ui.common.MinTouchHeight
 import com.potatoes.book5.realestate.ui.common.PillButton
 import com.potatoes.book5.realestate.ui.common.RankBadge
@@ -224,11 +226,12 @@ private fun directionText(ahead: Boolean, km: Double): String =
 
 /** 알림이 닫힐 때까지 남은 비율(1 → 0). 화면을 움직이지 않고 막대 길이만 줄인다(DD-005). */
 @Composable
-private fun rememberAlertProgress(key: Long): Float {
+private fun rememberAlertProgress(alert: DrivingAlertUi): Float {
+    val key = alert.key
     var progress by remember(key) { mutableFloatStateOf(1f) }
     val animated by animateFloatAsState(
         targetValue = progress,
-        animationSpec = tween(DrivingViewModel.ALERT_DURATION_MILLIS.toInt(), easing = LinearEasing),
+        animationSpec = tween(DrivingViewModel.durationOf(alert).toInt(), easing = LinearEasing),
         label = "alert-timeout",
     )
     LaunchedEffect(key) { progress = 0f }
@@ -241,7 +244,7 @@ private fun rememberAlertProgress(key: Long): Float {
  */
 @Composable
 private fun InterestAlertBanner(alert: InterestAlertUi, onScrap: () -> Unit) {
-    val animated = rememberAlertProgress(alert.key)
+    val animated = rememberAlertProgress(alert)
     val colors = MaterialTheme.colorScheme
     Surface(
         modifier = Modifier
@@ -276,11 +279,8 @@ private fun InterestAlertBanner(alert: InterestAlertUi, onScrap: () -> Unit) {
                     )
                 }
                 Spacer(Modifier.width(24.wpx))
-                // TTS(F-006)는 아직 연결 전이라 표시만 한다.
-                SpeakerIcon(size = 40.wpx, color = colors.surface)
-                Spacer(Modifier.width(12.wpx))
-                Text(stringResource(R.string.alert_speaking), style = MaterialTheme.typography.labelMedium)
-                Spacer(Modifier.width(36.wpx))
+                VoiceScrapHint(saved = alert.scrap == ScrapButtonState.SAVED)
+                Spacer(Modifier.width(24.wpx))
                 PillButton(
                     text = stringResource(if (alert.scrap == ScrapButtonState.SAVED) R.string.alert_interest_scrapped else R.string.alert_interest_scrap),
                     onClick = onScrap,
@@ -297,10 +297,47 @@ private fun InterestAlertBanner(alert: InterestAlertUi, onScrap: () -> Unit) {
     }
 }
 
-/** SCR-005 Landscape: 대장 교체 알림. 8초 뒤 자동으로 닫힌다. */
+/**
+ * 배너의 음성 스크랩 안내. 와이어프레임: SCR-005_landscape_driving_interest(_scrapped).svg
+ * 음성 인식(SpeechToText SDK)은 아직 연결 전이라 안내만 보여 준다(SCR-005 미결).
+ */
+@Composable
+private fun VoiceScrapHint(saved: Boolean) {
+    val colors = MaterialTheme.colorScheme
+    Surface(shape = CircleShape, color = colors.surface.copy(alpha = 0.12f), contentColor = colors.surface) {
+        Row(
+            modifier = Modifier.padding(start = 24.wpx, end = 48.wpx, top = 24.wpx, bottom = 24.wpx),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(shape = CircleShape, color = if (saved) colors.surface else colors.primary, modifier = Modifier.size(96.wpx)) {
+                Box(contentAlignment = Alignment.Center) {
+                    if (saved) {
+                        Icon(Icons.Filled.Check, contentDescription = null, tint = colors.primary, modifier = Modifier.size(64.wpx))
+                    } else {
+                        MicIcon(color = colors.onPrimary, modifier = Modifier.size(52.wpx))
+                    }
+                }
+            }
+            Spacer(Modifier.width(24.wpx))
+            Column {
+                Text(
+                    stringResource(if (saved) R.string.alert_voice_scrapped else R.string.alert_voice_scrap_command),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                Text(
+                    stringResource(if (saved) R.string.alert_voice_scrapped_detail else R.string.alert_voice_scrap_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colors.surface.copy(alpha = 0.75f),
+                )
+            }
+        }
+    }
+}
+
+/** SCR-005 Landscape: 대장 교체 알림. 10초 뒤 자동으로 닫힌다. */
 @Composable
 private fun LeaderAlertOverlay(alert: LeaderAlertUi) {
-    val animated = rememberAlertProgress(alert.key)
+    val animated = rememberAlertProgress(alert)
     Box(
         Modifier
             .fillMaxSize()
@@ -395,6 +432,20 @@ private fun DrivingInterestBannerPreview() {
             DrivingScreenState(
                 ranking = previewRanking,
                 alert = InterestAlertUi(1, "h", "한빛마을 1단지", 158_000, 34, 1.2, -70.0),
+            ),
+            onIntent = {},
+        )
+    }
+}
+
+@Preview(widthDp = 1187, heightDp = 797, showBackground = true)
+@Composable
+private fun DrivingInterestBannerScrappedPreview() {
+    KingOfRealEstateTheme(darkTheme = false) {
+        DrivingScreen(
+            DrivingScreenState(
+                ranking = previewRanking,
+                alert = InterestAlertUi(1, "h", "한빛마을 1단지", 158_000, 34, 1.2, -70.0, scrap = ScrapButtonState.SAVED),
             ),
             onIntent = {},
         )

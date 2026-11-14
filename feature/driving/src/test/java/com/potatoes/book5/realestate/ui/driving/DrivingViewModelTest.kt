@@ -145,7 +145,7 @@ class DrivingViewModelTest {
     }
 
     @Test
-    fun `주행 화면은 대장 교체 알림을 띄우고 8초 뒤 닫는다`() = runTest(dispatcher) {
+    fun `주행 화면은 대장 교체 알림을 띄우고 10초 뒤 닫는다`() = runTest(dispatcher) {
         val ranking = FakeRankingRepository(snapshotOf("a", "b"))
         val vm = viewModel(ranking)
         runCurrent()
@@ -158,7 +158,7 @@ class DrivingViewModelTest {
         assertEquals("단지-a", alert!!.previousName)
         assertEquals("단지-b", alert.currentName)
 
-        advanceTimeBy(DrivingViewModel.ALERT_DURATION_MILLIS - 1)
+        advanceTimeBy(DrivingViewModel.LEADER_ALERT_DURATION_MILLIS - 1)
         assertNotNull(vm.state.value.alert)
         advanceTimeBy(2)
         assertNull(vm.state.value.alert)
@@ -201,7 +201,7 @@ class DrivingViewModelTest {
         runCurrent()
         assertTrue("h" in scraps.scraps.value)
 
-        advanceTimeBy(DrivingViewModel.ALERT_DURATION_MILLIS + 1)
+        advanceTimeBy(DrivingViewModel.INTEREST_ALERT_DURATION_MILLIS + 1)
         assertNull(vm.state.value.alert)
     }
 
