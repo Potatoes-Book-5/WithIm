@@ -23,6 +23,7 @@ Pleos Connect 차량 앱입니다. 차량 위치 주변 아파트 시세를 조�
 ## 절대 규칙
 
 - `local.properties`와 키를 읽거나, 출력하거나, 커밋하지 않습니다.
+- Android 실행·계측 환경은 Pleos Connect만 사용합니다. 일반 Phone AVD·기기는 개발 검증에 사용하지 않습니다.
 - 앱 코드는 Clean Architecture + MVI 규칙을 따르고, 현재 프로젝트의 SDK 환경을 변경하지 않습니다.
 - SDK 호출은 `vehicle/` 패키지에만 둡니다.
 - 차량 모델명으로 분기하지 않습니다. 지원 여부 API로 확인합니다.
