@@ -16,18 +16,20 @@ Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용�
 | Kotlin | 2.0.0 | `gradle/libs.versions.toml` |
 | Compose BOM | 2024.04.01 | `gradle/libs.versions.toml` |
 | Lifecycle | 2.9.0 | `gradle/libs.versions.toml` |
+| Compose UI (실제 적용) | 1.7.8 (lifecycle-runtime-compose 2.9.0이 BOM의 1.6.6을 올림) | `./gradlew :app:dependencies` |
+| Coroutines | 1.7.3 | `gradle/libs.versions.toml` |
 | Activity Compose | 1.10.1 | `gradle/libs.versions.toml` |
 | Core KTX | 1.16.0 | `gradle/libs.versions.toml` |
 | Pleos Vehicle SDK | 2.3.2 (카탈로그에만 선언, 아직 비활성) | `gradle/libs.versions.toml` |
 | Pleos Maven 저장소 | `nexus-playground.pleos.ai` | `settings.gradle.kts` |
-| 실행 환경 | Pleos Connect Emulator v2.1.0 (Android 14, API 34) | [SETUP.md](SETUP.md) |
+| 실행 환경 | Pleos Connect Emulator v2.1.0. 기기 실측 API 35, 앱 창 229dpi (2026-11-14) | `adb shell getprop ro.build.version.sdk` |
 | 화면 방향 | 미지정 (기본 portrait, window 1개) | `AndroidManifest.xml` |
 
 ### 환경 규칙
 
 - SDK, Kotlin, AGP, Gradle 버전을 변경하려면 ADR을 먼저 작성합니다.
 - Pleos 버전 기준은 공식 Vehicle SDK Sample App입니다.
-- targetSdk는 35이고 실행 환경은 API 34이므로, API 35 전용 기능은 사용하지 않습니다.
+- 에뮬레이터 실측은 API 35지만 문서(SETUP.md)에는 API 34 이미지로 적혀 있습니다. 실차 API가 확인될 때까지 API 35 전용 기능은 쓰지 않습니다.
 - 버전은 `libs.versions.toml`에서만 관리하고 `build.gradle.kts`에 직접 쓰지 않습니다.
 - Pleos 키는 `local.properties`와 `BuildConfig`로만 전달합니다.
 
@@ -36,8 +38,8 @@ Clean Architecture의 계층 분리와 MVI의 단방향 상태 관리를 사용�
 | 구분 | 라이브러리 | 처리 |
 |---|---|---|
 | 사용 가능 | Compose UI, Material3, `lifecycle-viewmodel`, `lifecycle-viewmodel-savedstate`, `lifecycle-runtime-ktx` | 그대로 사용 |
-| 첫 MVI 화면 구현 시 추가 | `lifecycle-viewmodel-compose`, `lifecycle-runtime-compose` | 기존 `lifecycle` 버전 재사용, 빌드 확인 |
-| 첫 MVI 화면 구현 시 직접 선언 | `kotlinx-coroutines-android`, 테스트용 `kotlinx-coroutines-test` | 현재 전이 의존성 1.7.3, 직접 선언으로 고정 |
+| 사용 중 (T-014에서 추가) | `lifecycle-viewmodel-compose`, `lifecycle-runtime-compose` | 기존 `lifecycle` 버전 재사용. Compose UI가 1.7.8로 올라감 |
+| 사용 중 (T-014에서 직접 선언) | `kotlinx-coroutines-android`, 테스트용 `kotlinx-coroutines-test` | 1.7.3 고정 |
 | 사용 시 활성화 | Pleos Vehicle, TextToSpeech, SpeechToText, FusedLocation | [sdk-usage-map.md](platform/sdk-usage-map.md) 먼저 갱신 |
 | ADR 필요 | 내비게이션, DI 프레임워크, HTTP, 로컬 DB, DataStore | 도입 전에 ADR 작성 |
 
@@ -73,37 +75,35 @@ com.potatoes.book5.realestate/
 ├── RealEstateApplication.kt     # AppContainer 보유
 ├── di/AppContainer.kt
 ├── ui/
-│   ├── theme/
-│   ├── common/
-│   ├── ranking/                 # SCR-001
-│   │   ├── RankingContract.kt   # State, Intent, Result, Effect
-│   │   ├── RankingReducer.kt
-│   │   ├── RankingViewModel.kt
-│   │   ├── RankingRoute.kt      # ViewModel 연결
-│   │   └── RankingScreen.kt     # 상태 없는 UI
-│   ├── detail/                  # SCR-002
+│   ├── AppRoot.kt, AppViewModel.kt  # 화면 전환, 주행 상태
+│   ├── theme/                   # 색상, 글꼴, wpx·wsp 단위
+│   ├── common/                  # 공통 컴포넌트, 형식, 아이콘
+│   ├── home/                    # SCR-001
+│   │   ├── HomeContract.kt      # State, Intent, Result, Effect
+│   │   ├── HomeReducer.kt
+│   │   ├── HomeViewModel.kt
+│   │   ├── HomeRoute.kt         # ViewModel 연결
+│   │   └── HomeScreen.kt        # 상태 없는 UI
+│   ├── consent/                 # SCR-006
 │   ├── interest/                # SCR-003
-│   ├── driving/                 # SCR-004
-│   ├── alert/                   # SCR-005
-│   └── settings/                # SCR-006
+│   ├── driving/                 # SCR-004, SCR-009, SCR-005
+│   ├── dev/                     # 개발 빌드 전용 시뮬레이션 버튼
+│   └── (예정) detail/, scrap/, mypage/, summary/
 ├── domain/
-│   ├── model/                   # Apartment, Price, InterestCondition, DrivingState
+│   ├── model/                   # Apartment, RankingSnapshot, InterestCondition, DrivingState
 │   ├── error/                   # DomainError, Outcome
-│   ├── policy/                  # RankingPolicy, MatchingPolicy, AlertPolicy
 │   ├── port/                    # 외부 의존 인터페이스
-│   └── usecase/
+│   └── usecase/                 # 대장 교체 감지 등 비즈니스 규칙 포함
 ├── data/
-│   ├── repository/
-│   ├── remote/
-│   ├── local/
-│   └── mapper/
+│   ├── local/                   # SharedPreferences 저장소
+│   ├── sample/                  # 실거래가 API(T-005) 연결 전 샘플 순위·스크랩
+│   └── (예정) remote/, mapper/
 └── vehicle/
-    ├── location/                # F-001, FusedLocation
-    ├── restriction/             # CarUxRestrictions
-    └── speech/                  # TextToSpeech, 오디오 포커스
+    ├── simulation/              # 주행 규제 연동(DI-001) 전 개발용 주행 상태
+    └── (예정) location/, restriction/, speech/
 ```
 
-현재는 `MainActivity`와 `ui/theme`만 있습니다. 패키지는 기능을 구현할 때 추가합니다.
+샘플·시뮬레이션 구현은 `di/AppContainer.kt`에서만 연결되므로, 실제 API와 SDK가 정해지면 해당 구현만 교체합니다.
 
 ## 계층별 규칙
 
