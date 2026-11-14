@@ -51,7 +51,7 @@ App API는 다음 세 UseCase의 공개 계약이다. 별도 Service 계층이�
 
 `ResultMetadata`는 `executionMode`, `sourceId`, `sourceAsOf`, `synthetic`를 갖는다. dummy에서는 `executionMode=DUMMY`, `synthetic=true`, 원천 식별자는 합성임을 명시한다. UI/Callback 표시용 억 단위 문자열 대신 원 단위 정수 금액을 반환한다.
 
-예상 실패는 `Outcome.Failure(DomainError)`로 표현한다. 최신 main의 Offline/Timeout/Unsupported/Invalid/Unknown을 우선 사용한다. 취소 예외를 Unknown으로 잡아 성공/실패 응답을 다시 생성하지 않는다. 외부 오류 코드와 domain 오류의 변환은 어댑터 계약에 둔다.
+예상 실패는 `Outcome.Failure(DomainError)`로 표현한다. 기존 DomainError 유형을 재사용하고 provider·HTTP 오류도 adapter에서 구분한다. 취소 예외를 Unknown으로 잡아 성공/실패 응답을 다시 생성하지 않는다. 외부 오류 코드와 domain 오류의 변환은 어댑터 계약에 둔다.
 
 ## 4. 가격 요약 계약
 
@@ -91,3 +91,9 @@ domain UseCase는 입력 검증·필요 정보 판단 등 비즈니스 규칙을
 - 같은 입력/fixture의 결과가 결정적이며 모든 dummy 결과의 메타데이터가 합성임을 명시한다.
 - 저장과 브리핑 호출이 기존 Room/설정/읽음 상태를 변경하지 않는다.
 - API 테스트는 Android Intent 없이 수행할 수 있다. Android Intent 성공을 자연어 E2E 성공으로 기록하지 않는다.
+
+## T-040 단지 스크랩 API
+
+`ScrapVoiceTargetUseCase(AppCallContext)` → `Outcome<ActionResult<VoiceScrapResult>>`. AppCallContext에는 nullable VoiceContextSnapshot을 추가했다. snapshot에는 revision·foreground·enabled·selectedApartmentId·Nudge·capturedAt이 있으며 DI의 앱 상태 포트에서 얻는다. wire/LLM 파라미터에서 공급하지 않는다.
+
+repository 상세 조회 후 snapshot 세대를 재검증하고 Room ScrapRepository에 저장한다. 이미 저장됐으면 alreadySaved=true로 반환한다. 동일 UseCase의 ensure(id)는 배너 탭이 공유하는 멱등 명령이다. NeedsInput이면 fetch/저장하지 않는다. 가격·지역 저장·브리핑의 기존 dummy API와 분리한다. [전체 context 계약](voice-context.md).

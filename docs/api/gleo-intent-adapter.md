@@ -93,3 +93,7 @@ dummy 저장에는 success를 쓰지 않으므로 F-011의 영속 저장 후 성
 위 초기 테스트 전용 설명은 다음 배포 배치로 확장한다. core/domain에 AppAction 모델·포트·UseCase, core/data/src/debug에 dummy 구현, app/vehicle/gleo에 adapter를 둔다. debug GleoBindings는 공식 APP_ACTION_RESPONSE sender를 주입하고 debug assets/schema.json을 배포한다. release 바인딩은 null이며 receiver/schema는 없다. decoder는 ACTION_PARAM 객체 또는 개별 target/areaQuery extra를 받으며 혼합 입력은 거부한다. 이중 인코딩 JSON은 지원하지 않는다. 실제 Gleo schema 승인과 음성 호환성은 기기에서 확인해야 한다. [E2E 절차](../testing/gleo-tour/e2e.md).
 
 현재 dummy 평균 fixture는 최신 main 순위 정책과 독립적이다. 실데이터 API를 연결할 때는 Top 3/5 평균을 사용하지 않고 원본 거래를 기준으로 별도 집계한다. 위치 없는 지도 참고 좌표를 CURRENT_LOCATION으로 사용하지 않는다.
+
+## T-040 현재 등록 함수와 실제 저장
+
+현재 assets schema는 GET_AREA_PRICE_SUMMARY / SCRAP_APARTMENT / GET_REAL_ESTATE_BRIEFING이다. SAVE_INTEREST_AREA는 이전 debug 호출 호환을 위해 receiver/decoder에만 남는다. SCRAP_APARTMENT는 무인자이며 외부 단지 ID/프로필/좌표 주입을 거부한다. 앱 수신 시 확보한 context로 대상을 확정한다. 실제 로컬 저장 성공은 persisted=true, executionMode=LOCAL로 반환하고 dummy로 표시하지 않는다. timeout/예외도 LOCAL로 표시하며 저장 결과를 확인할 수 없을 때 ‘데이터 변경 없음’으로 단정하지 않는다. 모든 callback은 현재 silent다. [context](voice-context.md).

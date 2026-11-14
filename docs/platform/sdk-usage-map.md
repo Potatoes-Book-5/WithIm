@@ -57,4 +57,4 @@ T-027은 SDK 위치 획득을 구현하지 않고 [차량 위치 입력](locatio
 
 ## Gleo debug 통합
 
-T-039: SDK 추가 없이 Android broadcast를 app/vehicle/gleo에 격리한다. debug assets/schema.json·GleoActionReceiver로 3개 합성 action을 받고 APP_ACTION_RESPONSE로 반환한다. release에는 외부 진입점이 없다. 설치 버전의 schema 승인·음성 동작은 [E2E](../testing/gleo-tour/e2e.md)에서 확인한다.
+T-039: SDK 추가 없이 Android broadcast를 app/vehicle/gleo에 격리한다. debug assets/schema.json·GleoActionReceiver로 가격·브리핑 합성 action과 실제 단지 스크랩 action을 받고 APP_ACTION_RESPONSE로 반환한다. T-040에서 Nudge와 앱 상태의 실행 context를 연결했다. release에는 외부 진입점이 없다. 설치 버전의 schema 승인·음성 동작은 [E2E](../testing/gleo-tour/e2e.md)에서 확인한다.

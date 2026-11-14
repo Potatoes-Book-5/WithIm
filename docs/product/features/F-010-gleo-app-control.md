@@ -23,7 +23,7 @@ Gleo 음성 요청을 지역 가격 조회·관심 지역 저장·관심 지역 
 | 함수 | 선택 입력 | 처리 | 기본 component |
 |---|---|---|---|
 | GET_AREA_PRICE_SUMMARY | target: enum, areaQuery: string | 현재 또는 지정 지역의 가격 요약 | service |
-| SAVE_INTEREST_AREA | target: enum, areaQuery: string | 문맥/현재/지정 관심 지역 저장 | service |
+| SCRAP_APARTMENT | 없음 | 현재 상세 또는 보이는 관심 매물 Nudge의 단지를 멱등 스크랩 | service |
 | GET_REAL_ESTATE_BRIEFING | 없음 | 활성 프로필 관심 지역 변동 요약 | service |
 
 - MVP의 음성 입력은 지역 지정으로 제한한다. 면적·기간은 F-002의 저장 조건/기본값을 사용하며, 발화만으로 면적 필터를 바꾸는 기능은 지원 범위가 아니다. 원래 발화가 앱에 전달된다고 가정하지 않는다.
@@ -106,3 +106,13 @@ Gleo가 요청 ID를 전달한다는 보장은 없다. 앱 내부 요청 ID와 G
 ## Intent 어댑터 구현 준비
 
 외부 wire와 내부 호출을 [gleo-intent-adapter 계약](../../api/gleo-intent-adapter.md) 및 [App API 계약](../../api/app-action-api.md)으로 분리한 초안이 있다. [T-039 계획](../../plans/active/T-039-gleo-integration.md)은 기존 아키텍처 안에서 dummy 응답 경로를 구현할 순서를 정의한다. target enum은 문서 스키마와 debug 처리 경로에 반영했다. 실제 Gleo에 등록/검증한 것은 아니다. 이번 단계의 dummy 저장은 실제 저장 성공과 구분한다.
+
+## T-040 Nudge 기반 실행 문맥
+
+현재 schema는 가격·단지 스크랩·브리핑 세 함수다. 지역 저장 SAVE_INTEREST_AREA는 debug 호환 호출만 유지하고 schema에서 제외한다. 단지 스크랩과 관심 지역 저장은 다른 명령이다.
+
+SCR-005의 ‘스크랩해 줘’ 제안이 보이는 동안 해당 단지 ID와 배너 key를 문맥에 담는다. 현재 실제 표시 중인 상세가 있으면 그 단지, 그렇지 않으면 보이는 Nudge를 사용한다. 주행 화면 뒤의 상세, P 전환으로 숨겨진 배너, 만료된 배너, 마지막 대장을 추정해 쓰지 않는다. 앱 foreground·온보딩·동의 조건을 확인하고 Action 수신 시 snapshot을 고정한다. 상세 조회 뒤에도 실행 세대가 유효한지 재검증한다.
+
+실제 단지 스크랩은 로컬 저장을 수행하며 음성 재요청과 배너 탭은 동일 ensure-saved 명령을 사용한다. 성공 후 DB 관찰로 배너와 상세의 스크랩 상태를 갱신한다. 이미 저장된 단지는 다시 저장하거나 해제하지 않는다. 가격·지역 저장·브리핑의 dummy 계약은 유지한다. 명시 단지명 검색·‘두 번째’ 같은 순위 지시는 이번 SCRAP_APARTMENT의 지원 범위가 아니며 schema description으로 지원을 가장하지 않는다.
+
+앱 context가 Gleo에 자동 전송된다고 가정하지 않는다. 자연어 해석 및 자체 대화 context는 Gleo, 실행 snapshot·대상 검증·데이터 조회·저장·callback은 앱 책임이다. [실행 계약](../../api/voice-context.md), [E2E](../../testing/gleo-tour/e2e.md).

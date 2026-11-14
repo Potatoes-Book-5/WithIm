@@ -11,3 +11,5 @@
 - 공식 규격과 실제 지원 미결은 [플랫폼 문서](../platform/gleo-integration.md), 배치 근거는 [ADR-010](../decisions/ADR-010-gleo-intent-adapter.md)에 둔다.
 - 구체 작업 순서는 [T-039 계획](../plans/active/T-039-gleo-integration.md)을 따른다.
 - App API는 Kotlin 호출 계약이다. HTTP 서버나 OpenAPI 도입을 전제하지 않는다. Android Intent나 JSON DTO를 domain API에 노출하지 않는다.
+
+[Nudge·앱 상태 기반 실행 context와 단지 스크랩](voice-context.md)을 함께 따른다.

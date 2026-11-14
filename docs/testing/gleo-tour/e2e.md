@@ -20,8 +20,8 @@ macOS에서 기본 Java가 17이 아니면 먼저 `export JAVA_HOME=$(/usr/libex
 
 1. debug 앱 설치 후 schema가 들어 있는지 확인한다. release에는 schema/receiver가 없다.
 2. Gleo가 실행되는 Pleos 환경에서 설치/부팅 시 schema 재스캔과 승인 상태를 확인한다. 스키마 승인·Gleo 계정/서비스 상태는 앱 코드만으로 보장하지 않는다.
-3. “부동산 앱에서 이 동네 집값 알려줘”, “이 동네 관심 지역으로 저장해줘”, “부동산 브리핑 알려줘”를 순서대로 말한다.
-4. 각 요청이 GET_AREA_PRICE_SUMMARY / SAVE_INTEREST_AREA / GET_REAL_ESTATE_BRIEFING으로 전달되는지 확인한다. target 누락은 asking, 실제 지역명을 지정한 요청은 dummy가 실거래를 가장하지 않고 unsupported를 반환해야 한다.
+3. “부동산 앱에서 이 동네 집값 알려줘”, “이 단지 스크랩해 줘”, “부동산 브리핑 알려줘”를 순서대로 말한다.
+4. 각 요청이 GET_AREA_PRICE_SUMMARY / SCRAP_APARTMENT / GET_REAL_ESTATE_BRIEFING으로 전달되는지 확인한다. target 누락은 asking, 실제 지역명을 지정한 요청은 dummy가 실거래를 가장하지 않고 unsupported를 반환해야 한다.
 5. callback은 공식 ai.pleos.playground.intent.action.APP_ACTION_RESPONSE, packageName과 response extra를 사용한다. mode=silent이므로 소리가 안 나는 것만으로 실패라고 판단하지 않는다. 합성 결과는 음성으로 재생하지 않는다.
 6. 하나의 요청이 진행 중일 때 추가 요청을 보내 중복 응답이 없는지 확인한다. D/P를 전환해 기존 주행 화면이 유지되는지도 확인한다.
 
@@ -48,3 +48,11 @@ Broadcast completed는 수신 완료일 뿐 비동기 API 성공 증거가 아�
 공식 response는 외부 앱이 받는 implicit broadcast이므로 계측의 임시 callback 수신기도 RECEIVER_EXPORTED로 등록해야 한다. 앱 내부 전용 NOT_EXPORTED 수신기를 쓰면 Android 15에서 공식 경로의 응답을 받지 못했다. 임시 테스트 수신기는 finally에서 해제하고 실제 데이터·변경 권한을 제공하지 않는다. 앱의 release receiver 공개 여부와는 별개다.
 
 2026-11-15 emulator-5556(Pleos API 35)에서 GleoWireTest 8개 통과. debug schema/receiver 존재, release APK schema·manifest receiver 부재 및 release 단위 테스트 컴파일 통과를 확인했다. 최초 emulator-5554의 package 서비스 준비 실패·종료는 별도 기기 문제로 기록한다. 실제 Gleo 음성 검증은 아직 수행하지 않았다.
+
+## T-040 Nudge → 스크랩 E2E
+
+`./harness/gleo-e2e.sh`는 기존 wire 검증과 VoiceScrapE2ETest를 함께 실행한다. 후자는 synthetic 단지 fixture와 별도 in-memory Room을 사용하여 Nudge snapshot → SCRAP_APARTMENT Android Intent decode → 상세 fetch → 실제 Room 저장 → 공식 callback → 재요청의 alreadySaved → 배너 만료 뒤 asking을 검증한다. 실제 사용자 DB/동의 설정을 변경하지 않는다. manifest receiver/DI 경로 자체는 GleoWireTest가 별도로 검사한다. 이 둘을 실제 Gleo LLM 음성 E2E와 혼동하지 않는다.
+
+실제 음성 확인은 관심 매물 배너가 표시 중인 상태에서 ‘스크랩해 줘’를 말해 SCRAP_APARTMENT 선택, persisted=true callback, 배너 ‘스크랩함’, 주차 후 목록을 확인한다. P 전환·앱 background·배너 만료 뒤에는 숨겨진 Nudge를 저장하지 않아야 한다. 배너 탭과 음성을 연속 실행해도 해제되지 않아야 한다. 현재 schema의 세 함수 중 지역 저장은 단지 스크랩으로 교체됐다.
+
+T-040 최종 기록: headless emulator-5556에서 verify --device 통과(Android 16개). 별도 Gleo E2E는 9개 통과. JVM 141개 통과, release 빌드·테스트 컴파일 통과. 실제 Gleo 서비스의 자연어 해석/음성 출력·승인은 미검증이다.
