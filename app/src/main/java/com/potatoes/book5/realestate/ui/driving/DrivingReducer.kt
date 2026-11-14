@@ -1,6 +1,7 @@
 package com.potatoes.book5.realestate.ui.driving
 
 internal fun reduceDriving(state: DrivingScreenState, result: DrivingResult): DrivingScreenState = when (result) {
+    is DrivingResult.TradesUpdated -> state.copy(actualTrades = result.ranking)
     is DrivingResult.RankingUpdated -> state.copy(
         radiusKm = result.radiusKm,
         ranking = result.ranking,

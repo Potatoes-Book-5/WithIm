@@ -7,6 +7,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -20,9 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -71,11 +69,22 @@ fun DrivingScreen(state: DrivingScreenState, onIntent: (DrivingIntent) -> Unit) 
     ) {
         Column(Modifier.fillMaxSize().padding(horizontal = 48.wpx)) {
             Header(state = state, onSelect = { onIntent(DrivingIntent.SelectMode(it)) })
-            Box(Modifier.weight(1f).fillMaxWidth().padding(top = 24.wpx, bottom = 48.wpx)) {
-                when (state.mode) {
-                    DrivingMode.RANK -> RankCards(state.ranking)
-                    DrivingMode.MAP -> MapWithList(state)
+            Row(Modifier.weight(1f).fillMaxWidth().padding(top = 24.wpx, bottom = 48.wpx), horizontalArrangement = Arrangement.spacedBy(32.wpx)) {
+                Column(Modifier.weight(0.57f).fillMaxHeight(), verticalArrangement = Arrangement.spacedBy(16.wpx)) {
+                    Text(stringResource(R.string.driving_sample_label), style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    BoxWithConstraints(Modifier.weight(1f)) {
+                        when (state.mode) {
+                            DrivingMode.RANK -> if (maxWidth < 1500.wpx) {
+                                Column(verticalArrangement = Arrangement.spacedBy(20.wpx)) {
+                                    state.ranking.forEach { RankListRow(it) }
+                                }
+                            } else RankCards(state.ranking)
+                            DrivingMode.MAP -> SchematicMap(state.ranking, state.interestMatches, state.others, Modifier.fillMaxSize())
+                        }
+                    }
                 }
+                DrivingTradeTable(state.actualTrades, Modifier.weight(0.43f).fillMaxHeight())
             }
         }
         state.alert?.let { LeaderAlertOverlay(it) }
@@ -171,24 +180,6 @@ private fun RankCards(ranking: List<RankItemUi>) {
     }
 }
 
-/** SCR-009 Landscape(시안 D): 왼쪽 지도, 오른쪽 순위와 관심 매물 */
-@Composable
-private fun MapWithList(state: DrivingScreenState) {
-    Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(32.wpx)) {
-        SchematicMap(
-            ranking = state.ranking,
-            interestMatches = state.interestMatches,
-            others = state.others,
-            modifier = Modifier.weight(1f).fillMaxHeight(),
-        )
-        Column(Modifier.width(520.wpx), verticalArrangement = Arrangement.spacedBy(20.wpx)) {
-            Text(stringResource(R.string.driving_list_title, state.radiusKm), style = MaterialTheme.typography.titleMedium)
-            state.ranking.forEach { item -> RankListRow(item) }
-            state.interestMatches.firstOrNull()?.let { InterestRow(it) }
-        }
-    }
-}
-
 @Composable
 private fun RankListRow(item: RankItemUi) {
     val leader = item.rank == 1
@@ -214,28 +205,6 @@ private fun RankListRow(item: RankItemUi) {
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = MaterialTheme.typography.headlineLarge.fontWeight),
                 color = if (leader) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             )
-        }
-    }
-}
-
-@Composable
-private fun InterestRow(point: MapPointUi) {
-    Surface(
-        modifier = Modifier.fillMaxWidth().height(176.wpx),
-        shape = RoundedCornerShape(28.wpx),
-        color = MaterialTheme.colorScheme.background,
-        border = BorderStroke(3.wpx, MaterialTheme.colorScheme.primary),
-    ) {
-        Row(Modifier.padding(horizontal = 28.wpx), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(56.wpx))
-            Column(Modifier.padding(start = 24.wpx)) {
-                Text(point.name, style = MaterialTheme.typography.titleSmall.copy(fontWeight = MaterialTheme.typography.titleLarge.fontWeight), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(
-                    text = stringResource(R.string.driving_interest_meta, directionText(point.bearingDeg in -90.0..90.0, point.distanceKm)),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
         }
     }
 }

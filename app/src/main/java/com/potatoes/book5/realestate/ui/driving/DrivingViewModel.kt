@@ -5,9 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.potatoes.book5.realestate.domain.usecase.ObserveLeaderChangesUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveNearbyRankingUseCase
+import com.potatoes.book5.realestate.domain.usecase.GetSamsungTradeRankingUseCase
+import com.potatoes.book5.realestate.domain.error.DomainError
+import com.potatoes.book5.realestate.domain.error.Outcome
+import java.time.LocalDate
+import java.time.ZoneId
 import com.potatoes.book5.realestate.ui.common.toMapPoint
 import com.potatoes.book5.realestate.ui.common.toRankItem
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,6 +24,7 @@ class DrivingViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val observeNearbyRanking: ObserveNearbyRankingUseCase,
     private val observeLeaderChanges: ObserveLeaderChangesUseCase,
+    private val getTradeRanking: GetSamsungTradeRankingUseCase,
     private val alertDurationMillis: Long = ALERT_DURATION_MILLIS,
 ) : ViewModel() {
 
@@ -27,6 +34,30 @@ class DrivingViewModel(
     val state: StateFlow<DrivingScreenState> = _state.asStateFlow()
 
     private var alertCount = 0L
+    private var tradeLookup: Job? = null
+
+    private fun loadTradeRanking() {
+        if (tradeLookup?.isActive == true) return
+        tradeLookup = viewModelScope.launch {
+            val today = LocalDate.now(ZoneId.of("Asia/Seoul"))
+            val initial = DrivingTradeRankingUi(today.minusMonths(1), today)
+            apply(DrivingResult.TradesUpdated(initial))
+            val ranking = when (val result = getTradeRanking(today)) {
+                is Outcome.Success -> initial.copy(loading = false, rows = result.value.map {
+                    DrivingTradeUi(it.trade.apartmentName ?: "단지명 미제공", it.trade.priceManwon,
+                        it.trade.contractDate, it.distanceKm)
+                })
+                is Outcome.Failure -> initial.copy(loading = false, error = when (result.error) {
+                    DomainError.MissingApiKey -> "API 키 설정을 확인해 주세요"
+                    DomainError.Offline -> "네트워크에 연결할 수 없어요"
+                    DomainError.Timeout -> "조회 시간이 초과됐어요"
+                    DomainError.ProviderRejected -> "제공기관이 조회를 거절했어요"
+                    else -> "실거래를 불러오지 못했어요"
+                })
+            }
+            apply(DrivingResult.TradesUpdated(ranking))
+        }
+    }
 
     init {
         viewModelScope.launch {
@@ -62,6 +93,11 @@ class DrivingViewModel(
 
     fun onIntent(intent: DrivingIntent) {
         when (intent) {
+            DrivingIntent.Enter -> loadTradeRanking()
+            DrivingIntent.Exit -> {
+                tradeLookup?.cancel()
+                tradeLookup = null
+            }
             is DrivingIntent.SelectMode -> {
                 savedStateHandle[KEY_MODE] = intent.mode.name
                 apply(DrivingResult.ModeSelected(intent.mode))
