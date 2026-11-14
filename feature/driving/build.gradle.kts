@@ -21,6 +21,7 @@ android {
 dependencies {
     // 주행 화면 SCR-004, SCR-005, SCR-009(ADR-009). 지도 SDK는 이 모듈에만 둔다(ADR-004).
     implementation(project(":core:ui"))
+    implementation(project(":feature:yeongtong"))
     implementation(libs.naver.map.sdk)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

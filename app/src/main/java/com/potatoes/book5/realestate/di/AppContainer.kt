@@ -8,6 +8,7 @@ import com.potatoes.book5.realestate.domain.usecase.GetApartmentTradesUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetYeongtongTradeFeedUseCase
 import com.potatoes.book5.realestate.domain.usecase.GeocodeYeongtongTradeUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetSamsungReferenceTradesUseCase
+import com.potatoes.book5.realestate.domain.usecase.GetSamsungTradeRankingUseCase
 import com.potatoes.book5.realestate.data.local.PreferenceConsentRepository
 import com.potatoes.book5.realestate.data.local.PreferenceInterestRepository
 import com.potatoes.book5.realestate.data.local.SampleNeighborhoodRepository
@@ -69,6 +70,9 @@ class AppContainer(context: Context) {
     }
     val getSamsungReferenceTrades by lazy {
         GetSamsungReferenceTradesUseCase(getYeongtongTradeFeed, geocodeYeongtongTrade)
+    }
+    val getSamsungTradeRanking by lazy {
+        GetSamsungTradeRankingUseCase(getYeongtongTradeFeed, geocodeYeongtongTrade)
     }
     private val prefs = context.getSharedPreferences("im_with_you", Context.MODE_PRIVATE)
 

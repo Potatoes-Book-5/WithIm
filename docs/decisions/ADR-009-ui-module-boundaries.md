@@ -1,6 +1,6 @@
 ---
 id: ADR-009
-task: T-023
+task: T-024
 ---
 
 # ADR-009 UI 모듈 경계(designsystem, ui, feature)

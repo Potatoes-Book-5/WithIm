@@ -34,7 +34,7 @@ fun AppRoot(viewModel: AppViewModel = viewModel(factory = AppViewModels.Factory)
     Box(Modifier.fillMaxSize()) {
         if (state.showDriving) {
             DrivingRoute(
-                viewModel = viewModel(factory = AppViewModels.Factory),
+                viewModel = androidx.lifecycle.viewmodel.compose.viewModel<com.potatoes.book5.realestate.ui.driving.DrivingViewModel>(factory = AppViewModels.Factory),
                 naverMapAvailable = BuildConfig.NAVER_MAP_CLIENT_ID.isNotBlank(),
             )
         } else {

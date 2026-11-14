@@ -3,6 +3,17 @@ package com.potatoes.book5.realestate.ui.driving
 import com.potatoes.book5.realestate.domain.model.VehiclePose
 import com.potatoes.book5.realestate.ui.common.MapPointUi
 import com.potatoes.book5.realestate.ui.common.RankItemUi
+import java.time.LocalDate
+
+data class DrivingTradeUi(val name: String, val priceManwon: Long, val contractDate: LocalDate, val distanceKm: Double)
+
+data class DrivingTradeRankingUi(
+    val fromDate: LocalDate,
+    val toDate: LocalDate,
+    val loading: Boolean = true,
+    val rows: List<DrivingTradeUi> = emptyList(),
+    val error: String? = null,
+)
 
 /** 주행 중 화면의 보기. RANK = SCR-004, MAP = SCR-009 */
 enum class DrivingMode { RANK, MAP }
@@ -25,13 +36,17 @@ data class DrivingScreenState(
     /** 지도 중심이 되는 차량 위치. null이면 간이 지도로 그린다. */
     val vehicle: VehiclePose? = null,
     val alert: LeaderAlertUi? = null,
+    val actualTrades: DrivingTradeRankingUi? = null,
 )
 
 sealed interface DrivingIntent {
+    data object Enter : DrivingIntent
+    data object Exit : DrivingIntent
     data class SelectMode(val mode: DrivingMode) : DrivingIntent
 }
 
 sealed interface DrivingResult {
+    data class TradesUpdated(val ranking: DrivingTradeRankingUi) : DrivingResult
     data class RankingUpdated(
         val radiusKm: Int,
         val ranking: List<RankItemUi>,

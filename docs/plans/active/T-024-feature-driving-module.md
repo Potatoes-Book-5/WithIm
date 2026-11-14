@@ -1,8 +1,8 @@
 ---
-task: T-023
+task: T-024
 ---
 
-# T-023 주행 화면 feature 모듈 분리
+# T-024 주행 화면 feature 모듈 분리
 
 ## 목표
 
@@ -16,7 +16,7 @@ Now in Android 구조에 맞춰 공용 UI를 `:core:designsystem`, `:core:ui`로
 
 ## 작업 체크리스트
 
-- [x] T-023, ADR-009 등록과 계획
+- [x] T-024, ADR-009 등록과 계획
 - [x] `:core:designsystem`: `ui/theme`, 도메인을 모르는 공용 컴포넌트·아이콘
 - [x] `:core:ui`: 순위 표시 모델, 포맷, 조건 라벨, 스크랩 공용 UI와 문자열
 - [x] `:feature:driving`: 주행 화면, 지도, 문자열, 네이버 지도 의존성, 테스트
@@ -34,7 +34,7 @@ Now in Android 구조에 맞춰 공용 UI를 `:core:designsystem`, `:core:ui`로
 
 ## 진행 기록
 
-- 2026-11-14: T-023, ADR-009 등록, 계획 작성
+- 2026-11-14: T-024, ADR-009 등록, 계획 작성
 - 2026-11-14: `:core:designsystem`(theme, Components, Icons, LargeSnackbar, Pentagon), `:core:ui`(RankingUi, Format, ConditionLabels, ScrapUi와 문자열 29개), `:feature:driving`(주행 화면 7개 파일, 문자열 15개, 네이버 지도 의존성) 분리. 패키지명 유지
 - 2026-11-14: `DrivingRoute`가 ViewModel과 지도 사용 여부를 인자로 받도록 바꿨다. 주행 테스트는 `:feature:driving`으로 옮겼다
 - 2026-11-14: L1 통과. 단위 테스트 77건(app 62, feature:driving 5, core:domain 8, core:data 2). 에뮬레이터에서 홈 → 주행 시작 → 순위 → 지도(네이버 지도, 마커) → 주차 → 홈 확인

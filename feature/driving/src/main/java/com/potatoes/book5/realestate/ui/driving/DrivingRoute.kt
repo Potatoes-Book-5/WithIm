@@ -2,6 +2,7 @@ package com.potatoes.book5.realestate.ui.driving
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.DisposableEffect
 import com.potatoes.book5.realestate.ui.common.collectAsStateWithAppLifecycle
 
 /**
@@ -12,5 +13,9 @@ import com.potatoes.book5.realestate.ui.common.collectAsStateWithAppLifecycle
 @Composable
 fun DrivingRoute(viewModel: DrivingViewModel, naverMapAvailable: Boolean) {
     val state by viewModel.state.collectAsStateWithAppLifecycle()
+    DisposableEffect(viewModel) {
+        viewModel.onIntent(DrivingIntent.Enter)
+        onDispose { viewModel.onIntent(DrivingIntent.Exit) }
+    }
     DrivingScreen(state = state, onIntent = viewModel::onIntent, naverMapAvailable = naverMapAvailable)
 }

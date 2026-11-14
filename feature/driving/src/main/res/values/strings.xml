@@ -16,4 +16,13 @@
     <string name="driving_mode_map">지도</string>
     <string name="driving_mode_rank">순위</string>
     <string name="driving_radius">반경 %dkm</string>
+    <string name="driving_sample_label">주행 미리보기 · 샘플 단지 데이터</string>
+    <string name="driving_trade_title">최근 1개월 실거래 TOP 3</string>
+    <string name="driving_trade_reference">영통구 · 삼성전자 수원 기준 10km</string>
+    <string name="driving_trade_loading">실거래를 불러오는 중이에요</string>
+    <string name="driving_trade_empty">기간과 반경에 맞는 거래가 없어요</string>
+    <string name="driving_trade_rank">순위</string>
+    <string name="driving_trade_apartment">단지 · 거래일 · 거리</string>
+    <string name="driving_trade_amount">거래금액</string>
+    <string name="driving_trade_basis">거래 총액순 · 개별 거래 기준\n차량 위치 연결 전 임시 기준점</string>
 </resources>

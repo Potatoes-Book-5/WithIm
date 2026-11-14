@@ -1,17 +1,27 @@
 package com.potatoes.book5.realestate.ui.driving
 
 import androidx.lifecycle.SavedStateHandle
+import com.potatoes.book5.realestate.domain.error.Outcome
+import com.potatoes.book5.realestate.domain.model.AddressKind
 import com.potatoes.book5.realestate.domain.model.Apartment
 import com.potatoes.book5.realestate.domain.model.ConsentSettings
+import com.potatoes.book5.realestate.domain.model.GeoCoordinates
 import com.potatoes.book5.realestate.domain.model.NearbyApartment
 import com.potatoes.book5.realestate.domain.model.RankingSnapshot
+import com.potatoes.book5.realestate.domain.model.TradePage
+import com.potatoes.book5.realestate.domain.port.AddressGeocoder
+import com.potatoes.book5.realestate.domain.port.ApartmentTradeRepository
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
 import com.potatoes.book5.realestate.domain.port.RankingRepository
+import com.potatoes.book5.realestate.domain.usecase.GeocodeYeongtongTradeUseCase
+import com.potatoes.book5.realestate.domain.usecase.GetSamsungTradeRankingUseCase
+import com.potatoes.book5.realestate.domain.usecase.GetYeongtongTradeFeedUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveLeaderChangesUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveNearbyRankingUseCase
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +42,21 @@ import org.junit.Test
 /** 주행 화면(SCR-004, SCR-005, SCR-009) ViewModel과 리듀서. app 모듈의 HomeDrivingTest에서 옮겼다(ADR-009). */
 @OptIn(ExperimentalCoroutinesApi::class)
 class DrivingViewModelTest {
+
+    private fun emptyTradeRanking() = GetSamsungTradeRankingUseCase(
+        GetYeongtongTradeFeedUseCase(object : ApartmentTradeRepository {
+            override suspend fun getTrades(
+                districtCode: String,
+                contractMonth: YearMonth,
+                pageNumber: Int,
+                pageSize: Int,
+            ): Outcome<TradePage> = Outcome.Success(TradePage(emptyList(), pageNumber, pageSize, 0))
+        }),
+        GeocodeYeongtongTradeUseCase(object : AddressGeocoder {
+            override suspend fun geocode(address: String, kind: AddressKind): Outcome<GeoCoordinates> =
+                error("Empty trade feed must not request coordinates")
+        }),
+    )
 
     private val dispatcher = StandardTestDispatcher()
 
@@ -81,6 +106,7 @@ class DrivingViewModelTest {
             SavedStateHandle(),
             ObserveNearbyRankingUseCase(ranking),
             ObserveLeaderChangesUseCase(ranking, consent, Duration.ZERO),
+            emptyTradeRanking(),
         )
         runCurrent()
         assertNull(vm.state.value.alert)
@@ -102,11 +128,11 @@ class DrivingViewModelTest {
     fun `순위와 지도 보기를 바꾸고 기억한다`() = runTest(dispatcher) {
         val handle = SavedStateHandle()
         val ranking = FakeRankingRepository(snapshotOf("a"))
-        val vm = DrivingViewModel(handle, ObserveNearbyRankingUseCase(ranking), ObserveLeaderChangesUseCase(ranking, consent))
+        val vm = DrivingViewModel(handle, ObserveNearbyRankingUseCase(ranking), ObserveLeaderChangesUseCase(ranking, consent), emptyTradeRanking())
         vm.onIntent(DrivingIntent.SelectMode(DrivingMode.MAP))
         assertEquals(DrivingMode.MAP, vm.state.value.mode)
 
-        val restored = DrivingViewModel(handle, ObserveNearbyRankingUseCase(ranking), ObserveLeaderChangesUseCase(ranking, consent))
+        val restored = DrivingViewModel(handle, ObserveNearbyRankingUseCase(ranking), ObserveLeaderChangesUseCase(ranking, consent), emptyTradeRanking())
         assertEquals(DrivingMode.MAP, restored.state.value.mode)
     }
 }
