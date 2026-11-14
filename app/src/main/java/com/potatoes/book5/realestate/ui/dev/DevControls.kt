@@ -17,7 +17,8 @@ import com.potatoes.book5.realestate.R
 import com.potatoes.book5.realestate.ui.theme.wpx
 
 /**
- * 개발 빌드 전용. 주행 규제 연동(DI-001)과 실제 위치 이동 전까지 주행 화면과 대장 교체 알림을 확인하는 데 쓴다.
+ * 개발 빌드 전용. 주행 규제 연동(DI-001), 실제 위치 이동, 실거래가 API(T-005) 전까지
+ * 주행 화면, 대장 교체 알림, 스크랩 변동을 확인하는 데 쓴다.
  * 릴리스 빌드에는 나타나지 않는다(AppRoot의 BuildConfig.DEBUG).
  */
 @Composable
@@ -25,6 +26,7 @@ fun DevControls(
     driving: Boolean,
     onSetDriving: (Boolean) -> Unit,
     onNextArea: () -> Unit,
+    onPublishNewDeals: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -48,6 +50,9 @@ fun DevControls(
             }
             TextButton(onClick = onNextArea) {
                 Text(stringResource(R.string.dev_next_area), style = MaterialTheme.typography.labelSmall, color = Color.White)
+            }
+            TextButton(onClick = onPublishNewDeals) {
+                Text(stringResource(R.string.dev_new_deals), style = MaterialTheme.typography.labelSmall, color = Color.White)
             }
         }
     }

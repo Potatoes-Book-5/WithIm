@@ -20,6 +20,7 @@ private val LightColors = lightColorScheme(
     onSurfaceVariant = WireframeColors.Sub,
     outline = WireframeColors.Line,
     error = WireframeColors.Up,
+    errorContainer = WireframeColors.UpLight,
 )
 
 private val DarkColors = darkColorScheme(
@@ -35,6 +36,7 @@ private val DarkColors = darkColorScheme(
     onSurfaceVariant = WireframeColors.DarkSub,
     outline = WireframeColors.DarkLine,
     error = WireframeColors.Up,
+    errorContainer = WireframeColors.DarkUpLight,
 )
 
 @Composable

@@ -5,8 +5,10 @@ import com.potatoes.book5.realestate.domain.model.ConsentSettings
 import com.potatoes.book5.realestate.domain.model.InterestCondition
 import com.potatoes.book5.realestate.domain.model.DrivingState
 import com.potatoes.book5.realestate.domain.model.Neighborhood
+import com.potatoes.book5.realestate.domain.model.ApartmentDetail
+import com.potatoes.book5.realestate.domain.model.Deal
 import com.potatoes.book5.realestate.domain.model.RankingSnapshot
-import com.potatoes.book5.realestate.domain.model.ScrapSummary
+import com.potatoes.book5.realestate.domain.model.Scrap
 import kotlinx.coroutines.flow.Flow
 
 interface ConsentRepository {
@@ -34,8 +36,26 @@ interface RankingRepository {
     fun observeNearbyRanking(): Flow<RankingSnapshot>
 }
 
+/** 기기에 저장한 스크랩(F-008). 구현은 Room(ADR-005). */
 interface ScrapRepository {
-    suspend fun summary(): ScrapSummary
+    fun observeAll(): Flow<List<Scrap>>
+    fun observeIsScrapped(apartmentId: String): Flow<Boolean>
+    suspend fun getAll(): List<Scrap>
+    suspend fun get(apartmentId: String): Scrap?
+    suspend fun upsert(scrap: Scrap)
+    suspend fun delete(apartmentId: String)
+    suspend fun markChangeSeen(apartmentId: String)
+}
+
+/** 단지 상세와 최신 실거래. 실거래가 API(T-005)를 연결하면 구현을 교체한다. */
+interface ApartmentRepository {
+    suspend fun detail(apartmentId: String): Outcome<ApartmentDetail>
+    suspend fun latestDeal(apartmentId: String): Outcome<Deal>
+}
+
+/** 개발 빌드에서 새 실거래가 등록된 것처럼 흉내 낸다. */
+interface MarketSimulation {
+    fun publishNewDeals()
 }
 
 /** 주행 규제 상태. 실제 구현은 vehicle/ 패키지의 CarUxRestrictions 어댑터다(DI-001). */

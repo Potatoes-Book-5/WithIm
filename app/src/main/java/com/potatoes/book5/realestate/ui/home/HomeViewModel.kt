@@ -3,8 +3,9 @@ package com.potatoes.book5.realestate.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.potatoes.book5.realestate.domain.usecase.GetInterestConditionUseCase
-import com.potatoes.book5.realestate.domain.usecase.GetScrapSummaryUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveNearbyRankingUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveScrapSummaryUseCase
+import com.potatoes.book5.realestate.ui.Screen
 import com.potatoes.book5.realestate.ui.common.toRankItem
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -17,7 +18,7 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val observeNearbyRanking: ObserveNearbyRankingUseCase,
-    private val getScrapSummary: GetScrapSummaryUseCase,
+    private val observeScrapSummary: ObserveScrapSummaryUseCase,
     private val getInterestCondition: GetInterestConditionUseCase,
 ) : ViewModel() {
 
@@ -39,12 +40,16 @@ class HomeViewModel(
                     )
                 )
             )
-            val scrap = getScrapSummary()
-            apply(
-                HomeResult.ScrapLoaded(
-                    ScrapCardUi(scrap.totalCount, scrap.changedCount, scrap.firstChange?.apartmentName, scrap.firstChange?.kind)
+        }
+        // 스크랩은 DB를 관찰해 상세 화면에서 바꾼 내용이 바로 반영된다.
+        viewModelScope.launch {
+            observeScrapSummary().collect { scrap ->
+                apply(
+                    HomeResult.ScrapLoaded(
+                        ScrapCardUi(scrap.totalCount, scrap.changedCount, scrap.firstChange?.apartmentName, scrap.firstChange?.kind)
+                    )
                 )
-            )
+            }
         }
         viewModelScope.launch {
             observeNearbyRanking().collect { snapshot ->
@@ -63,12 +68,13 @@ class HomeViewModel(
 
     fun onIntent(intent: HomeIntent) {
         val effect = when (intent) {
-            HomeIntent.OpenInterest -> HomeEffect.OpenInterestConditions
+            HomeIntent.OpenInterest -> HomeEffect.Navigate(Screen.Interest)
+            HomeIntent.OpenScrapChanges -> HomeEffect.Navigate(Screen.Scraps(changedOnly = (_state.value.scrap?.changedCount ?: 0) > 0))
+            HomeIntent.OpenScraps -> HomeEffect.Navigate(Screen.Scraps())
+            is HomeIntent.OpenApartment -> HomeEffect.Navigate(Screen.Detail(intent.id))
             HomeIntent.OpenMyPage -> HomeEffect.ShowComingSoon(HomeDestination.MY_PAGE)
             HomeIntent.OpenSettings -> HomeEffect.ShowComingSoon(HomeDestination.SETTINGS)
-            HomeIntent.OpenScrapChanges, HomeIntent.OpenScraps -> HomeEffect.ShowComingSoon(HomeDestination.SCRAPS)
             HomeIntent.OpenDriveSummary -> HomeEffect.ShowComingSoon(HomeDestination.DRIVE_SUMMARY)
-            is HomeIntent.OpenApartment -> HomeEffect.ShowComingSoon(HomeDestination.APARTMENT_DETAIL)
         }
         viewModelScope.launch { _effect.send(effect) }
     }

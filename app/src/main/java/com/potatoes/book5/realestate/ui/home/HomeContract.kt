@@ -3,6 +3,7 @@ package com.potatoes.book5.realestate.ui.home
 import com.potatoes.book5.realestate.domain.model.AreaRange
 import com.potatoes.book5.realestate.domain.model.PriceRange
 import com.potatoes.book5.realestate.domain.model.ScrapChangeKind
+import com.potatoes.book5.realestate.ui.Screen
 import com.potatoes.book5.realestate.ui.common.RankItemUi
 import java.time.LocalDateTime
 
@@ -37,7 +38,8 @@ data class HomeState(
     val followers: List<RankItemUi> get() = ranking.drop(1)
 }
 
-enum class HomeDestination { MY_PAGE, SETTINGS, SCRAPS, DRIVE_SUMMARY, APARTMENT_DETAIL }
+/** 아직 구현하지 않은 화면 */
+enum class HomeDestination { MY_PAGE, SETTINGS, DRIVE_SUMMARY }
 
 sealed interface HomeIntent {
     data object OpenMyPage : HomeIntent
@@ -62,6 +64,6 @@ sealed interface HomeResult {
 }
 
 sealed interface HomeEffect {
-    data object OpenInterestConditions : HomeEffect
+    data class Navigate(val screen: Screen) : HomeEffect
     data class ShowComingSoon(val destination: HomeDestination) : HomeEffect
 }

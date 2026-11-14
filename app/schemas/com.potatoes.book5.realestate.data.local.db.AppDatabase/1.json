@@ -1,0 +1,112 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "3f973e4b957a349e1ff4b90227118e8a",
+    "entities": [
+      {
+        "tableName": "scraps",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`apartment_id` TEXT NOT NULL, `name` TEXT NOT NULL, `neighborhood` TEXT NOT NULL, `area_pyeong` INTEGER NOT NULL, `scrapped_at` INTEGER NOT NULL, `baseline_price_manwon` INTEGER NOT NULL, `baseline_deal_date` INTEGER NOT NULL, `last_price_manwon` INTEGER NOT NULL, `last_deal_date` INTEGER NOT NULL, `last_checked_at` INTEGER NOT NULL, `change_kind` TEXT, `change_delta_manwon` INTEGER, `change_detected_at` INTEGER, `change_seen` INTEGER NOT NULL, PRIMARY KEY(`apartment_id`))",
+        "fields": [
+          {
+            "fieldPath": "apartmentId",
+            "columnName": "apartment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "neighborhood",
+            "columnName": "neighborhood",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "areaPyeong",
+            "columnName": "area_pyeong",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scrappedAt",
+            "columnName": "scrapped_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "baselinePriceManwon",
+            "columnName": "baseline_price_manwon",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "baselineDealDate",
+            "columnName": "baseline_deal_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastPriceManwon",
+            "columnName": "last_price_manwon",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastDealDate",
+            "columnName": "last_deal_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastCheckedAt",
+            "columnName": "last_checked_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "changeKind",
+            "columnName": "change_kind",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "changeDeltaManwon",
+            "columnName": "change_delta_manwon",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "changeDetectedAt",
+            "columnName": "change_detected_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "changeSeen",
+            "columnName": "change_seen",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "apartment_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3f973e4b957a349e1ff4b90227118e8a')"
+    ]
+  }
+}

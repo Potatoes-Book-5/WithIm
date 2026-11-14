@@ -5,7 +5,9 @@ import com.potatoes.book5.realestate.data.local.PreferenceConsentRepository
 import com.potatoes.book5.realestate.data.local.PreferenceInterestRepository
 import com.potatoes.book5.realestate.data.local.SampleNeighborhoodRepository
 import com.potatoes.book5.realestate.data.sample.SampleRankingRepository
-import com.potatoes.book5.realestate.data.sample.SampleScrapRepository
+import com.potatoes.book5.realestate.data.local.RoomScrapRepository
+import com.potatoes.book5.realestate.data.local.db.AppDatabase
+import com.potatoes.book5.realestate.data.sample.SampleApartmentRepository
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
 import com.potatoes.book5.realestate.domain.port.InterestRepository
 import com.potatoes.book5.realestate.domain.port.NeighborhoodRepository
@@ -14,7 +16,15 @@ import com.potatoes.book5.realestate.domain.port.VehicleSimulation
 import com.potatoes.book5.realestate.domain.usecase.GetInterestConditionUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetNeighborhoodSuggestionsUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetOnboardingStepUseCase
-import com.potatoes.book5.realestate.domain.usecase.GetScrapSummaryUseCase
+import com.potatoes.book5.realestate.domain.usecase.GetApartmentDetailUseCase
+import com.potatoes.book5.realestate.domain.usecase.GetScrapUseCase
+import com.potatoes.book5.realestate.domain.usecase.MarkScrapChangeSeenUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveIsScrappedUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveScrapSummaryUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveScrapsUseCase
+import com.potatoes.book5.realestate.domain.usecase.RefreshScrapChangesUseCase
+import com.potatoes.book5.realestate.domain.usecase.SimulateNewDealsUseCase
+import com.potatoes.book5.realestate.domain.usecase.ToggleScrapUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveDrivingStateUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveLeaderChangesUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveNearbyRankingUseCase
@@ -37,7 +47,9 @@ class AppContainer(context: Context) {
     private val interestRepository: InterestRepository = PreferenceInterestRepository(prefs, Dispatchers.IO)
     private val neighborhoodRepository: NeighborhoodRepository = SampleNeighborhoodRepository()
     private val rankingRepository = SampleRankingRepository()
-    private val scrapRepository: ScrapRepository = SampleScrapRepository()
+    private val database = AppDatabase.create(context)
+    private val scrapRepository: ScrapRepository = RoomScrapRepository(database.scrapDao())
+    private val apartmentRepository = SampleApartmentRepository()
     private val drivingStateProvider = SimulatedDrivingStateProvider()
 
     private val vehicleSimulation = object : VehicleSimulation {
@@ -53,10 +65,19 @@ class AppContainer(context: Context) {
     val skipInterestCondition = SkipInterestConditionUseCase(interestRepository, consentRepository)
 
     val observeNearbyRanking = ObserveNearbyRankingUseCase(rankingRepository)
-    val getScrapSummary = GetScrapSummaryUseCase(scrapRepository)
     val observeDrivingState = ObserveDrivingStateUseCase(drivingStateProvider)
     val observeLeaderChanges = ObserveLeaderChangesUseCase(rankingRepository, consentRepository)
 
     val simulateDriving = SimulateDrivingUseCase(vehicleSimulation)
     val simulateAreaChange = SimulateAreaChangeUseCase(vehicleSimulation)
+
+    val observeScraps = ObserveScrapsUseCase(scrapRepository)
+    val observeScrapSummary = ObserveScrapSummaryUseCase(scrapRepository)
+    val observeIsScrapped = ObserveIsScrappedUseCase(scrapRepository)
+    val getScrap = GetScrapUseCase(scrapRepository)
+    val getApartmentDetail = GetApartmentDetailUseCase(apartmentRepository)
+    val toggleScrap = ToggleScrapUseCase(scrapRepository)
+    val markScrapChangeSeen = MarkScrapChangeSeenUseCase(scrapRepository)
+    val refreshScrapChanges = RefreshScrapChangesUseCase(scrapRepository, apartmentRepository)
+    val simulateNewDeals = SimulateNewDealsUseCase(apartmentRepository, refreshScrapChanges)
 }

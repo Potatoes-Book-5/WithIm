@@ -12,6 +12,7 @@ internal object WireframeColors {
     val Accent = Color(0xFF2F5BEA)
     val AccentLight = Color(0xFFE6ECFD)
     val Up = Color(0xFFD93636)
+    val UpLight = Color(0xFFFDECEC)
 
     // dark 테마 프레임은 아직 없으므로 임시 값입니다.
     val DarkBackground = Color(0xFF0F1115)
@@ -21,4 +22,5 @@ internal object WireframeColors {
     val DarkSub = Color(0xFFA9AFBA)
     val DarkAccent = Color(0xFF7C9BFF)
     val DarkAccentLight = Color(0xFF1E2A4D)
+    val DarkUpLight = Color(0xFF4A2020)
 }

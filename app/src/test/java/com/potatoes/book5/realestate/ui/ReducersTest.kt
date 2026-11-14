@@ -69,8 +69,30 @@ class ReducersTest {
 
     @Test
     fun `앱 시작 단계에 맞는 화면으로 간다`() {
-        assertEquals(Destination.CONSENT, reduceApp(AppState(), AppResult.StartAt(OnboardingStep.CONSENT)).destination)
-        assertEquals(Destination.INTEREST, reduceApp(AppState(), AppResult.StartAt(OnboardingStep.INTEREST)).destination)
-        assertEquals(Destination.HOME, reduceApp(AppState(), AppResult.StartAt(OnboardingStep.DONE)).destination)
+        assertEquals(Screen.Consent, reduceApp(AppState(), AppResult.StartAt(OnboardingStep.CONSENT)).current)
+        assertEquals(Screen.Interest, reduceApp(AppState(), AppResult.StartAt(OnboardingStep.INTEREST)).current)
+        assertEquals(Screen.Home, reduceApp(AppState(), AppResult.StartAt(OnboardingStep.DONE)).current)
+    }
+
+    @Test
+    fun `화면 스택은 쌓고 되돌리며 같은 화면을 연달아 쌓지 않는다`() {
+        var state = reduceApp(AppState(), AppResult.StartAt(OnboardingStep.DONE))
+        assertEquals(false, state.canGoBack)
+        state = reduceApp(state, AppResult.Push(Screen.Scraps()))
+        state = reduceApp(state, AppResult.Push(Screen.Detail("a")))
+        state = reduceApp(state, AppResult.Push(Screen.Detail("a")))
+        assertEquals(listOf(Screen.Home, Screen.Scraps(), Screen.Detail("a")), state.stack)
+        state = reduceApp(state, AppResult.Pop)
+        state = reduceApp(state, AppResult.Pop)
+        assertEquals(Screen.Home, state.current)
+        // 홈에서 더 되돌리지 않는다(시스템 뒤로 가기에 맡김).
+        assertEquals(state, reduceApp(state, AppResult.Pop))
+        assertEquals(true, state.onboardingDone)
+    }
+
+    @Test
+    fun `온보딩 중 관심 조건은 홈으로 교체되어 뒤로 가도 돌아가지 않는다`() {
+        val state = reduceApp(AppState(stack = listOf(Screen.Interest)), AppResult.Reset(listOf(Screen.Home)))
+        assertEquals(listOf(Screen.Home), state.stack)
     }
 }

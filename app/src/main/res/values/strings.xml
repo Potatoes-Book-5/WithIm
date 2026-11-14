@@ -67,9 +67,49 @@
     <string name="scrap_rank_change">순위 변동</string>
     <string name="coming_soon_my_page">마이 페이지는 준비 중이에요</string>
     <string name="coming_soon_settings">설정은 준비 중이에요</string>
-    <string name="coming_soon_scrap">스크랩 목록은 준비 중이에요</string>
     <string name="coming_soon_drive_summary">주행 요약은 준비 중이에요</string>
-    <string name="coming_soon_detail">아파트 상세는 준비 중이에요</string>
+
+    <!-- 공통 -->
+    <string name="back">뒤로</string>
+
+    <!-- SCR-007 스크랩 목록 -->
+    <string name="scrap_title">스크랩</string>
+    <string name="scrap_filter_all">전체 %d</string>
+    <string name="scrap_filter_changed">변동 있음 %d</string>
+    <string name="scrap_item_meta">%1$s · %2$d평 · %3$s 스크랩</string>
+    <string name="scrap_badge_new_deal">새 실거래</string>
+    <string name="scrap_badge_price_up">가격 ▲ %s</string>
+    <string name="scrap_badge_price_down">가격 ▼ %s</string>
+    <string name="scrap_badge_rank_change">순위 변동</string>
+    <string name="scrap_empty_title">아직 스크랩한 단지가 없어요</string>
+    <string name="scrap_empty_desc">아파트 상세에서 스크랩하면 새 실거래와 가격 변동을 알려 드려요</string>
+    <string name="scrap_changed_empty">새로 확인할 변동이 없어요</string>
+
+    <!-- SCR-002 아파트 상세 -->
+    <string name="detail_meta">%1$s %2$s · %3$s세대 · %4$d년</string>
+    <string name="detail_scrap">스크랩</string>
+    <string name="detail_scrapped">스크랩됨</string>
+    <string name="detail_latest_price">최근 실거래가</string>
+    <string name="detail_latest_meta">%1$d평 · %2$s · %3$d층</string>
+    <string name="detail_delta_up">직전 대비 ▲ %s</string>
+    <string name="detail_delta_down">직전 대비 ▼ %s</string>
+    <string name="detail_delta_same">직전과 같은 가격</string>
+    <string name="detail_trend_title">최근 1년 실거래가</string>
+    <string name="detail_info">단지 정보</string>
+    <string name="detail_households">세대수</string>
+    <string name="detail_households_value">%s세대</string>
+    <string name="detail_built">준공</string>
+    <string name="detail_built_value">%d년</string>
+    <string name="detail_pyeong">평형</string>
+    <string name="detail_pyeong_value">%1$d~%2$d평</string>
+    <string name="detail_distance">현재 거리</string>
+    <string name="detail_distance_unknown">알 수 없음</string>
+    <string name="detail_recent_deals">최근 거래</string>
+    <string name="detail_deal_meta">%1$d평 %2$d층</string>
+    <string name="detail_loading">단지 정보를 불러오는 중이에요</string>
+    <string name="detail_failed">단지 정보를 불러오지 못했어요</string>
+    <string name="detail_retry">다시 시도</string>
+    <string name="detail_scrap_failed">스크랩을 저장하지 못했어요. 다시 시도해 주세요</string>
 
     <!-- SCR-004, SCR-009, SCR-005 주행 중 -->
     <string name="driving_mode_rank">순위</string>
@@ -93,4 +133,5 @@
     <string name="dev_start_driving">주행 시작</string>
     <string name="dev_park">주차</string>
     <string name="dev_next_area">지역 이동(대장 교체)</string>
+    <string name="dev_new_deals">새 실거래(스크랩)</string>
 </resources>
