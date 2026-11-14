@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.potatoes.book5.realestate.domain.error.Outcome
+import com.potatoes.book5.realestate.domain.model.NearbyApartment
+import com.potatoes.book5.realestate.domain.policy.MarketPeriod
 import com.potatoes.book5.realestate.domain.usecase.ObserveInterestMatchAlertsUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveLeaderChangesUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveNearbyRankingUseCase
@@ -53,6 +55,12 @@ class DrivingViewModel(
                     DrivingResult.RankingUpdated(
                         radiusKm = snapshot.radiusKm,
                         ranking = snapshot.top.mapIndexed { i, item -> item.toRankItem(i + 1) },
+                        mapRanking = (snapshot.top + snapshot.interestMatches + snapshot.others)
+                            .distinctBy { it.apartment.id }
+                            .sortedWith(compareByDescending<NearbyApartment> {
+                                it.apartment.priceManwon
+                            }.thenByDescending { it.apartment.dealDate })
+                            .take(5).mapIndexed { i, item -> item.toRankItem(i + 1) },
                         interestMatches = snapshot.interestMatches.map { it.toMapPoint() },
                         others = snapshot.others.map { it.toMapPoint() },
                         vehicle = snapshot.vehicle,
@@ -62,7 +70,7 @@ class DrivingViewModel(
                 )
                 val today = LocalDate.now(ZoneId.of("Asia/Seoul"))
                 apply(DrivingResult.TradesUpdated(DrivingTradeRankingUi(
-                    fromDate = snapshot.periodStart ?: today.minusMonths(1),
+                    fromDate = snapshot.periodStart ?: today.minusMonths(MarketPeriod.MONTHS),
                     toDate = snapshot.periodEnd ?: today,
                     loading = snapshot.loading,
                     areaLabel = snapshot.neighborhoodName,

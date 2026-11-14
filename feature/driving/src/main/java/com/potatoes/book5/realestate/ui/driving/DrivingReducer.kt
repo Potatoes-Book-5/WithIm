@@ -5,6 +5,7 @@ internal fun reduceDriving(state: DrivingScreenState, result: DrivingResult): Dr
     is DrivingResult.RankingUpdated -> state.copy(
         radiusKm = result.radiusKm,
         ranking = result.ranking,
+        mapRanking = result.mapRanking,
         interestMatches = result.interestMatches,
         others = result.others,
         vehicle = result.vehicle,

@@ -1,5 +1,7 @@
 package com.potatoes.book5.realestate.ui
 
+import com.potatoes.book5.realestate.domain.policy.MarketPeriod
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.potatoes.book5.realestate.domain.model.DrivingState
@@ -142,12 +144,12 @@ class AppViewModel(
             is AppIntent.DevSetDriving -> simulateDriving(intent.driving)
             AppIntent.DevEndDrive -> simulateDriveEnd()
             AppIntent.DevLookupYeongtongTrades -> viewModelScope.launch {
-                apply(AppResult.DevTradeStatusChanged("최근 1개월 실거래 갱신 중"))
+                apply(AppResult.DevTradeStatusChanged("최근 ${MarketPeriod.MONTHS}개월 실거래 갱신 중"))
                 val status = when (val result = refreshMarket()) {
                     is Outcome.Failure -> "갱신하지 못했어요. 위치와 네트워크 상태를 확인해 주세요"
                     is Outcome.Success -> {
                         refreshScrapChanges()
-                        "최근 1개월 실거래 반영 완료"
+                        "최근 ${MarketPeriod.MONTHS}개월 실거래 반영 완료"
                     }
                 }
                 apply(AppResult.DevTradeStatusChanged(status))
