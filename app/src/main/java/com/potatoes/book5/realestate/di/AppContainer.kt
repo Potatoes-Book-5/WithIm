@@ -54,6 +54,7 @@ import com.potatoes.book5.realestate.domain.usecase.SimulateAreaChangeUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateDrivingUseCase
 import com.potatoes.book5.realestate.domain.usecase.SkipInterestConditionUseCase
 import com.potatoes.book5.realestate.vehicle.simulation.SimulatedDrivingStateProvider
+import com.potatoes.book5.realestate.vehicle.location.VehicleLocationInput
 import kotlinx.coroutines.Dispatchers
 
 /**
@@ -77,6 +78,7 @@ class AppContainer(context: Context) {
     private val prefs = context.getSharedPreferences("im_with_you", Context.MODE_PRIVATE)
 
     private val consentRepository: ConsentRepository = PreferenceConsentRepository(prefs, Dispatchers.IO)
+    val vehicleLocationProvider by lazy { VehicleLocationInput(consentRepository) }
     private val interestRepository: InterestRepository = PreferenceInterestRepository(prefs, Dispatchers.IO)
     private val neighborhoodRepository: NeighborhoodRepository = SampleNeighborhoodRepository()
     private val rankingRepository = SampleRankingRepository()

@@ -1,0 +1,34 @@
+# 차량 위치 입력 연결 (T-027)
+
+위치 획득과 Pleos SDK 콜백은 차량 기능 담당자가 구현한다. 부동산 화면은 `VehicleLocationProvider` 포트에서 받은 위치만 처리한다. 앱은 Android GPS 센서를 직접 읽거나 위치 권한을 요청하지 않는다.
+
+## Pleos 콜백 연결
+
+`RealEstateApplication.container.vehicleLocationProvider`는 `app/vehicle/location/VehicleLocationInput`이다. 차량 SDK 콜백에서 다음처럼 전달한다.
+
+```kotlin
+val input = (application as RealEstateApplication).container.vehicleLocationProvider
+input.updateLocation(
+    pose = VehiclePose(
+        location = GeoPoint(latitude = sdkLatitude, longitude = sdkLongitude),
+        headingDeg = sdkHeadingOrNull,
+    ),
+    accuracyMeters = sdkAccuracyMeters,
+    observedAt = sdkObservedInstant,
+    source = LocationSource.VEHICLE,
+)
+```
+
+위도·경도는 WGS84 도(degree), 정확도는 미터, 관측 시각은 `Instant`로 전달한다. 진행 방향을 제공하지 못하면 `headingDeg = null`로 둔다. `0.0`을 미확인 방향의 대체값으로 쓰지 않는다. SDK 지원 여부와 권한·위치 서비스 상태는 담당자가 확인하고, 위치를 쓸 수 없으면 `input.unavailable(LocationStatus.PERMISSION_REQUIRED)`처럼 실제 원인에 맞는 상태를 전달한다. 차량 모델명으로 분기하지 않는다.
+
+앱 입력 브리지는 위치 동의가 없으면 좌표를 화면·시세 계산에 전달하지 않는다. 정확도 100m 초과 또는 잘못된 좌표는 부정확 상태로, 관측 뒤 30초가 지난 좌표는 오래된 상태로 처리한다. 콜백은 위치가 바뀔 때 계속 전달해야 한다. GPS 원좌표와 Vworld 변환 좌표를 DB에 저장하지 않는다.
+
+## 개발 빌드의 이동 경로 입력
+
+Debug APK에만 `com.potatoes.book5.realestate.DEBUG_LOCATION` 브로드캐스트 리시버가 있다. 위도·경도·정확도를 문자열 extra `latitude`, `longitude`, `accuracy`로 전달하고 진행 방향이 있으면 `heading`을 추가한다. 수신 위치의 출처는 `EMULATOR_ROUTE`다. 프로덕션 APK에는 이 리시버가 없다.
+
+```shell
+adb shell am broadcast -a com.potatoes.book5.realestate.DEBUG_LOCATION -n com.potatoes.book5.realestate/.vehicle.location.DebugLocationReceiver --es latitude '<위도>' --es longitude '<경도>' --es accuracy '10'
+```
+
+이 입력은 에뮬레이터 화면 검토용이다. 경로는 [동탄역(경기도 화성시 동탄역로 151)](https://www.srail.or.kr/cms/archive.do?pageId=KR0406020000)에서 [삼성전자 수원 본사](https://www.samsung.com/sec/ir/reports-disclosures/public-disclosure/4005/)로 진행한다. 주소를 좌표로 바꾼 결과는 검토 경로에만 일시적으로 사용하고 DB에 남기지 않는다.

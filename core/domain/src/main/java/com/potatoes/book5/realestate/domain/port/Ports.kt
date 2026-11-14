@@ -15,11 +15,14 @@ import com.potatoes.book5.realestate.domain.model.DriveSummary
 import com.potatoes.book5.realestate.domain.model.PassedInterest
 import java.time.LocalDateTime
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 interface ConsentRepository {
     /** 아직 동의 화면에서 결정하지 않았으면 null. */
     suspend fun get(): ConsentSettings?
     suspend fun save(settings: ConsentSettings)
+    /** Emits changes to the app's location permission choice. */
+    fun observe(): Flow<ConsentSettings?> = flow { emit(get()) }
 }
 
 interface InterestRepository {

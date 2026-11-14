@@ -1,0 +1,7 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <receiver android:name=".vehicle.location.DebugLocationReceiver" android:exported="true">
+            <intent-filter><action android:name="com.potatoes.book5.realestate.DEBUG_LOCATION" /></intent-filter>
+        </receiver>
+    </application>
+</manifest>

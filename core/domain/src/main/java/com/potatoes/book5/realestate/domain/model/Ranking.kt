@@ -2,6 +2,7 @@ package com.potatoes.book5.realestate.domain.model
 
 import java.time.LocalDate
 import java.time.LocalDateTime
+import com.potatoes.book5.realestate.domain.error.DomainError
 
 /** 아파트 단지와 대표 실거래. 가격은 만원 단위(예: 24억 5,000만 원 = 245000). */
 data class Apartment(
@@ -21,7 +22,7 @@ data class GeoPoint(val latitude: Double, val longitude: Double)
  * 차량 위치와 진행 방향.
  * @param headingDeg 북쪽 기준 시계 방향 진행 방위(0~360)
  */
-data class VehiclePose(val location: GeoPoint, val headingDeg: Double)
+data class VehiclePose(val location: GeoPoint, val headingDeg: Double? = null)
 
 /**
  * 차량 기준 주변 단지.
@@ -31,6 +32,7 @@ data class NearbyApartment(
     val apartment: Apartment,
     val distanceKm: Double,
     val bearingDeg: Double,
+    val directionKnown: Boolean = true,
 ) {
     val isAhead: Boolean get() = bearingDeg in -90.0..90.0
 }
@@ -49,6 +51,11 @@ data class RankingSnapshot(
     val dataAsOf: LocalDateTime,
     /** 스냅샷 기준 차량 위치. 위치를 모르면 null이고 지도는 간이 지도로 대체한다(SCR-009). */
     val vehicle: VehiclePose? = null,
+    val loading: Boolean = false,
+    val error: DomainError? = null,
+    val periodStart: LocalDate? = null,
+    val periodEnd: LocalDate? = null,
+    val referenceLabel: String? = null,
 ) {
     val leader: NearbyApartment? get() = top.firstOrNull()
 }

@@ -42,7 +42,7 @@ class SampleRankingRepository : RankingRepository {
 
         /** 차량 기준 거리·상대 방위에 맞는 좌표를 단지에 붙인다. */
         private fun VehiclePose.place(apartment: Apartment, km: Double, deg: Double) = NearbyApartment(
-            apartment = apartment.copy(location = GeoMath.destination(location, km, headingDeg + deg)),
+            apartment = apartment.copy(location = GeoMath.destination(location, km, requireNotNull(headingDeg) + deg)),
             distanceKm = km,
             bearingDeg = deg,
         )

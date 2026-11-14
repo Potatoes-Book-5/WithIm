@@ -15,8 +15,9 @@ data class RankItemUi(
     val distanceKm: Double,
     val bearingDeg: Double,
     val location: GeoPoint? = null,
+    val directionKnown: Boolean = true,
 ) {
-    val isAhead: Boolean get() = bearingDeg in -90.0..90.0
+    val isAhead: Boolean get() = directionKnown && bearingDeg in -90.0..90.0
 }
 
 /** 지도에 찍을 점(관심 매물, 그 밖의 단지). */
@@ -38,6 +39,7 @@ fun NearbyApartment.toRankItem(rank: Int) = RankItemUi(
     distanceKm = distanceKm,
     bearingDeg = bearingDeg,
     location = apartment.location,
+    directionKnown = directionKnown,
 )
 
 fun NearbyApartment.toMapPoint() = MapPointUi(apartment.id, apartment.name, distanceKm, bearingDeg, apartment.location)
