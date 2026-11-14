@@ -9,3 +9,4 @@
 | [audio-focus-impl.md](audio-focus-impl.md) | AF | TTS 오디오 포커스 |
 | [sdk-usage-map.md](sdk-usage-map.md) | - | 기능별 사용 API와 미지원 시 동작 |
 | [molit-api.md](molit-api.md) | - | 국토부 아파트 매매 실거래가 조회 |
+| [vworld-api.md](vworld-api.md) | - | Vworld 주소 좌표 변환과 영통구 조회 |

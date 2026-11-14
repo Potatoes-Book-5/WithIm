@@ -187,4 +187,5 @@
     <string name="dev_next_area">지역 이동(대장 교체)</string>
     <string name="dev_new_deals">새 실거래(스크랩)</string>
     <string name="dev_end_drive">주행 종료(요약)</string>
+    <string name="dev_lookup_yeongtong">영통구 실거래 조회</string>
 </resources>
