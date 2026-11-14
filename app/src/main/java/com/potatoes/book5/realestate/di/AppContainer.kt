@@ -1,6 +1,9 @@
 package com.potatoes.book5.realestate.di
 
 import android.content.Context
+import com.potatoes.book5.realestate.BuildConfig
+import com.potatoes.book5.realestate.data.remote.MolitRepositoryFactory
+import com.potatoes.book5.realestate.domain.usecase.GetApartmentTradesUseCase
 import com.potatoes.book5.realestate.data.local.PreferenceConsentRepository
 import com.potatoes.book5.realestate.data.local.PreferenceInterestRepository
 import com.potatoes.book5.realestate.data.local.SampleNeighborhoodRepository
@@ -53,6 +56,9 @@ import kotlinx.coroutines.Dispatchers
  * 실거래가 API, 지도 SDK, 주행 규제가 연결되면 아래 샘플·시뮬레이션 구현만 교체한다.
  */
 class AppContainer(context: Context) {
+    val getApartmentTrades: GetApartmentTradesUseCase by lazy {
+        GetApartmentTradesUseCase(MolitRepositoryFactory.create(BuildConfig.MOLIT_API_KEY))
+    }
     private val prefs = context.getSharedPreferences("im_with_you", Context.MODE_PRIVATE)
 
     private val consentRepository: ConsentRepository = PreferenceConsentRepository(prefs, Dispatchers.IO)
