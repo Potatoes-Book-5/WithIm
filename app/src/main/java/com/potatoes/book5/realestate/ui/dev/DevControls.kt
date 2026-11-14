@@ -50,7 +50,7 @@ fun DevControls(
                     color = Color.White,
                 )
             }
-            // 주차 후 3분을 기다리지 않고 세션을 닫아 요약을 만든다.
+            // 주차로 바꾸고 바로 세션을 닫아 요약을 만든다.
             TextButton(onClick = onEndDrive) {
                 Text(stringResource(R.string.dev_end_drive), style = MaterialTheme.typography.labelSmall, color = Color.White)
             }

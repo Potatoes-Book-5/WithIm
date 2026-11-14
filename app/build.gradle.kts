@@ -38,6 +38,8 @@ if (naverMapClientId.isEmpty()) {
 android {
     namespace = "com.potatoes.book5.realestate"
     compileSdk = 35
+    // AAOS 주행 규제(CarUxRestrictionsManager, T-035). 플랫폼 선택 라이브러리를 컴파일에만 쓴다.
+    useLibrary("android.car")
 
     defaultConfig {
         applicationId = "com.potatoes.book5.realestate"
@@ -101,6 +103,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":feature:driving"))
     // Pleos Connect SDK — 요구사항 확정 후 주석 해제
+    // 기어는 Vehicle SDK `Gear`가 deprecated 되어 AAOS GEAR_SELECTION을 쓴다(T-034).
     // implementation(libs.pleos.vehicle)
     // 차량 위치(F-001, T-029). 호출은 vehicle/ 패키지에만 둔다.
     implementation(libs.pleos.fused.location)

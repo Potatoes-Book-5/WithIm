@@ -9,6 +9,7 @@ import com.potatoes.book5.realestate.domain.usecase.RefreshMarketUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetOnboardingStepUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveDrivingStateUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveUnseenDriveSummaryUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveUxRestrictedUseCase
 import com.potatoes.book5.realestate.domain.usecase.RefreshScrapChangesUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateDriveEndUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateDrivingUseCase
@@ -41,6 +42,8 @@ sealed interface Screen {
 data class AppState(
     val stack: List<Screen> = listOf(Screen.Loading),
     val drivingState: DrivingState = DrivingState.PARKED,
+    /** 플랫폼이 DO 화면만 허용한다(T-035, DI-002). */
+    val uxRestricted: Boolean = false,
     val devTradeStatus: String? = null,
 ) {
     val current: Screen get() = stack.last()
@@ -49,8 +52,14 @@ data class AppState(
     /** 온보딩을 마쳤는지. 홈이 스택 맨 아래에 있으면 마친 것이다. */
     val onboardingDone: Boolean get() = stack.first() == Screen.Home
 
+    /** 기어가 주행 중이거나(T-034) 플랫폼 주행 규제가 켜졌다(T-035). 이때는 DO 화면만 보여 준다. */
+    private val driveView: Boolean get() = drivingState == DrivingState.DRIVING || uxRestricted
+
     /** 온보딩 이후 주행 중이면 어느 화면에 있었든 주행 화면을 보여 준다(S-005). 주차하면 원래 화면으로 돌아간다. */
-    val showDriving: Boolean get() = onboardingDone && drivingState == DrivingState.DRIVING
+    val showDriving: Boolean get() = onboardingDone && driveView
+
+    /** 온보딩을 마치기 전에 주행이 시작되면 동의·조건 화면 대신 주차 안내만 보여 준다(F-007 주행 중 진입 차단, T-035). */
+    val showParkFirst: Boolean get() = !onboardingDone && current != Screen.Loading && driveView
 }
 
 sealed interface AppIntent {
@@ -70,6 +79,7 @@ sealed interface AppResult {
     data class Push(val screen: Screen) : AppResult
     data object Pop : AppResult
     data class DrivingChanged(val state: DrivingState) : AppResult
+    data class UxRestrictionChanged(val restricted: Boolean) : AppResult
     /** 확인하지 않은 주행 요약이 생겼다(F-009 규칙 3). */
     data class SummaryReady(val sessionId: Long) : AppResult
     data class DevTradeStatusChanged(val status: String) : AppResult
@@ -90,6 +100,7 @@ internal fun reduceApp(state: AppState, result: AppResult): AppState = when (res
     is AppResult.Push -> if (state.current == result.screen) state else state.copy(stack = state.stack + result.screen)
     AppResult.Pop -> if (state.canGoBack) state.copy(stack = state.stack.dropLast(1)) else state
     is AppResult.DrivingChanged -> state.copy(drivingState = result.state)
+    is AppResult.UxRestrictionChanged -> state.copy(uxRestricted = result.restricted)
     // 온보딩 중에는 띄우지 않는다. 이미 요약이나 모아보기 화면이면 다시 쌓지 않는다.
     is AppResult.SummaryReady ->
         if (!state.onboardingDone || state.current is Screen.DriveSummary || state.current is Screen.InterestCatchUp) state
@@ -105,6 +116,7 @@ class AppViewModel(
     private val observeUnseenDriveSummary: ObserveUnseenDriveSummaryUseCase,
     private val simulateDriveEnd: SimulateDriveEndUseCase,
     private val refreshMarket: RefreshMarketUseCase,
+    private val observeUxRestricted: ObserveUxRestrictedUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AppState())
@@ -113,6 +125,7 @@ class AppViewModel(
     init {
         viewModelScope.launch { apply(AppResult.StartAt(getOnboardingStep())) }
         viewModelScope.launch { observeDrivingState().collect { apply(AppResult.DrivingChanged(it)) } }
+        viewModelScope.launch { observeUxRestricted().collect { apply(AppResult.UxRestrictionChanged(it)) } }
         // 앱을 실행할 때 스크랩 단지의 변동을 확인한다(F-008 규칙 4).
         // 주행 요약이 생기면 주차 중 화면 위에 띄운다. 앱이 꺼져 있었다면 다음 실행 때 띄운다(S-009).
         viewModelScope.launch {

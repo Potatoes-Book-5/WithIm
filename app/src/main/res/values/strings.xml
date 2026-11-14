@@ -157,6 +157,8 @@
     <string name="dev_label">개발용</string>
     <string name="dev_start_driving">주행 시작</string>
     <string name="dev_park">주차</string>
+    <!-- 온보딩 전 주행 시작(T-035) -->
+    <string name="park_first_title">주차한 뒤 시작할 수 있어요</string>
     <string name="dev_next_area">지역 이동(대장 교체)</string>
     <string name="dev_new_deals">새 실거래(스크랩)</string>
     <string name="dev_end_drive">주행 종료(요약)</string>

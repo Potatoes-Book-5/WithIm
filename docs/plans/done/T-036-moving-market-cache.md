@@ -1,8 +1,8 @@
 ---
-task: T-034
+task: T-036
 ---
 
-# T-034 이동 중 실거래 조회와 캐시 재사용
+# T-036 이동 중 실거래 조회와 캐시 재사용
 
 ## 목표
 
@@ -39,5 +39,6 @@ UI 배치, SDK·키 설정, 디스크·DB 캐시, 지도 반경·지역 확정 3
 - 2026-11-14: 삼성전자→강남 도로의 출발·도착 구간에서 정차 전 1위·지역·거리 갱신 확인. 죽전역 경유 도로 시연도 기존 앱에서 수행.
 - 2026-11-14: 사용자 승인으로 A 처리 중 들어온 B·C를 버리고 최신 D만 이어 처리하는 직렬 처리로 확정. 지역·출처 변경에 따른 네트워크 취소도 제거하고 기존 세대·라운드·위치 검증은 유지.
 - 2026-11-14: 독립 리뷰에서 작업 완료 직후 로딩 재진입, 캐시 성공/실패 빠른 반환의 로딩 미해제, 월별 수신시각 뒤늦은 기록을 찾아 수정.
+- 2026-11-15: 최신 `main`에서 기어 연동 작업에 T-034가 이미 등록되어 있어 이 캐시 작업을 T-036으로 다시 발급하고 문서 참조를 정리했다.
 
 - Verification: assembleDebug, lintDebug, docs and independent review passed. Actual road replay trace: maximum active scan 1, duplicate finished generation 0, monthly cache fetch=0 observed.

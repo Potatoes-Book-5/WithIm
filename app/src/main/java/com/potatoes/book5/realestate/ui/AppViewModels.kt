@@ -38,7 +38,7 @@ object AppViewModels {
             val c = container()
             AppViewModel(
                 c.getOnboardingStep, c.observeDrivingState, c.refreshScrapChanges, c.simulateDriving,
-                c.observeUnseenDriveSummary, c.simulateDriveEnd, c.refreshMarket,
+                c.observeUnseenDriveSummary, c.simulateDriveEnd, c.refreshMarket, c.observeUxRestricted,
             )
         }
         initializer {
