@@ -24,7 +24,7 @@ task: T-014
 - [x] 문서 검사 및 CSV·JSON·fixture 정합성 검증
 - [x] 저장소 협업 규칙에 따라 별도 reviewer 에이전트 검토
 - [x] 리뷰 지적 수정과 문서/CSV/JSON/합성 fixture 검증 기록
-- [ ] 영어 커밋 후 origin/geonu/gleo-spec push
+- [x] 영어 커밋 후 origin/geonu/gleo-spec push
 
 ## 검증 방법
 
@@ -49,3 +49,5 @@ task: T-014
 
 - 2026-11-14: reviewer가 수정 후 추가 중대 지적 없음으로 확인했다. Docs 링크/ID 검사와 diff 공백 검사를 통과했다. CSV 82개(우선순위 P0 65개, P1 17개; 확장 Gate 5개)의 ID/명세 경로, JSON 스키마/Callback 파싱, 합성 평균 12억·가격 순위 C/B/A·추천 B/A를 검증했다. 앱 테스트는 0개 실행했으며 모든 케이스는 미실행 상태다.
 - 정합성 검사 첫 실행에서 정책 공통 케이스에 feature_ids가 비어 있음을 발견해 통합 기능 F-010을 연결한 뒤 전체 검사를 다시 통과했다.
+
+- 2026-11-14: 등록 커밋 0418d5a와 명세 커밋 5550ee7을 origin/geonu/gleo-spec에 push했다. 작업은 팀 문서 검토를 위한 review 상태이며 모든 신규 기능/화면은 draft다. main 머지와 PR 생성은 하지 않았다.
