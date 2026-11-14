@@ -45,6 +45,7 @@ Pleos Connect 차량 앱입니다. 차량 위치 주변 아파트 시세를 조�
 | 디자인, 화면 명세 | [docs/design/](docs/design/README.md) |
 | 앱 아키텍처(Clean + MVI), SDK 환경 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | 완료 기준과 검증 | [docs/QUALITY.md](docs/QUALITY.md) |
+| 시나리오별 테스트 설계 | [docs/testing/](docs/testing/README.md) |
 | 개발 환경 | [docs/SETUP.md](docs/SETUP.md) |
 | 결정 기록 | [docs/decisions/](docs/decisions/README.md) |
 | AI 협업 규칙 | [docs/team/ai-collaboration.md](docs/team/ai-collaboration.md) |
