@@ -8,3 +8,4 @@
 | [driving-restriction-impl.md](driving-restriction-impl.md) | DI | CarUxRestrictions 연동 |
 | [audio-focus-impl.md](audio-focus-impl.md) | AF | TTS 오디오 포커스 |
 | [sdk-usage-map.md](sdk-usage-map.md) | - | 기능별 사용 API와 미지원 시 동작 |
+| [molit-api.md](molit-api.md) | - | 국토부 아파트 매매 실거래가 조회 |

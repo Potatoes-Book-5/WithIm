@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!--
         Pleos 권한(pleos.car.permission.*)은 실제로 쓰는 API의 최소 권한만 선언합니다.
         요구사항 확정 후 위치·TTS 등 사용 기능에 맞춰 추가합니다.

@@ -16,6 +16,12 @@ val localProperties = Properties().apply {
 
 fun localProp(key: String): String = localProperties.getProperty(key, "").trim()
 
+// Public API key supplied outside the repository. Never log the value.
+val molitApiKeyLiteral = providers.gradleProperty("MOLIT_API_KEY").orNull?.trim().orEmpty()
+    .ifBlank { providers.environmentVariable("MOLIT_API_KEY").orNull?.trim().orEmpty() }
+    .let { value -> "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"")
+        .replace("\n", "\\n").replace("\r", "\\r") + "\"" }
+
 android {
     namespace = "com.potatoes.book5.realestate"
     compileSdk = 35
@@ -27,6 +33,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "0.1.0"
+        buildConfigField("String", "MOLIT_API_KEY", molitApiKeyLiteral)
 
         buildConfigField("String", "PLEOS_PROJECT_ID", "\"${localProp("pleos.projectId")}\"")
         buildConfigField("String", "PLEOS_CLIENT_ID", "\"${localProp("pleos.clientId")}\"")
@@ -73,6 +80,8 @@ ksp {
 }
 
 dependencies {
+    implementation(libs.retrofit)
+    implementation(libs.okhttp)
     // Pleos Connect SDK — 요구사항 확정 후 주석 해제
     // implementation(libs.pleos.vehicle)
 
