@@ -45,3 +45,4 @@
 | T-039 | feature | Gleo adapter 모듈 통합 및 debug 음성 E2E | review | - | P1 | - | - |
 | T-040 | feature | Nudge와 앱 상태 기반 음성 실행 context | review | - | P1 | - | - |
 | T-041 | feature | 음성용 메모리 read model과 스크랩 빠른 조회 | review | - | P1 | - | - |
+| T-042 | feature | TTS 음성 입력 기반 Pleos Gleo 자동 검증 | todo | - | P1 | - | - |
