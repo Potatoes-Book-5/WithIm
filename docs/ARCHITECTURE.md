@@ -332,3 +332,9 @@ King-of-real-estate/
     ├── references/   # 외부 자료
     └── learnings/    # 실패와 개선 기록
 ```
+
+## Gleo 외부 호출 확장 — 구현 전 제안
+
+[ADR-006](decisions/ADR-006-gleo-intent-adapter.md)은 gleo-intent-adapter를 기존 vehicle.gleo 패키지의 컴포넌트로 두는 제안이다. 어댑터는 Android Intent를 [App API](api/app-action-api.md)의 순수 domain 입력으로 변환하고 UseCase를 호출한다. Dummy Repository는 data.sample, 조립은 기존 AppContainer에 둔다. 별도 Gradle 모듈이나 ViewModel을 경유하는 호출 계층을 추가하지 않는다.
+
+외부 Intent와 MVI Intent는 다른 계약이다. 화면 MVI와 기존 ADR-003은 유지한다. 상세 [어댑터 계약](api/gleo-intent-adapter.md)과 [T-021 구현 계획](plans/active/T-021-gleo-intent-adapter-dummy.md)은 미구현 초안이다. 계획에는 최신 main에 이미 존재하는 AppContainer/Outcome/Room/샘플 구현을 확인한 내용과 현재 Gleo 브랜치의 차이를 기록했다. 실제 구현 전 main 동기화·ID 충돌 정리를 선행한다.

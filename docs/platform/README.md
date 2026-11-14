@@ -12,3 +12,5 @@
 ## Gleo 연동 확장
 
 [Gleo·위치·내비 연동 확인 사항](gleo-integration.md)에 공식 문서 URL·확인일·설치 환경 미검증 사항을 정리한다. 제품 기본값은 platform에 정의하지 않고 기능 문서에서 관리한다. [스키마 예시](examples/gleo/schema.example.json)는 문서 자산이며 앱 assets에 자동 적용하지 않는다.
+
+호출 계층의 구현 전 계약은 [api/README](../api/README.md)에 별도로 둔다. platform은 공식 근거/지원 여부, api는 wire↔내부 UseCase 변환을 소유한다.

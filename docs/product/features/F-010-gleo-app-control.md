@@ -102,3 +102,7 @@ Gleo가 요청 ID를 전달한다는 보장은 없다. 앱 내부 요청 ID와 G
 - [ ] 지역 문맥 우선순위와 제안 기본값 제품 검토
 - [ ] 향후 음성 면적/기간 조건 지원 시 별도 파라미터·검증·스키마/테스트 계약 추가
 - [ ] 프로필·개인정보 처리 방식(F-007)
+
+## Intent 어댑터 구현 준비
+
+외부 wire와 내부 호출을 [gleo-intent-adapter 계약](../../api/gleo-intent-adapter.md) 및 [App API 계약](../../api/app-action-api.md)으로 분리한 초안이 있다. [T-021 계획](../../plans/active/T-021-gleo-intent-adapter-dummy.md)은 기존 아키텍처 안에서 dummy 응답 경로를 구현할 순서를 정의한다. target enum 추가는 vNext 제안이며 현재 JSON 예시/런타임이 이미 바뀌었다는 뜻은 아니다. 이번 단계의 dummy 저장은 실제 저장 성공과 구분한다.

@@ -69,4 +69,4 @@
 | S-011 | scenario | 신혼부부 대화형 모빌리티 임장 | draft | `product/scenarios/S-011-conversational-property-tour.md` | T-020 | F-002, F-003, F-004, F-010, F-011, F-012, F-013, F-014, SCR-002, SCR-011, SCR-012 |
 | SCR-011 | screen | 관심 지역 목록 | draft | `design/screens/SCR-011-interest-area-list.md` | T-020 | F-007, F-011, S-011, SCR-002, SCR-012 |
 | SCR-012 | screen | 데일리 브리핑 | draft | `design/screens/SCR-012-daily-briefing.md` | T-020 | F-007, F-013, S-011, SCR-011 |
-| ADR-006 | decision | Gleo Intent 어댑터와 App API 경계 | reserved | `decisions/ADR-006-gleo-intent-adapter.md` | T-021 | - |
+| ADR-006 | decision | Gleo Intent 어댑터와 App API 경계 | draft | `decisions/ADR-006-gleo-intent-adapter.md` | T-021 | - |
