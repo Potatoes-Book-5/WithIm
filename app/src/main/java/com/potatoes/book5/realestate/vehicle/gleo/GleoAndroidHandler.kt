@@ -33,7 +33,9 @@ class GleoAndroidHandler(
     private val adapter: GleoIntentAdapter,
     private val decoder: GleoIntentDecoder = GleoIntentDecoder(),
 ) {
-    suspend fun handle(intent: Intent, receivedAtMillis: Long = System.nanoTime() / 1_000_000L) {
-        decoder.decode(intent)?.let { adapter.handle(it.copy(receivedAtMillis = receivedAtMillis)) }
+    fun captureContext() = adapter.captureContext()
+    suspend fun handle(intent: Intent, receivedAtMillis: Long = System.nanoTime() / 1_000_000L,
+        context: com.potatoes.book5.realestate.domain.model.appaction.AppCallContext? = null) {
+        decoder.decode(intent)?.let { adapter.handle(it.copy(receivedAtMillis = receivedAtMillis), context) }
     }
 }

@@ -1,6 +1,6 @@
 {
   "packageName": "com.potatoes.book5.realestate",
-  "appDescription": "A development-only synthetic real estate demo. All prices and briefing items are fictional; saving areas does not persist data.",
+  "appDescription": "An apartment exploration app with contextual apartment scrap saving and synthetic test price summaries and briefings.",
   "version": "0.1.0",
   "actionCalls": [
     {
@@ -35,28 +35,12 @@
     {
       "type": "function",
       "function": {
-        "name": "SAVE_INTEREST_AREA",
-        "description": "Simulates saving an area but does not persist anything. Always reports that no area was saved.",
+        "name": "SCRAP_APARTMENT",
+        "description": "Saves the apartment currently selected in the app or offered in its visible scrap suggestion. Requests clarification when no target is available.",
         "parameters": {
           "type": "object",
-          "properties": {
-            "target": {
-              "type": "string",
-              "enum": [
-                "CURRENT_LOCATION",
-                "LAST_REFERENCED_AREA",
-                "NAMED_AREA"
-              ],
-              "description": "The source of the target area: the current vehicle location, an explicitly referenced earlier area, or a named area."
-            },
-            "areaQuery": {
-              "type": "string",
-              "description": "The name of the requested area when the target is NAMED_AREA."
-            }
-          },
-          "required": [
-            "target"
-          ]
+          "properties": {},
+          "required": []
         },
         "component": "service"
       }

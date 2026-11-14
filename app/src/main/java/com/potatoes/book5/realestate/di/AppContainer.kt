@@ -149,5 +149,8 @@ class AppContainer(context: Context) {
             if (liveNeighborhoods != condition.neighborhoods) interestRepository.save(condition.copy(neighborhoods = liveNeighborhoods))
         }
     }
-    val gleoIntentHandler by lazy { GleoBindings.create(context) }
+    val voiceContext: com.potatoes.book5.realestate.domain.model.appaction.VoiceContextPort =
+        com.potatoes.book5.realestate.data.repository.InMemoryVoiceContext()
+    val scrapVoiceTarget by lazy { com.potatoes.book5.realestate.domain.usecase.ScrapVoiceTargetUseCase(scrapRepository, apartmentRepository, voiceContext) }
+    val gleoIntentHandler by lazy { GleoBindings.create(context, voiceContext, scrapVoiceTarget) }
 }

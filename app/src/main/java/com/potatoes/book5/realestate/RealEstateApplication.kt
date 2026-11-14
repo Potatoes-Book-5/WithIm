@@ -22,8 +22,13 @@ class RealEstateApplication : Application() {
             container.driveSessionRecorder.run()
         }
         container.fusedLocationBridge.start(appScope)
+        appScope.launch {
+            container.consentChanges.collect { container.voiceContext.setConsented(it?.locationConsented == true) }
+        }
     }
-    fun launchGleoRequest(intent: android.content.Intent, receivedAtMillis: Long) = appScope.launch {
-        container.gleoIntentHandler?.handle(intent, receivedAtMillis)
+    fun launchGleoRequest(intent: android.content.Intent, receivedAtMillis: Long): kotlinx.coroutines.Job {
+        val handler = container.gleoIntentHandler
+        val captured = handler?.captureContext()
+        return appScope.launch { handler?.handle(intent, receivedAtMillis, captured) }
     }
 }

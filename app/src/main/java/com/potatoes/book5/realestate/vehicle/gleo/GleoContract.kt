@@ -3,7 +3,7 @@ package com.potatoes.book5.realestate.vehicle.gleo
 import com.potatoes.book5.realestate.domain.model.appaction.AreaTarget
 
 enum class GleoAction {
-    GET_AREA_PRICE_SUMMARY, SAVE_INTEREST_AREA, GET_REAL_ESTATE_BRIEFING;
+    GET_AREA_PRICE_SUMMARY, SAVE_INTEREST_AREA, GET_REAL_ESTATE_BRIEFING, SCRAP_APARTMENT;
     companion object { fun fromWire(value: String?): GleoAction? = entries.firstOrNull { it.name == value } }
 }
 data class GleoInput(
@@ -25,12 +25,12 @@ data class GleoCallback(
 ) {
     companion object {
         fun failure(action: GleoAction, code: String) = GleoCallback(
-            action, "fail", "The test request could not be completed. No user data was changed.",
-            listOf(mapOf("code" to code, "executionMode" to "DUMMY", "synthetic" to true)),
+            action, "fail", "The request could not be completed. Please check the current state before retrying.",
+            listOf(mapOf("code" to code, "executionMode" to if(action == GleoAction.SCRAP_APARTMENT) "LOCAL" else "DUMMY", "synthetic" to (action != GleoAction.SCRAP_APARTMENT))),
         )
         fun asking(action: GleoAction, field: String) = GleoCallback(
-            action, "asking", "Additional target information is required for this test request.",
-            listOf(mapOf("requiredField" to field, "executionMode" to "DUMMY", "synthetic" to true)),
+            action, "asking", if(action == GleoAction.SCRAP_APARTMENT) "Select an apartment or use an active scrap suggestion before trying again." else "Additional target area information is required.",
+            listOf(mapOf("requiredField" to field, "executionMode" to if(action == GleoAction.SCRAP_APARTMENT) "LOCAL" else "DUMMY", "synthetic" to (action != GleoAction.SCRAP_APARTMENT))),
         )
     }
 }

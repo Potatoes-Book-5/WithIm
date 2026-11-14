@@ -3,6 +3,12 @@ import com.potatoes.book5.realestate.domain.error.*
 import org.junit.Assert.*
 import org.junit.Test
 class GleoResponseMapperTest {
+ @Test fun askingMessagesAndTimeoutMetadataMatchAction() {
+  assertTrue(GleoCallback.asking(GleoAction.SCRAP_APARTMENT,"apartment").message.contains("apartment"))
+  assertTrue(GleoCallback.asking(GleoAction.GET_AREA_PRICE_SUMMARY,"target").message.contains("area"))
+  assertEquals("LOCAL",GleoCallback.failure(GleoAction.SCRAP_APARTMENT,"TIMEOUT").data.single()["executionMode"])
+  assertEquals(false,GleoCallback.failure(GleoAction.SCRAP_APARTMENT,"TIMEOUT").data.single()["synthetic"])
+ }
  @Test fun providerErrorsAreMappedWithoutDetails() {
   val errors = listOf(DomainError.MissingApiKey, DomainError.InvalidResponse, DomainError.ProviderRejected, DomainError.Http(401))
   val codes = listOf("SERVICE_UNAVAILABLE","INVALID_PROVIDER_RESPONSE","PROVIDER_REJECTED","PROVIDER_ERROR")
