@@ -5,6 +5,7 @@ import com.potatoes.book5.realestate.domain.error.Outcome
 import com.potatoes.book5.realestate.domain.model.Apartment
 import com.potatoes.book5.realestate.domain.model.ConsentSettings
 import com.potatoes.book5.realestate.domain.model.InterestCondition
+import com.potatoes.book5.realestate.domain.model.GeoPoint
 import com.potatoes.book5.realestate.domain.model.NearbyApartment
 import com.potatoes.book5.realestate.domain.model.Neighborhood
 import com.potatoes.book5.realestate.domain.model.RankingSnapshot
@@ -12,6 +13,7 @@ import com.potatoes.book5.realestate.domain.model.ApartmentDetail
 import com.potatoes.book5.realestate.domain.model.Deal
 import com.potatoes.book5.realestate.domain.model.PriceRecord
 import com.potatoes.book5.realestate.domain.model.Scrap
+import com.potatoes.book5.realestate.domain.model.VehiclePose
 import com.potatoes.book5.realestate.domain.port.ApartmentRepository
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
 import com.potatoes.book5.realestate.domain.port.InterestRepository
@@ -112,7 +114,11 @@ fun scrapOf(
 }
 
 /** 테스트용 순위 스냅샷. leaderIds 순서대로 1위부터 채운다. */
-fun snapshotOf(vararg leaderIds: String, area: String = "정자동"): RankingSnapshot = RankingSnapshot(
+fun snapshotOf(
+    vararg leaderIds: String,
+    area: String = "정자동",
+    vehicle: VehiclePose? = VehiclePose(GeoPoint(37.0, 127.0)),
+): RankingSnapshot = RankingSnapshot(
     neighborhoodName = area,
     radiusKm = 10,
     top = leaderIds.mapIndexed { i, id ->
@@ -121,6 +127,7 @@ fun snapshotOf(vararg leaderIds: String, area: String = "정자동"): RankingSna
     interestMatches = emptyList(),
     others = emptyList(),
     dataAsOf = LocalDateTime.of(2026, 11, 13, 9, 0),
+    vehicle = vehicle,
 )
 
 class FakeNeighborhoodRepository(

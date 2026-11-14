@@ -25,11 +25,11 @@ import com.potatoes.book5.realestate.ui.theme.wpx
 import java.time.format.DateTimeFormatter
 
 @Composable
-internal fun DrivingTradeTable(ranking: DrivingTradeRankingUi?, modifier: Modifier = Modifier) {
+internal fun DrivingTradeTable(ranking: DrivingTradeRankingUi?, hasVehicleLocation: Boolean, modifier: Modifier = Modifier) {
     Surface(modifier, shape = RoundedCornerShape(32.wpx), color = MaterialTheme.colorScheme.surfaceVariant) {
         Column(Modifier.padding(24.wpx), verticalArrangement = Arrangement.spacedBy(8.wpx)) {
             Text(stringResource(R.string.driving_trade_title), style = MaterialTheme.typography.titleMedium)
-            Text(stringResource(R.string.driving_trade_reference), style = MaterialTheme.typography.bodySmall,
+            Text(stringResource(if (hasVehicleLocation) R.string.driving_trade_reference else R.string.driving_trade_reference_samsung), style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             ranking?.let {
                 Text("${it.fromDate} ~ ${it.toDate}", style = MaterialTheme.typography.labelMedium)
@@ -62,7 +62,7 @@ internal fun DrivingTradeTable(ranking: DrivingTradeRankingUi?, modifier: Modifi
                     }
                 }
             }
-            Text(stringResource(R.string.driving_trade_basis), style = MaterialTheme.typography.labelSmall,
+            Text(stringResource(if (hasVehicleLocation) R.string.driving_trade_basis else R.string.driving_trade_basis_samsung), style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
