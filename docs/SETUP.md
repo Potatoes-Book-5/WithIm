@@ -84,6 +84,8 @@ git clone https://github.com/Potatoes-Book-5/King-of-real-estate.git ~/AndroidSt
    - `pleos.projectId` — 프로젝트 ID(Key)
    - `pleos.clientId`, `pleos.clientSecret` — SDK 클라이언트 ID / 시크릿 (TTS·STT SDK에서 사용)
    - 빌드 시 `BuildConfig.PLEOS_PROJECT_ID` / `PLEOS_CLIENT_ID` / `PLEOS_CLIENT_SECRET`으로 들어갑니다.
+   - 실거래·좌표 조회 키 `MOLIT_API_KEY`, `VWORLD_API_KEY`도 여기에 넣습니다. 프로젝트 `gradle.properties`는 git에 올라가므로 넣지 않습니다.
+   - 키를 바꾼 뒤에는 다시 빌드해야 `BuildConfig`에 반영됩니다.
 3. git 훅을 활성화합니다. 클론 후 한 번만 실행하며, 빠뜨리면 [커밋 규칙](team/git-workflow.md)이 검사되지 않습니다.
    ```bash
    ./harness/setup.sh

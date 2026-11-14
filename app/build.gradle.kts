@@ -15,15 +15,15 @@ val localProperties = Properties().apply {
 
 fun localProp(key: String): String = localProperties.getProperty(key, "").trim()
 
-// Public API key supplied outside the repository. Never log the value.
-val molitApiKeyLiteral = providers.gradleProperty("MOLIT_API_KEY").orNull?.trim().orEmpty()
-    .ifBlank { providers.environmentVariable("MOLIT_API_KEY").orNull?.trim().orEmpty() }
+// 공공 API 키는 저장소 밖에서 받는다. 값은 로그에 남기지 않는다.
+// local.properties → 사용자 Gradle 속성(~/.gradle/gradle.properties, -P) → 환경 변수(CI) 순으로 찾는다.
+fun apiKeyLiteral(key: String): String = localProp(key)
+    .ifBlank { providers.gradleProperty(key).orNull?.trim().orEmpty() }
+    .ifBlank { providers.environmentVariable(key).orNull?.trim().orEmpty() }
     .let { value -> "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"")
         .replace("\n", "\\n").replace("\r", "\\r") + "\"" }
-val vworldApiKeyLiteral = providers.gradleProperty("VWORLD_API_KEY").orNull?.trim().orEmpty()
-    .ifBlank { providers.environmentVariable("VWORLD_API_KEY").orNull?.trim().orEmpty() }
-    .let { value -> "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"")
-        .replace("\n", "\\n").replace("\r", "\\r") + "\"" }
+val molitApiKeyLiteral = apiKeyLiteral("MOLIT_API_KEY")
+val vworldApiKeyLiteral = apiKeyLiteral("VWORLD_API_KEY")
 
 // 네이버 지도 Client ID(ADR-004). 콘솔 헤더 이름(X-NCP-APIGW-API-KEY-ID)으로 적어도 읽는다.
 // Client Secret(X-NCP-APIGW-API-KEY)은 지도 표시에 쓰지 않으므로 읽지 않는다.
