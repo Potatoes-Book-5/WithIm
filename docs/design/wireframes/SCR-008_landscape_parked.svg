@@ -74,7 +74,11 @@
 <path d="M2230.0 882.0 L2235.8 896.0 L2250.9 897.2 L2239.4 907.1 L2242.9 921.8 L2230.0 913.9 L2217.1 921.8 L2220.6 907.1 L2209.1 897.2 L2224.2 896.0 Z" fill="none" stroke="#111318" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 <text x="2326.0" y="918.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="600" fill="#111318" text-anchor="middle">스크랩</text>
 </g>
-<text x="2488" y="1096" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="36" font-weight="700" fill="#2F5BEA" text-anchor="end">스크랩 목록 보기 ›</text>
+<g id="button/catch-up">
+<rect x="1769" y="1024" width="719" height="120" rx="60" fill="#2F5BEA"/>
+<text x="2128.5" y="1098.4" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="40" font-weight="700" fill="#FFFFFF" text-anchor="middle">관심 매물 모아보기 ›</text>
+</g>
+<text x="2488" y="1212" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="36" font-weight="700" fill="#2F5BEA" text-anchor="end">스크랩 목록 보기 ›</text>
 </g>
 </g>
 </svg>

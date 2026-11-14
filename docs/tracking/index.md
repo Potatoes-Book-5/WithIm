@@ -65,3 +65,4 @@
 | ADR-007 | decision | 주소 좌표 변환과 임시 기준 위치 | draft | `decisions/ADR-007-geocoding-reference.md` | T-021 | - |
 | ADR-008 | decision | Gradle 모듈 경계와 의존 방향 | draft | `decisions/ADR-008-gradle-module-boundaries.md` | T-022 | - |
 | ADR-009 | decision | UI 모듈 경계(designsystem, ui, feature) | approved | `decisions/ADR-009-ui-module-boundaries.md` | T-024 | - |
+| SCR-011 | screen | 주차 후 관심 매물 모아보기 | draft | `design/screens/SCR-011-interest-catch-up.md` | T-026 | F-009, F-008, F-005, S-009 |

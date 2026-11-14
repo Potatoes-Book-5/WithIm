@@ -109,4 +109,21 @@ class DriveSummaryTest {
         assertEquals(Screen.DriveSummary(1), state.current)
         assertEquals(state, reduceApp(state, AppResult.SummaryReady(2)))
     }
+
+    @Test
+    fun `모아보기를 보고 있으면 새 요약을 그 위에 쌓지 않는다`() {
+        var state = reduceApp(AppState(), AppResult.StartAt(OnboardingStep.DONE))
+        state = reduceApp(state, AppResult.Push(Screen.InterestCatchUp(1)))
+        assertEquals(state, reduceApp(state, AppResult.SummaryReady(2)))
+    }
+
+    @Test
+    fun `주행 요약에서 관심 매물 모아보기를 누르면 같은 주행의 모아보기를 연다`() = runTest(dispatcher) {
+        val drives = FakeDriveRecordRepository()
+        val id = drives.finished(0)
+        val vm = vm(id, drives, FakeScrapRepository())
+        runCurrent()
+        vm.onIntent(DriveSummaryIntent.OpenInterestCatchUp)
+        assertEquals(DriveSummaryEffect.Navigate(Screen.InterestCatchUp(id)), vm.effect.first())
+    }
 }

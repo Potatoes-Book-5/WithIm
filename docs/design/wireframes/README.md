@@ -19,6 +19,8 @@
 | [SCR-004_landscape_driving.svg](SCR-004_landscape_driving.svg) | `SCR-004/landscape/driving/light` | [SCR-004](../screens/SCR-004-driving-simple-view.md) |
 | [SCR-005_portrait_driving.svg](SCR-005_portrait_driving.svg) | `SCR-005/portrait/driving/light` | [SCR-005](../screens/SCR-005-alert-overlay.md) |
 | [SCR-005_landscape_driving.svg](SCR-005_landscape_driving.svg) | `SCR-005/landscape/driving/light` | [SCR-005](../screens/SCR-005-alert-overlay.md) |
+| [SCR-005_landscape_driving_interest.svg](SCR-005_landscape_driving_interest.svg) | `SCR-005/landscape/driving/interest/light` | [SCR-005](../screens/SCR-005-alert-overlay.md) |
+| [SCR-005_landscape_driving_interest_scrapped.svg](SCR-005_landscape_driving_interest_scrapped.svg) | `SCR-005/landscape/driving/interest-scrapped/light` | [SCR-005](../screens/SCR-005-alert-overlay.md) |
 | [SCR-006_landscape_parked.svg](SCR-006_landscape_parked.svg) | `SCR-006/landscape/parked/light` | [SCR-006](../screens/SCR-006-consent-settings.md) |
 | [SCR-007_landscape_parked.svg](SCR-007_landscape_parked.svg) | `SCR-007/landscape/parked/light` | [SCR-007](../screens/SCR-007-scrap-list.md) |
 | [SCR-008_landscape_parked.svg](SCR-008_landscape_parked.svg) | `SCR-008/landscape/parked/light` | [SCR-008](../screens/SCR-008-drive-summary.md) |
@@ -26,8 +28,9 @@
 | [SCR-009_landscape_driving.svg](SCR-009_landscape_driving.svg) | `SCR-009/landscape/driving/light` | [SCR-009](../screens/SCR-009-driving-map-mode.md) |
 | [SCR-009_portrait_driving_fallback.svg](SCR-009_portrait_driving_fallback.svg) | 대체안(레이더), Figma 이관 보류 | [SCR-009](../screens/SCR-009-driving-map-mode.md) |
 | [SCR-010_landscape_parked.svg](SCR-010_landscape_parked.svg) | `SCR-010/landscape/parked/light` | [SCR-010](../screens/SCR-010-my-page.md) |
+| [SCR-011_landscape_parked.svg](SCR-011_landscape_parked.svg) | `SCR-011/landscape/parked/light` | [SCR-011](../screens/SCR-011-interest-catch-up.md) |
 
-전체 화면을 표지와 함께 한 파일로 모은 [wireframes.pdf](wireframes.pdf)도 있습니다. SVG를 고치면 PDF도 다시 만들어야 합니다.
+전체 화면을 표지와 함께 한 파일로 모은 [wireframes.pdf](wireframes.pdf)도 있습니다. SVG를 고치면 PDF도 다시 만들어야 합니다. SCR-005 관심 매물 배너(T-025), SCR-008의 `관심 매물 모아보기` 버튼과 SCR-011(T-026)은 아직 PDF에 반영하지 않았습니다.
 
 ## Figma로 가져오기
 

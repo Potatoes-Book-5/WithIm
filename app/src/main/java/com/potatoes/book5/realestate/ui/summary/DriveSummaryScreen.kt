@@ -42,6 +42,7 @@ import com.potatoes.book5.realestate.domain.model.PassedInterest
 import com.potatoes.book5.realestate.ui.common.CrownIcon
 import com.potatoes.book5.realestate.ui.common.MinTouchHeight
 import com.potatoes.book5.realestate.ui.common.PillButton
+import com.potatoes.book5.realestate.ui.common.PillStyle
 import com.potatoes.book5.realestate.ui.common.ScrapToggleButton
 import com.potatoes.book5.realestate.ui.common.formatDistance
 import com.potatoes.book5.realestate.ui.common.formatPrice
@@ -243,6 +244,14 @@ private fun PassedInterests(
                     )
                 }
             }
+            Spacer(Modifier.height(24.wpx))
+            // SCR-011: 이번 주행에서 만난 관심 매물만 모아 본다(T-026).
+            PillButton(
+                text = stringResource(R.string.summary_open_catch_up),
+                onClick = { onIntent(DriveSummaryIntent.OpenInterestCatchUp) },
+                style = PillStyle.Primary,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
         Text(
             text = stringResource(R.string.summary_open_scraps),

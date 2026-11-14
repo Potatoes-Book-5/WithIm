@@ -46,6 +46,7 @@ import com.potatoes.book5.realestate.domain.usecase.RefreshScrapChangesUseCase
 import com.potatoes.book5.realestate.domain.usecase.SimulateNewDealsUseCase
 import com.potatoes.book5.realestate.domain.usecase.ToggleScrapUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveDrivingStateUseCase
+import com.potatoes.book5.realestate.domain.usecase.ObserveInterestMatchAlertsUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveLeaderChangesUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveNearbyRankingUseCase
 import com.potatoes.book5.realestate.domain.usecase.SaveConsentUseCase
@@ -101,6 +102,7 @@ class AppContainer(context: Context) {
     val observeNearbyRanking = ObserveNearbyRankingUseCase(rankingRepository)
     val observeDrivingState = ObserveDrivingStateUseCase(drivingStateProvider)
     val observeLeaderChanges = ObserveLeaderChangesUseCase(rankingRepository, consentRepository)
+    val observeInterestAlerts = ObserveInterestMatchAlertsUseCase(rankingRepository, consentRepository, scrapRepository)
 
     val simulateDriving = SimulateDrivingUseCase(vehicleSimulation)
     val simulateAreaChange = SimulateAreaChangeUseCase(vehicleSimulation)
