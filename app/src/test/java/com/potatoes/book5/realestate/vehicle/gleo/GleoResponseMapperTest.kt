@@ -18,4 +18,10 @@ class GleoResponseMapperTest {
    assertEquals(code,callback.data.single()["code"])
   }
  }
+ @Test fun unavailablePreparedDataHasRecoverableCodes() {
+  assertEquals("DATA_NOT_READY", GleoResponseMapper().map(GleoAction.SCRAP_APARTMENT,
+   Outcome.Failure(DomainError.DataNotReady(PreparedDataFailure.NOT_READY))).data.single()["code"])
+  assertEquals("STALE_DATA", GleoResponseMapper().map(GleoAction.SCRAP_APARTMENT,
+   Outcome.Failure(DomainError.DataNotReady(PreparedDataFailure.STALE))).data.single()["code"])
+ }
 }

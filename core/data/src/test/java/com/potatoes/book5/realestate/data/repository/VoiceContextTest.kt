@@ -27,9 +27,12 @@ class VoiceContextTest {
   override suspend fun markChangeSeen(apartmentId: String) { }
   override suspend fun deleteAll() { rows.value=emptyList() }
  }
- private fun apartments(load: suspend (String)->Outcome<ApartmentDetail>)=object:ApartmentRepository {
-  override suspend fun detail(apartmentId: String)=load(apartmentId)
-  override suspend fun latestDeal(apartmentId: String): Outcome<Deal> = error("unused")
+ private fun apartments(load: (String)->Outcome<ApartmentDetail>)=PreparedScrapReader { id ->
+  when(val value=load(id)) {
+   is Outcome.Failure -> value
+   is Outcome.Success -> value.value.let { d -> Outcome.Success(PreparedScrapCandidate(d.id,d.name,d.neighborhood,
+    d.latestDeal.areaPyeong,PriceRecord(d.latestDeal.priceManwon,d.latestDeal.date),d.builtYear,time,"41117",d.households)) }
+  }
  }
  @Test fun visibleNudgeExpiresAndHiddenViewsCannotPublish() {
   active();store.showNudge(1,"a",8000)
@@ -58,17 +61,17 @@ class VoiceContextTest {
   assertTrue(api.ensure("a") is Outcome.Success)
   assertEquals(1,rows.writes);assertEquals("a",rows.rows.value.single().apartmentId)
  }
- @Test fun capturedTargetSurvivesReplacementDuringFetch()=runTest {
+ @Test fun capturedTargetSurvivesReplacementDuringPreparedRead()=runTest {
   active();store.showNudge(1,"a",8000);val captured=call();val rows=Scraps()
   val api=ScrapVoiceTargetUseCase(rows,apartments { id -> assertEquals("a",id);store.showNudge(2,"b",8000);Outcome.Success(detail) },store)
   assertTrue(api(captured) is Outcome.Success);assertEquals("a",rows.rows.value.single().apartmentId)
  }
- @Test fun revokedContextAfterFetchPreventsMutation()=runTest {
+ @Test fun revokedContextAfterPreparedReadPreventsMutation()=runTest {
   active();store.showNudge(1,"a",8000);val rows=Scraps()
   val api=ScrapVoiceTargetUseCase(rows,apartments { store.setConsented(false);Outcome.Success(detail) },store)
   assertTrue(api(call()) is Outcome.Failure);assertEquals(0,rows.writes)
  }
- @Test fun missingTargetNeverFetchesAndFetchFailureNeverWrites()=runTest {
+ @Test fun missingTargetNeverReadsAndUnavailableSnapshotNeverWrites()=runTest {
   active();val rows=Scraps();var fetches=0
   val api=ScrapVoiceTargetUseCase(rows,apartments { fetches++;Outcome.Failure(DomainError.Offline) },store)
   assertEquals(Outcome.Success(ActionResult.NeedsInput("apartment")),api(call()));assertEquals(0,fetches)

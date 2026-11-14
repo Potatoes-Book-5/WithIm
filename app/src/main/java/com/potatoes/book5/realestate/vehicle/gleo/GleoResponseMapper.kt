@@ -6,7 +6,8 @@ import com.potatoes.book5.realestate.domain.model.appaction.*
 
 class GleoResponseMapper {
     fun map(action: GleoAction, outcome: Outcome<ActionResult<AppActionPayload>>): GleoCallback = when (outcome) {
-        is Outcome.Failure -> GleoCallback.failure(action, when (outcome.error) {
+        is Outcome.Failure -> GleoCallback.failure(action, when (val error = outcome.error) {
+            is DomainError.DataNotReady -> if (error.reason == com.potatoes.book5.realestate.domain.error.PreparedDataFailure.STALE) "STALE_DATA" else "DATA_NOT_READY"
             DomainError.Offline -> "OFFLINE"
             DomainError.Timeout -> "TIMEOUT"
             DomainError.MissingApiKey -> "SERVICE_UNAVAILABLE"

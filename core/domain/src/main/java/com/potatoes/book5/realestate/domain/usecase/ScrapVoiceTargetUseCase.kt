@@ -11,7 +11,7 @@ data class VoiceScrapResult(val apartmentId: String, val alreadySaved: Boolean)
 /** Ensure-saved operation: a repeated voice request must never toggle a scrap off. */
 class ScrapVoiceTargetUseCase(
  private val scraps: ScrapRepository,
- private val apartments: ApartmentRepository,
+ private val prepared: PreparedScrapReader,
  private val contexts: VoiceContextPort,
  private val now: () -> LocalDateTime = LocalDateTime::now,
 ) {
@@ -26,16 +26,16 @@ class ScrapVoiceTargetUseCase(
  private suspend fun save(id: String, allowed: () -> Boolean): Outcome<ActionResult<VoiceScrapResult>> = mutex.withLock {
   if(!allowed()) return@withLock Outcome.Failure(DomainError.Invalid("context_invalidated"))
   if(scraps.get(id)!=null) return@withLock Outcome.Success(ActionResult.Completed(VoiceScrapResult(id,true)))
-  val detail=when(val result=apartments.detail(id)) {
+  val candidate=when(val result=prepared.readScrapCandidate(id)) {
    is Outcome.Failure -> return@withLock result
    is Outcome.Success -> result.value
   }
-  if(detail.id!=id) return@withLock Outcome.Failure(DomainError.InvalidResponse)
+  if(candidate.apartmentId!=id || candidate.name.isBlank() || candidate.areaPyeong <= 0 || candidate.latest.priceManwon <= 0) return@withLock Outcome.Failure(DomainError.InvalidResponse)
   if(!allowed()) return@withLock Outcome.Failure(DomainError.Invalid("context_invalidated"))
   // Recheck after fetch so another completed save is never overwritten.
   if(scraps.get(id)!=null) return@withLock Outcome.Success(ActionResult.Completed(VoiceScrapResult(id,true)))
-  val at=now(); val record=PriceRecord(detail.latestDeal.priceManwon,detail.latestDeal.date)
-  scraps.upsert(Scrap(id,detail.name,detail.neighborhood,detail.latestDeal.areaPyeong,at,record,record,at,null,detail.households,detail.builtYear))
+  val at=now(); val record=candidate.latest
+  scraps.upsert(Scrap(id,candidate.name,candidate.neighborhood,candidate.areaPyeong,at,record,record,at,null,candidate.households,candidate.builtYear))
   Outcome.Success(ActionResult.Completed(VoiceScrapResult(id,false)))
  }
 }
