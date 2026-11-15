@@ -37,10 +37,10 @@
 <path d="M849 691.92 L1662 661.92" fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M849 894.64 L1662 864.64" fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M1471.94 252 L1410.1 1016" fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
-<circle cx="1255.5" cy="836.72" r="116" fill="none" stroke="#2F5BEA" stroke-width="4" stroke-dasharray="18 14"/>
-<text x="1349.86" y="744.36" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="700" fill="#2F5BEA" text-anchor="start">2km</text>
-<circle cx="1255.5" cy="836.72" r="290" fill="none" stroke="#9AA1AD" stroke-width="4"/>
-<text x="1473.4" y="620.82" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="700" fill="#5B6270" text-anchor="start">5km</text>
+<circle cx="1255.5" cy="836.72" r="145" fill="none" stroke="#9AA1AD" stroke-width="4"/>
+<text x="1364.2" y="955.5" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="700" fill="#5B6270" text-anchor="start">500m</text>
+<circle cx="1255.5" cy="836.72" r="290" fill="none" stroke="#2F5BEA" stroke-width="4"/>
+<text x="1473.4" y="620.82" font-family="Asta Sans, Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="700" fill="#2F5BEA" text-anchor="start">1km</text>
 <circle cx="1023.6" cy="438.52" r="12" fill="#A9AFBA"/>
 <circle cx="1448.75" cy="691.9200000000001" r="12" fill="#A9AFBA"/>
 <circle cx="1162.74" cy="1053.92" r="12" fill="#A9AFBA"/>

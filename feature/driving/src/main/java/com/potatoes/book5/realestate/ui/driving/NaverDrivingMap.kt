@@ -55,9 +55,15 @@ import kotlin.math.ln
 import kotlin.math.min
 import kotlin.math.sin
 
-/** Street-level camera. Ranking distance must never zoom the camera out. */
-private const val VISIBLE_RADIUS_METERS = 150.0
-private const val STREET_LEVEL_MIN_ZOOM = 18.5
+/**
+ * 차량 주변에 담을 반경 1km(SCR-009). 카메라 줌은 이 값과 지도 크기로 계산한다.
+ * 순위 조회 반경(3km)이나 순위 핀 위치로 카메라를 넓히지 않는다.
+ */
+private const val VISIBLE_RADIUS_METERS = 1_000.0
+
+/** 거리 원: 안쪽 500m 회색 눈금, 바깥 1km 강조색(화면 가장자리). */
+private const val INNER_RING_METERS = 500.0
+private const val OUTER_RING_METERS = VISIBLE_RADIUS_METERS
 
 /** 차량을 화면 아래쪽 약 3/4 지점에 두기 위한 위쪽 콘텐츠 패딩 비율. (패딩 + 높이) / 2 = 0.74 × 높이 */
 private const val TOP_PADDING_RATIO = 0.48f
@@ -160,9 +166,7 @@ private fun NaverDrivingMap(
         val heightPx = constraints.maxHeight
         // 차량에서 위쪽(높이의 0.74)과 좌우(너비의 0.5) 중 짧은 쪽에 반경이 들어오게 한다.
         val visibleDp = with(density) { min(widthPx * 0.5f, heightPx * 0.74f).toDp().value }
-        val visibleRadius = VISIBLE_RADIUS_METERS
-        val cameraZoom = maxOf(STREET_LEVEL_MIN_ZOOM,
-            zoomFor(Projection.getMetersPerDp(center.location.latitude, 0.0), visibleDp, visibleRadius))
+        val cameraZoom = zoomFor(Projection.getMetersPerDp(center.location.latitude, 0.0), visibleDp, VISIBLE_RADIUS_METERS)
 
         AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize())
 
@@ -236,10 +240,12 @@ private fun NaverMap.applyDrivingSettings() {
 }
 
 /**
- * Convert visible length to a zoom. The live map additionally enforces a street-level minimum.
- * @param metersPerDpAtZoom0 차량 위도에서 줌 0의 dp당 미터(`Projection.getMetersPerDp`)
+ * [visibleDp] 길이에 [radiusMeters]가 들어가는 줌.
+ * 네이버 지도 SDK의 `Projection.getMetersPerDp(latitude, zoom)`은 줌이 1 오를 때마다 절반이 되므로
+ * `metersPerDp(zoom) = metersPerDp(0) / 2^zoom`이고, 원하는 dp당 미터(`radiusMeters / visibleDp`)를 넣어 줌을 푼다.
+ * @param metersPerDpAtZoom0 차량 위도에서 줌 0의 dp당 미터(`Projection.getMetersPerDp(latitude, 0.0)`)
  */
-internal fun zoomFor(metersPerDpAtZoom0: Double, visibleDp: Float, radiusMeters: Double = 5_500.0): Double {
+internal fun zoomFor(metersPerDpAtZoom0: Double, visibleDp: Float, radiusMeters: Double = VISIBLE_RADIUS_METERS): Double {
     val wantedMetersPerDp = radiusMeters / visibleDp
     return ln(metersPerDpAtZoom0 / wantedMetersPerDp) / ln(2.0)
 }
@@ -258,15 +264,15 @@ private fun buildOverlays(
 ): List<Overlay> {
     val center = centerPose.location.toLatLng()
     val circles = listOf(
-        CircleOverlay(center, 50.0).apply {
+        CircleOverlay(center, INNER_RING_METERS).apply {
             color = android.graphics.Color.TRANSPARENT
-            outlineColor = colors.accent
+            outlineColor = withAlpha(colors.ink, 0.35f)
             outlineWidth = sizes.stroke.toInt()
             zIndex = 0
         },
-        CircleOverlay(center, 100.0).apply {
+        CircleOverlay(center, OUTER_RING_METERS).apply {
             color = android.graphics.Color.TRANSPARENT
-            outlineColor = withAlpha(colors.ink, 0.35f)
+            outlineColor = colors.accent
             outlineWidth = sizes.stroke.toInt()
             zIndex = 0
         },
