@@ -106,7 +106,7 @@ git clone https://github.com/Potatoes-Book-5/King-of-real-estate.git ~/AndroidSt
 adb shell am start -n com.potatoes.book5.realestate/.MainActivity
 ```
 
-앱 런처에도 **King of Real Estate**(집 모양 아이콘)로 표시됩니다.
+앱 런처에는 `app_name`인 **임과 함께**(집 모양 아이콘)로 표시됩니다. 영어 이름은 **WithIm**입니다.
 
 > `adb`가 없다고 나오면 PATH에 추가합니다 (`~/.zshrc`):
 > ```bash
