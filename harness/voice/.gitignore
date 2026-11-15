@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.wav
+*.aiff
+*.log
+/session.json
+/results.json
+/run.json
+/app-boundary.json
+/instrumentation.txt
+/runs/

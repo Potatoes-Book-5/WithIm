@@ -22,11 +22,15 @@ run() {
   "$@" 2>&1 | tee -a "$log"
 }
 
+if [ "$mode" = "--device" ]; then
+  run python3 harness/check-pleos-device.py
+fi
+
 run bash harness/check-docs.sh
 run bash harness/check-registry.sh
 
 if [ "$mode" != "--docs" ]; then
-  run ./gradlew assembleDebug testDebugUnitTest lintDebug
+  run ./gradlew :core:domain:test assembleDebug testDebugUnitTest lintDebug
 fi
 
 if [ "$mode" = "--device" ]; then

@@ -119,6 +119,7 @@ class AppViewModel(
     private val simulateDriveEnd: SimulateDriveEndUseCase,
     private val refreshMarket: RefreshMarketUseCase,
     private val observeUxRestricted: ObserveUxRestrictedUseCase,
+    private val voiceContext: com.potatoes.book5.realestate.domain.model.appaction.VoiceContextPort? = null,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AppState())
@@ -159,5 +160,8 @@ class AppViewModel(
 
     private fun apply(result: AppResult) {
         _state.update { reduceApp(it, result) }
+        val current=_state.value
+        voiceContext?.setAppState(current.onboardingDone,
+            (current.current as? Screen.Detail)?.apartmentId?.takeUnless { current.showDriving }, current.showDriving, visualDetailsAllowed = !current.showDriving)
     }
 }

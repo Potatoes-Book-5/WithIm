@@ -30,5 +30,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)
+    testImplementation(libs.json.test)
     testImplementation(libs.kotlinx.coroutines.test)
 }

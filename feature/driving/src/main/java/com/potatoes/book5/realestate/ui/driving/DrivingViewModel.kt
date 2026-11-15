@@ -31,6 +31,9 @@ class DrivingViewModel(
     private val refreshMarket: RefreshMarketUseCase,
     private val observeInterestAlerts: ObserveInterestMatchAlertsUseCase,
     private val toggleScrapById: ToggleScrapByIdUseCase,
+    private val voiceContext: com.potatoes.book5.realestate.domain.model.appaction.VoiceContextPort? = null,
+    private val observeScrappedIds: com.potatoes.book5.realestate.domain.usecase.ObserveScrappedIdsUseCase? = null,
+    private val ensureScrap: com.potatoes.book5.realestate.domain.usecase.ScrapVoiceTargetUseCase? = null,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -38,8 +41,9 @@ class DrivingViewModel(
     )
     val state: StateFlow<DrivingScreenState> = _state.asStateFlow()
 
-    private var alertCount = 0L
+    private val alertCount get() = alertIds.incrementAndGet()
     private var tradeLookup: Job? = null
+    private var savedIds: Set<String> = emptySet()
 
     private fun loadTradeRanking() {
         if (tradeLookup?.isActive == true) return
@@ -49,6 +53,14 @@ class DrivingViewModel(
     }
 
     init {
+        observeScrappedIds?.let { observe -> viewModelScope.launch {
+            observe().collect { ids ->
+                savedIds=ids
+                val alert=_state.value.alert as? InterestAlertUi
+                if(alert != null && alert.apartmentId in ids)
+                    apply(DrivingResult.AlertScrapChanged(alert.key, ScrapButtonState.SAVED))
+            }
+        } }
         viewModelScope.launch {
             observeNearbyRanking().collect { snapshot ->
                 apply(
@@ -89,7 +101,7 @@ class DrivingViewModel(
             observeLeaderChanges().collect { change ->
                 show(
                     LeaderAlertUi(
-                        key = ++alertCount,
+                        key = alertCount,
                         previousName = change.previous.name,
                         currentName = change.current.apartment.name,
                         priceManwon = change.current.apartment.priceManwon,
@@ -105,7 +117,7 @@ class DrivingViewModel(
                 val apartment = event.match.apartment
                 show(
                     InterestAlertUi(
-                        key = ++alertCount,
+                        key = alertCount,
                         apartmentId = apartment.id,
                         name = apartment.name,
                         priceManwon = apartment.priceManwon,
@@ -121,9 +133,15 @@ class DrivingViewModel(
 
     /** 화면 알림은 자동으로 닫는다(F-006 규칙 3). TTS 연동은 이후 작업이다. */
     private fun show(alert: DrivingAlertUi) {
-        apply(DrivingResult.AlertShown(alert))
+        val previous=_state.value.alert
+        if(previous != null) voiceContext?.dismissNudge(previous.key)
+        val displayed=if(alert is InterestAlertUi && alert.apartmentId in savedIds)
+            alert.copy(scrap=ScrapButtonState.SAVED) else alert
+        apply(DrivingResult.AlertShown(displayed))
+        if(alert is InterestAlertUi) voiceContext?.showNudge(alert.key,alert.apartmentId,durationOf(alert))
         viewModelScope.launch {
             delay(durationOf(alert))
+            voiceContext?.dismissNudge(alert.key)
             apply(DrivingResult.AlertExpired(alert.key))
         }
     }
@@ -133,6 +151,11 @@ class DrivingViewModel(
         if (alert.key != key || alert.scrap != ScrapButtonState.IDLE) return
         apply(DrivingResult.AlertScrapChanged(key, ScrapButtonState.SAVING))
         viewModelScope.launch {
+            if(ensureScrap != null) {
+                val result=ensureScrap.ensure(alert.apartmentId)
+                apply(DrivingResult.AlertScrapChanged(key, if(result is Outcome.Success) ScrapButtonState.SAVED else ScrapButtonState.IDLE))
+                return@launch
+            }
             var outcome = toggleScrapById(alert.apartmentId)
             // 그사이 다른 화면에서 스크랩해 둔 단지였다면 토글이 해제했으므로 다시 켠다.
             if (outcome is Outcome.Success && !outcome.value) outcome = toggleScrapById(alert.apartmentId)
@@ -160,7 +183,12 @@ class DrivingViewModel(
         _state.update { reduceDriving(it, result) }
     }
 
+    override fun onCleared() {
+        _state.value.alert?.let { voiceContext?.dismissNudge(it.key) }
+        super.onCleared()
+    }
     companion object {
+        private val alertIds=java.util.concurrent.atomic.AtomicLong()
         /** 대장 교체 알림 표시 시간(F-006 규칙 3, 2026-11-14 사용자 결정 10초) */
         const val LEADER_ALERT_DURATION_MILLIS = 10_000L
         /** 관심 매물 배너 표시 시간(F-006 규칙 3, 제안값 8초) */
