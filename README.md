@@ -2,7 +2,8 @@
 
 **임(장)과 함께; 내가 궁금했던 부동산 정보와 함께하는 모빌리티 경험**
 
-**WithIm (임과 함께)** 은 현대자동차그룹 **Pleos Connect** 차량 인포테인먼트(IVI) 플랫폼을 위한 **실시간 지능형 모빌리티 임장 앱**입니다. 차량의 실시간 위치(FusedLocation), 기어/주행 규제 상태(AAOS `GEAR_SELECTION`·`CarUxRestrictions`), 온디바이스 음성 안내(TextToSpeech), 대화형 음성 에이전트(Gleo AI), 내비게이션(NaviHelper)을 결합하여, 일상적인 주행과 드라이브 동선을 자연스러운 부동산 탐색(임장) 경험으로 확장합니다.
+**WithIm (임과 함께)** 은 현대자동차그룹 **Pleos Connect** 차량 인포테인먼트(IVI) 플랫폼을 위한 **실시간 지능형 모빌리티 임장 앱**입니다.  
+차량의 실시간 위치(FusedLocation), 기어/주행 규제 상태(AAOS `GEAR_SELECTION`·`CarUxRestrictions`), 온디바이스 음성 안내(TextToSpeech), 대화형 음성 에이전트(Gleo AI), 내비게이션(NaviHelper)을 결합하여, 일상적인 주행과 드라이브 동선을 자연스러운 부동산 탐색(임장) 경험으로 확장합니다.
 
 ---
 
@@ -94,8 +95,8 @@ adb shell pm grant com.potatoes.book5.realestate pleos.car.permission.TTS_SERVIC
 
 1. **저장소 클론 및 Git 훅 설정**
    ```bash
-   git clone https://github.com/Potatoes-Book-5/King-of-real-estate.git
-   cd King-of-real-estate
+   git clone https://github.com/Potatoes-Book-5/WithIm.git
+   cd WithIm
    ./harness/setup.sh
    cp local.properties.example local.properties   # API 키 입력
    ```
@@ -158,8 +159,8 @@ Pleos Connect 에뮬레이터에서 실제 주행(기어 변속, 차량 위치 �
   - Release APK 빌드: `./gradlew assembleRelease`
     - 생성 경로: `app/build/outputs/apk/release/app-release-unsigned.apk`
 - **GitHub 저장소 및 Release 링크**:
-  - GitHub Repository: <https://github.com/Potatoes-Book-5/King-of-real-estate> (공모전 제출 미러: <https://github.com/Potatoes-Book-5/WithIm>)
-  - GitHub Releases (APK 다운로드): <https://github.com/Potatoes-Book-5/King-of-real-estate/releases>
+  - GitHub Repository: <https://github.com/Potatoes-Book-5/WithIm>
+  - APK 다운로드 경로: <https://github.com/Potatoes-Book-5/WithIm/tree/main/apk>
 
 ---
 
