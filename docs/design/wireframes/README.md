@@ -30,7 +30,13 @@
 | [SCR-010_landscape_parked.svg](SCR-010_landscape_parked.svg) | `SCR-010/landscape/parked/light` | [SCR-010](../screens/SCR-010-my-page.md) |
 | [SCR-011_landscape_parked.svg](SCR-011_landscape_parked.svg) | `SCR-011/landscape/parked/light` | [SCR-011](../screens/SCR-011-interest-catch-up.md) |
 
-전체 화면을 표지와 함께 한 파일로 모은 [wireframes.pdf](wireframes.pdf)도 있습니다. SVG를 고치면 PDF도 다시 만들어야 합니다. SCR-005 관심 매물 배너(T-025), SCR-008의 `관심 매물 모아보기` 버튼과 SCR-011(T-026)은 아직 PDF에 반영하지 않았습니다.
+전체 화면을 표지와 함께 한 파일로 모은 [wireframes.pdf](wireframes.pdf)도 있습니다. 표지의 앱 이름은 영어 이름 **WithIm**(임과 함께)입니다. 위 표의 SVG를 SCR 순서대로 한 쪽에 하나씩 싣고, 쪽마다 SCR ID, 화면 이름, 변형, 방향·상태를 적습니다.
+
+SVG를 고치거나 추가하면 PDF를 다시 만듭니다. Google Chrome이 필요하며, 새 SVG는 스크립트의 `PAGES` 목록에 먼저 추가합니다.
+
+```bash
+python3 harness/build-wireframes-pdf.py
+```
 
 ## Figma로 가져오기
 
