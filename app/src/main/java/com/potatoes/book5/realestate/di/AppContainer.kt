@@ -118,6 +118,7 @@ class AppContainer(context: Context) {
         consentRepository,
         scrapRepository,
         interestRepository = interestRepository,
+        driveRecordRepository = driveRecordRepository,
     )
 
     val simulateDriving = SimulateDrivingUseCase(vehicleSimulation)

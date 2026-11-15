@@ -3,6 +3,8 @@ package com.potatoes.book5.realestate.ui
 import com.potatoes.book5.realestate.domain.model.DriveRank
 import com.potatoes.book5.realestate.domain.model.PassedInterest
 import com.potatoes.book5.realestate.domain.model.OnboardingStep
+import com.potatoes.book5.realestate.domain.model.DriveRecommendation
+import com.potatoes.book5.realestate.domain.model.RecommendationKey
 import com.potatoes.book5.realestate.domain.usecase.MarkDriveSummarySeenUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveDriveSummaryUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveScrappedIdsUseCase
@@ -98,6 +100,30 @@ class DriveSummaryTest {
         runCurrent()
         assertFalse(vm.state.value.isLoading)
         assertNull(vm.state.value.summary)
+    }
+
+    @Test
+    fun `추천 카드와 별도 알림 매물을 모두 지나친 관심 목록에 중복 없이 포함한다`() = runTest(dispatcher) {
+        val drives = FakeDriveRecordRepository()
+        val id = drives.startSession(t, 10)
+        drives.recordSnapshot(
+            sessionId = id,
+            at = t,
+            top = emptyList(),
+            passed = listOf(PassedInterest("featured", "추천 단지", 1.0, 120_000)),
+            recommendations = listOf(
+                DriveRecommendation("featured", "추천 단지", 120_000, 30, 95, 1.0, RecommendationKey.PRICE),
+                DriveRecommendation("second", "다른 추천", 110_000, 28, 90, 1.5, RecommendationKey.AREA),
+                DriveRecommendation("third", "세 번째 추천", 100_000, 25, 85, 1.8, RecommendationKey.NEWNESS),
+            ),
+        )
+        drives.recordAlertedInterest(t.plusMinutes(1), 10, PassedInterest("outside-top3", "알림 단지", 1.9, 130_000))
+        drives.finishSession(id, null)
+
+        val summary = drives.observeSummary(id).first()!!
+
+        assertEquals(listOf("outside-top3"), summary.additionalPassedInterests.map { it.apartmentId })
+        assertEquals(4, summary.interestSummaryCount)
     }
 
     @Test

@@ -58,7 +58,7 @@ fun InterestCatchUpScreen(state: DriveSummaryState, onIntent: (DriveSummaryInten
     ) {
         Header(summary, onBack = { onIntent(DriveSummaryIntent.Close) })
         val recommendations = summary?.recommendationTop.orEmpty()
-        val passedItems = if (recommendations.isEmpty()) summary?.passedInterests.orEmpty() else emptyList()
+        val passedItems = summary?.additionalPassedInterests.orEmpty()
         LazyColumn(
             modifier = Modifier.fillMaxWidth().weight(1f),
             contentPadding = PaddingValues(top = 40.wpx, bottom = 16.wpx),
@@ -74,16 +74,15 @@ fun InterestCatchUpScreen(state: DriveSummaryState, onIntent: (DriveSummaryInten
                         onToggle = { onIntent(DriveSummaryIntent.ToggleScrap(item.apartmentId)) },
                     )
                 }
-            } else {
-                items(passedItems, key = { it.apartmentId }) { item ->
-                    CatchUpRow(
-                        item = item,
-                        scrapped = item.apartmentId in state.scrappedIds,
-                        toggling = item.apartmentId in state.togglingIds,
-                        onOpen = { onIntent(DriveSummaryIntent.OpenApartment(item.apartmentId)) },
-                        onToggle = { onIntent(DriveSummaryIntent.ToggleScrap(item.apartmentId)) },
-                    )
-                }
+            }
+            items(passedItems, key = { it.apartmentId }) { item ->
+                CatchUpRow(
+                    item = item,
+                    scrapped = item.apartmentId in state.scrappedIds,
+                    toggling = item.apartmentId in state.togglingIds,
+                    onOpen = { onIntent(DriveSummaryIntent.OpenApartment(item.apartmentId)) },
+                    onToggle = { onIntent(DriveSummaryIntent.ToggleScrap(item.apartmentId)) },
+                )
             }
         }
         Text(
@@ -114,7 +113,7 @@ private fun Header(summary: DriveSummary?, onBack: () -> Unit) {
             Text(
                 stringResource(
                     R.string.catch_up_meta,
-                    summary.recommendationTop.takeIf { it.isNotEmpty() }?.size ?: summary.passedInterests.size,
+                    summary.interestSummaryCount,
                     date.monthValue,
                     date.dayOfMonth,
                 ),

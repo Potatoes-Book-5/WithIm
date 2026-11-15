@@ -66,6 +66,9 @@ interface DriveDao {
     @Query("SELECT COUNT(*) FROM drive_ranks WHERE session_id = :id")
     suspend fun rankCount(id: Long): Int
 
+    @Query("SELECT COUNT(*) FROM drive_passed_interests WHERE session_id = :id")
+    suspend fun passedCount(id: Long): Int
+
     @Query("UPDATE drive_sessions SET ended_at = :endedAt WHERE id = :id")
     suspend fun end(id: Long, endedAt: Long)
 

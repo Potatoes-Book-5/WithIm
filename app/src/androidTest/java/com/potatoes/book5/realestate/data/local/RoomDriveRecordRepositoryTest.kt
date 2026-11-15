@@ -78,6 +78,20 @@ class RoomDriveRecordRepositoryTest {
     }
 
     @Test
+    fun alertedRecommendationIsKeptAsPassedInterestEvenOutsideFinalTopThree() = runTest {
+        repo.recordAlertedInterest(t.plusMinutes(2), 10, PassedInterest("alerted", "알림 단지", 1.8, 150))
+        val id = repo.openSessionId()!!
+        // The recorder reuses the session if the notification created it first.
+        assertEquals(id, repo.startSession(t.plusMinutes(2), 10))
+        repo.recordAlertedInterest(t.plusMinutes(5), 10, PassedInterest("alerted", "알림 단지", 0.7, 150))
+        repo.recordSnapshot(id, t.plusMinutes(6), emptyList(), emptyList())
+
+        assertTrue(repo.finishSession(id, t.plusMinutes(7)))
+        val summary = repo.observeSummary(id).first()!!
+        assertEquals(listOf("alerted" to 0.7), summary.passedInterests.map { it.apartmentId to it.closestKm })
+    }
+
+    @Test
     fun emptySessionIsDeletedAndTrimKeepsRecent() = runTest {
         val empty = repo.startSession(t, 10)
         assertFalse(repo.finishSession(empty, null))

@@ -1,7 +1,9 @@
 package com.potatoes.book5.realestate.domain.usecase
 
 import com.potatoes.book5.realestate.domain.model.NearbyApartment
+import com.potatoes.book5.realestate.domain.model.PassedInterest
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
+import com.potatoes.book5.realestate.domain.port.DriveRecordRepository
 import com.potatoes.book5.realestate.domain.port.RankingRepository
 import com.potatoes.book5.realestate.domain.port.ScrapRepository
 import com.potatoes.book5.realestate.domain.port.InterestRepository
@@ -30,6 +32,7 @@ class ObserveInterestMatchAlertsUseCase(
     private val suppress: Duration = Duration.ofHours(24),
     private val now: () -> LocalDateTime = LocalDateTime::now,
     private val interestRepository: InterestRepository? = null,
+    private val driveRecordRepository: DriveRecordRepository? = null,
 ) {
     private val alertedAt = mutableMapOf<String, LocalDateTime>()
 
@@ -58,6 +61,16 @@ class ObserveInterestMatchAlertsUseCase(
                 .filter { candidate -> alertedAt[candidate.apartment.id]?.let { Duration.between(it, at) >= suppress } ?: true }
                 .minByOrNull { it.distanceKm }
                 ?: return@collect
+            driveRecordRepository?.recordAlertedInterest(
+                at = at,
+                radiusKm = snapshot.radiusKm,
+                interest = PassedInterest(
+                    apartmentId = target.apartment.id,
+                    name = target.apartment.name,
+                    closestKm = target.distanceKm,
+                    priceManwon = target.apartment.priceManwon,
+                ),
+            )
             alertedAt[target.apartment.id] = at
             emit(InterestMatchAlert(target, at))
         }

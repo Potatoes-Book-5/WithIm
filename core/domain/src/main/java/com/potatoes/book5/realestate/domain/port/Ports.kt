@@ -103,6 +103,8 @@ interface DriveRecordRepository {
         passed: List<PassedInterest>,
         recommendations: List<DriveRecommendation> = emptyList(),
     )
+    /** Persist the exact recommendation that produced a driving notification in this trip summary. */
+    suspend fun recordAlertedInterest(at: LocalDateTime, radiusKm: Int, interest: PassedInterest)
     suspend fun recordLeaderChange(sessionId: Long, change: DriveLeaderChange)
     suspend fun recordRound(
         sessionId: Long, at: LocalDateTime,
