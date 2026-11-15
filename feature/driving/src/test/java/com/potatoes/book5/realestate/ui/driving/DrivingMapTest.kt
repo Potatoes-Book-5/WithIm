@@ -2,6 +2,7 @@ package com.potatoes.book5.realestate.ui.driving
 
 import com.potatoes.book5.realestate.domain.model.GeoPoint
 import com.potatoes.book5.realestate.domain.model.VehiclePose
+import com.potatoes.book5.realestate.ui.common.MapPointUi
 import kotlin.math.pow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -23,5 +24,20 @@ class DrivingMapTest {
         assertEquals(1_000.0, metersPerDpAtZoom0 / 2.0.pow(zoom) * 300, 1e-6)
         // 화면이 넓을수록 더 확대한다.
         assertTrue(zoomFor(metersPerDpAtZoom0, 600f) > zoom)
+    }
+
+    @Test
+    fun `추천 알림 핀은 다음 순위 갱신 뒤에도 유지되고 중복되지 않는다`() {
+        val first = MapPointUi("h", "한빛마을 1단지", 1.2, -70.0, GeoPoint(37.0, 127.0))
+        val updated = first.copy(distanceKm = 0.8, bearingDeg = -40.0)
+        var state = reduceDriving(DrivingScreenState(), DrivingResult.RecommendationLocated(first))
+
+        state = reduceDriving(
+            state,
+            DrivingResult.RankingUpdated(10, emptyList(), emptyList(), emptyList(), mapCenter = VehiclePose(GeoPoint(37.1, 127.1))),
+        )
+        state = reduceDriving(state, DrivingResult.RecommendationLocated(updated))
+
+        assertEquals(listOf(updated), state.alertedRecommendations)
     }
 }

@@ -246,7 +246,7 @@ private fun PassedInterests(
                             item = item,
                             scrapped = item.apartmentId in state.scrappedIds,
                             toggling = item.apartmentId in state.togglingIds,
-                            onOpen = { onIntent(DriveSummaryIntent.OpenApartment(item.apartmentId)) },
+                            onOpen = { onIntent(DriveSummaryIntent.OpenRecommendation(item)) },
                             onToggle = { onIntent(DriveSummaryIntent.ToggleScrap(item.apartmentId)) },
                         )
                     }

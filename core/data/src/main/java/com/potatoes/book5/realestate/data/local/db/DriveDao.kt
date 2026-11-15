@@ -128,3 +128,24 @@ interface DriveDao {
         insertRanks(ranks)
     }
 }
+
+@Dao
+interface RecommendationFeedbackDao {
+    @Query("SELECT * FROM recommendation_feedback ORDER BY apartment_id")
+    suspend fun getAll(): List<RecommendationFeedbackEntity>
+
+    @Query("SELECT * FROM recommendation_feedback WHERE apartment_id = :apartmentId")
+    suspend fun get(apartmentId: String): RecommendationFeedbackEntity?
+
+    @Upsert
+    suspend fun upsert(item: RecommendationFeedbackEntity)
+
+    @Transaction
+    suspend fun recordDetailOpen(item: RecommendationFeedbackEntity) {
+        val old = get(item.apartmentId)
+        upsert(item.copy(detailOpenCount = ((old?.detailOpenCount ?: 0) + 1).coerceAtMost(10)))
+    }
+
+    @Query("DELETE FROM recommendation_feedback")
+    suspend fun deleteAll()
+}

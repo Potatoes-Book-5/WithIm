@@ -9,6 +9,7 @@ import com.potatoes.book5.realestate.domain.model.ApartmentDetail
 import com.potatoes.book5.realestate.domain.model.Deal
 import com.potatoes.book5.realestate.domain.model.RankingSnapshot
 import com.potatoes.book5.realestate.domain.model.Scrap
+import com.potatoes.book5.realestate.domain.model.RecommendationFeedback
 import com.potatoes.book5.realestate.domain.model.DriveLeaderChange
 import com.potatoes.book5.realestate.domain.model.DriveRank
 import com.potatoes.book5.realestate.domain.model.DriveSummary
@@ -58,6 +59,13 @@ interface ScrapRepository {
     suspend fun upsert(scrap: Scrap)
     suspend fun delete(apartmentId: String)
     suspend fun markChangeSeen(apartmentId: String)
+    suspend fun deleteAll()
+}
+
+/** On-device aggregate of explicit recommendation detail opens. */
+interface RecommendationFeedbackRepository {
+    suspend fun getAll(): List<RecommendationFeedback>
+    suspend fun recordDetailOpen(recommendation: DriveRecommendation)
     suspend fun deleteAll()
 }
 

@@ -4,10 +4,10 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.potatoes.book5.realestate.data.local.db.AppDatabase
+import com.potatoes.book5.realestate.domain.model.DriveRecommendation
 import com.potatoes.book5.realestate.domain.model.DriveLeaderChange
 import com.potatoes.book5.realestate.domain.model.DriveRank
 import com.potatoes.book5.realestate.domain.model.PassedInterest
-import com.potatoes.book5.realestate.domain.model.DriveRecommendation
 import com.potatoes.book5.realestate.domain.model.RecommendationKey
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -28,12 +28,14 @@ class RoomDriveRecordRepositoryTest {
 
     private lateinit var db: AppDatabase
     private lateinit var repo: RoomDriveRecordRepository
+    private lateinit var feedbackRepo: RoomRecommendationFeedbackRepository
     private val t = LocalDateTime.of(2026, 11, 14, 10, 0)
 
     @Before
     fun setUp() {
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), AppDatabase::class.java).build()
         repo = RoomDriveRecordRepository(db, ZoneId.of("Asia/Seoul"))
+        feedbackRepo = RoomRecommendationFeedbackRepository(db.recommendationFeedbackDao())
     }
 
     @After
@@ -113,5 +115,20 @@ class RoomDriveRecordRepositoryTest {
         assertEquals(ids[2], repo.observeLatestId().first())
         // 마지막 기록 시각으로 닫혔다.
         assertEquals(t.plusHours(2).plusMinutes(30), repo.observeSummary(ids[2]).first()!!.endedAt)
+    }
+
+    @Test
+    fun recommendationDetailOpenFeedbackIsAggregatedAndDeleted() = runTest {
+        val item = DriveRecommendation("opened", "상세를 연 단지", 120_000, 32, 90, 1.2, RecommendationKey.AREA, "정자동", 1_000, 2018)
+        repeat(12) { feedbackRepo.recordDetailOpen(item) }
+
+        val stored = feedbackRepo.getAll().single()
+        assertEquals("opened", stored.apartmentId)
+        assertEquals(10, stored.detailOpenCount)
+        assertEquals("정자동", stored.neighborhoodName)
+        assertEquals(1_000, stored.households)
+
+        feedbackRepo.deleteAll()
+        assertTrue(feedbackRepo.getAll().isEmpty())
     }
 }

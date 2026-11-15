@@ -7,6 +7,7 @@ import com.potatoes.book5.realestate.domain.usecase.MarkDriveSummarySeenUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveDriveSummaryUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveScrappedIdsUseCase
 import com.potatoes.book5.realestate.domain.usecase.ToggleScrapByIdUseCase
+import com.potatoes.book5.realestate.domain.usecase.RecordRecommendationDetailOpenUseCase
 import com.potatoes.book5.realestate.ui.Screen
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.Channel
@@ -25,6 +26,7 @@ class DriveSummaryViewModel(
     observeScrappedIds: ObserveScrappedIdsUseCase,
     private val markSeen: MarkDriveSummarySeenUseCase,
     private val toggleScrapById: ToggleScrapByIdUseCase,
+    private val recordRecommendationDetailOpen: RecordRecommendationDetailOpenUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DriveSummaryState())
@@ -50,6 +52,7 @@ class DriveSummaryViewModel(
         when (intent) {
             DriveSummaryIntent.Close -> send(DriveSummaryEffect.Close)
             is DriveSummaryIntent.OpenApartment -> send(DriveSummaryEffect.Navigate(Screen.Detail(intent.apartmentId)))
+            is DriveSummaryIntent.OpenRecommendation -> openRecommendation(intent.recommendation)
             DriveSummaryIntent.OpenScraps -> send(DriveSummaryEffect.Navigate(Screen.Scraps()))
             DriveSummaryIntent.OpenInterestCatchUp -> _state.value.summary?.let { send(DriveSummaryEffect.Navigate(Screen.InterestCatchUp(it.id))) }
             is DriveSummaryIntent.ToggleScrap -> toggle(intent.apartmentId)
@@ -69,6 +72,19 @@ class DriveSummaryViewModel(
             }
             if (!ok) _effect.send(DriveSummaryEffect.ShowScrapFailed)
             apply(DriveSummaryResult.Toggling(apartmentId, false))
+        }
+    }
+
+    private fun openRecommendation(recommendation: com.potatoes.book5.realestate.domain.model.DriveRecommendation) {
+        viewModelScope.launch {
+            try {
+                recordRecommendationDetailOpen(recommendation)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                // A local feedback write must not block opening the apartment detail.
+            }
+            _effect.send(DriveSummaryEffect.Navigate(Screen.Detail(recommendation.apartmentId)))
         }
     }
 

@@ -115,6 +115,7 @@ class DrivingViewModel(
         viewModelScope.launch {
             observeInterestAlerts().collect { event ->
                 val apartment = event.match.apartment
+                apply(DrivingResult.RecommendationLocated(event.match.toMapPoint()))
                 show(
                     InterestAlertUi(
                         key = alertCount,

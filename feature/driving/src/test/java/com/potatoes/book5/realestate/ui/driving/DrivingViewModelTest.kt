@@ -191,12 +191,14 @@ class DrivingViewModelTest {
         val vm = viewModel(ranking, scraps)
         runCurrent()
 
-        val near = NearbyApartment(Apartment("h", "한빛마을 1단지", 158_000, 34, LocalDate.of(2026, 10, 1)), 1.2, -70.0)
+        val location = GeoPoint(37.0, 127.0)
+        val near = NearbyApartment(Apartment("h", "한빛마을 1단지", 158_000, 34, LocalDate.of(2026, 10, 1), location), 1.2, -70.0)
         ranking.snapshots.value = snapshotOf("a").copy(interestMatches = listOf(near))
         runCurrent()
         val alert = vm.state.value.alert as? InterestAlertUi
         assertNotNull(alert)
         assertEquals("한빛마을 1단지", alert!!.name)
+        assertEquals(location, vm.state.value.alertedRecommendations.single().location)
         assertEquals(ScrapButtonState.IDLE, alert.scrap)
 
         vm.onIntent(DrivingIntent.ScrapAlert(alert.key))

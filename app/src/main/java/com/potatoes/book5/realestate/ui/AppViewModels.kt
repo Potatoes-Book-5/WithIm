@@ -77,6 +77,7 @@ object AppViewModels {
                 observeScrappedIds = c.observeScrappedIds,
                 markSeen = c.markDriveSummarySeen,
                 toggleScrapById = c.toggleScrapById,
+                recordRecommendationDetailOpen = c.recordRecommendationDetailOpen,
             )
         }
         initializer {

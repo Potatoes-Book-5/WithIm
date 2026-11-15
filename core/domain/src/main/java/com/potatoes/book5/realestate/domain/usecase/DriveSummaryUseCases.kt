@@ -4,6 +4,7 @@ import com.potatoes.book5.realestate.domain.error.Outcome
 import com.potatoes.book5.realestate.domain.model.DriveLeaderChange
 import com.potatoes.book5.realestate.domain.model.DriveRank
 import com.potatoes.book5.realestate.domain.model.DriveSummary
+import com.potatoes.book5.realestate.domain.model.DriveRecommendation
 import com.potatoes.book5.realestate.domain.model.LeaderEventKind
 import com.potatoes.book5.realestate.domain.model.DrivingState
 import com.potatoes.book5.realestate.domain.model.PassedInterest
@@ -14,6 +15,7 @@ import com.potatoes.book5.realestate.domain.port.DrivingStateProvider
 import com.potatoes.book5.realestate.domain.port.InterestRepository
 import com.potatoes.book5.realestate.domain.port.RankingRepository
 import com.potatoes.book5.realestate.domain.port.ScrapRepository
+import com.potatoes.book5.realestate.domain.port.RecommendationFeedbackRepository
 import com.potatoes.book5.realestate.domain.port.VehicleSimulation
 import java.time.LocalDateTime
 import kotlin.time.Duration
@@ -41,6 +43,8 @@ class DriveSessionRecorder(
     private val endDelay: Duration = Duration.ZERO,
     private val keep: Int = 10,
     private val interestRepository: InterestRepository? = null,
+    private val scrapRepository: ScrapRepository? = null,
+    private val recommendationFeedbackRepository: RecommendationFeedbackRepository? = null,
 ) {
     /** 개발 빌드에서 기다리지 않고 세션을 닫는 신호. 받을 때까지 남아 있다. */
     private val endSignal = Channel<Unit>(Channel.CONFLATED)
@@ -79,7 +83,13 @@ class DriveSessionRecorder(
                             top = top,
                             passed = snapshot.interestMatches.map { PassedInterest(it.apartment.id, it.apartment.name, it.distanceKm, it.apartment.priceManwon) },
                             recommendations = interestRepository?.get()?.let { condition ->
-                                DriveRecommendationPolicy.rank(condition, snapshot.recommendationCandidates, at.year)
+                                DriveRecommendationPolicy.rank(
+                                    condition,
+                                    snapshot.recommendationCandidates,
+                                    at.year,
+                                    scraps = scrapRepository?.getAll().orEmpty(),
+                                    feedback = recommendationFeedbackRepository?.getAll().orEmpty(),
+                                )
                             }.orEmpty(),
                         )
                         val newRound = snapshot.round?.id != lastRoundId
@@ -109,6 +119,12 @@ class DriveSessionRecorder(
     private suspend fun finish(id: Long, endedAt: LocalDateTime?) {
         if (repository.finishSession(id, endedAt)) repository.trim(keep)
     }
+}
+
+class RecordRecommendationDetailOpenUseCase(
+    private val repository: RecommendationFeedbackRepository,
+) {
+    suspend operator fun invoke(recommendation: DriveRecommendation) = repository.recordDetailOpen(recommendation)
 }
 
 /** 요약 하나를 관찰한다. id가 null이면 가장 최근 요약(홈 `지난 주행 요약`). */

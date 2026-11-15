@@ -47,6 +47,17 @@ data class Scrap(
     val hasUnseenChange: Boolean get() = change?.seen == false
 }
 
+/** Local aggregate for a recommendation card that the user opened. No trip or raw event timestamp is kept. */
+data class RecommendationFeedback(
+    val apartmentId: String,
+    val priceManwon: Long,
+    val areaPyeong: Int,
+    val neighborhoodName: String?,
+    val households: Int?,
+    val builtYear: Int?,
+    val detailOpenCount: Int,
+)
+
 data class PricePoint(val month: YearMonth, val priceManwon: Long)
 
 /** 아파트 상세(SCR-002). 제공되지 않는 단지 메타데이터는 null로 둔다. */

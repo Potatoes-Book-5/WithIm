@@ -90,10 +90,15 @@ fun DrivingMap(state: DrivingScreenState, naverMapAvailable: Boolean, modifier: 
         }
         return
     }
-    val rankedIds = state.mapRanking.mapTo(mutableSetOf()) { it.id }
-    NaverDrivingMap(center, vehicle, state.mapRanking,
-        state.interestMatches.filterNot { it.id in rankedIds },
-        state.others.filterNot { it.id in rankedIds }, modifier)
+    val rankedIds = state.mapRanking.mapTo(HashSet()) { it.id }
+    NaverDrivingMap(
+        center,
+        vehicle,
+        state.mapRanking,
+        (state.interestMatches + state.alertedRecommendations).distinctBy { it.id },
+        state.others.filterNot { it.id in rankedIds },
+        modifier,
+    )
 }
 
 /**
@@ -280,15 +285,17 @@ private fun buildOverlays(
     val dots = others.mapNotNull { point ->
         point.location?.let { marker(it, images.dot, z = 1) }
     }
-    val interests = interestMatches.mapNotNull { point ->
-        point.location?.let { marker(it, images.interest, z = 2) }
+    val rankedIds = ranking.mapTo(HashSet()) { it.id }
+    val recommendationIds = interestMatches.mapTo(HashSet()) { it.id }
+    val interests = interestMatches.filterNot { it.id in rankedIds }.mapNotNull { point ->
+        point.location?.let { marker(it, images.interest, z = 11) }
     }
     // Keep each pin at its real coordinate. The map viewport reveals it only as the car approaches;
     // never pan to the leader or fit all 3 km ranking pins into the camera.
     // 1위가 가장 위에 오도록 순위가 높을수록 zIndex를 크게 한다.
     val pins = ranking.mapNotNull { item ->
         item.location?.let { location ->
-            val image = images.rank(item.rank)
+            val image = images.rank(item.rank, item.id in recommendationIds)
             marker(location, image, z = 10 - item.rank).apply {
                 // 1위 이미지는 원 위에 왕관이 있어 원 중심을 좌표에 맞춘다.
                 if (item.rank == 1) anchor = PointF(0.5f, 1f - sizes.pin / 2 / (sizes.pin + sizes.crown * 0.8f))
@@ -320,7 +327,7 @@ private fun withAlpha(color: Int, alpha: Float): Int =
 
 /** 마커 이미지. 간이 지도(SchematicMap)와 같은 모양을 비트맵으로 그린다. */
 private class MarkerImages(private val colors: MarkerColors, private val sizes: MarkerSizes) {
-    private val ranks = mutableMapOf<Int, OverlayImage>()
+    private val ranks = mutableMapOf<Pair<Int, Boolean>, OverlayImage>()
 
     val dot: OverlayImage by lazy {
         draw(sizes.dot, sizes.dot) { canvas, w, _ ->
@@ -332,9 +339,9 @@ private class MarkerImages(private val colors: MarkerColors, private val sizes: 
     val interest: OverlayImage by lazy {
         draw(sizes.pin, sizes.pin) { canvas, w, _ ->
             val r = w / 2
-            canvas.drawCircle(r, r, r - sizes.stroke / 2, fill(colors.ground))
-            canvas.drawCircle(r, r, r - sizes.stroke / 2, stroke(colors.accent, sizes.stroke))
-            canvas.drawPath(starPath(r, r, r * 0.55f, r * 0.24f), fill(colors.accent))
+            canvas.drawCircle(r, r, r, fill(colors.ground))
+            canvas.drawCircle(r, r, r - sizes.stroke / 2, fill(colors.accent))
+            canvas.drawPath(starPath(r, r, r * 0.58f, r * 0.26f), fill(colors.ground))
         }
     }
 
@@ -365,7 +372,7 @@ private class MarkerImages(private val colors: MarkerColors, private val sizes: 
         }
     }
 
-    fun rank(rank: Int): OverlayImage = ranks.getOrPut(rank) {
+    fun rank(rank: Int, recommended: Boolean = false): OverlayImage = ranks.getOrPut(rank to recommended) {
         val leader = rank == 1
         val crownHeight = if (leader) sizes.crown * 0.8f else 0f
         draw(sizes.pin, sizes.pin + crownHeight) { canvas, w, _ ->
@@ -374,6 +381,13 @@ private class MarkerImages(private val colors: MarkerColors, private val sizes: 
             if (leader) canvas.drawPath(crownPath((w - sizes.crown) / 2, 0f, sizes.crown), fill(colors.accent))
             canvas.drawCircle(r, cy, r, fill(colors.ground))
             canvas.drawCircle(r, cy, r - sizes.stroke / 2, fill(if (leader) colors.accent else colors.ink))
+            if (recommended) {
+                val badgeX = r * 1.62f
+                val badgeY = cy + r * 0.55f
+                val badgeRadius = r * 0.34f
+                canvas.drawCircle(badgeX, badgeY, badgeRadius, fill(colors.ground))
+                canvas.drawPath(starPath(badgeX, badgeY, badgeRadius * 0.72f, badgeRadius * 0.32f), fill(colors.accent))
+            }
             val text = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = colors.ground
                 textAlign = Paint.Align.CENTER

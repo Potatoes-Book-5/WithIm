@@ -16,6 +16,7 @@ sealed interface DriveSummaryIntent {
     data object Close : DriveSummaryIntent
     data class ToggleScrap(val apartmentId: String) : DriveSummaryIntent
     data class OpenApartment(val apartmentId: String) : DriveSummaryIntent
+    data class OpenRecommendation(val recommendation: com.potatoes.book5.realestate.domain.model.DriveRecommendation) : DriveSummaryIntent
     data object OpenScraps : DriveSummaryIntent
     /** SCR-008에서 같은 주행의 관심 매물 모아보기(SCR-011)를 연다. */
     data object OpenInterestCatchUp : DriveSummaryIntent

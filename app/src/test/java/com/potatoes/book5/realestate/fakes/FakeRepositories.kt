@@ -13,6 +13,8 @@ import com.potatoes.book5.realestate.domain.model.ApartmentDetail
 import com.potatoes.book5.realestate.domain.model.Deal
 import com.potatoes.book5.realestate.domain.model.PriceRecord
 import com.potatoes.book5.realestate.domain.model.Scrap
+import com.potatoes.book5.realestate.domain.model.DriveRecommendation
+import com.potatoes.book5.realestate.domain.model.RecommendationFeedback
 import com.potatoes.book5.realestate.domain.model.VehiclePose
 import com.potatoes.book5.realestate.domain.port.ApartmentRepository
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
@@ -20,6 +22,7 @@ import com.potatoes.book5.realestate.domain.port.InterestRepository
 import com.potatoes.book5.realestate.domain.port.NeighborhoodRepository
 import com.potatoes.book5.realestate.domain.port.RankingRepository
 import com.potatoes.book5.realestate.domain.port.ScrapRepository
+import com.potatoes.book5.realestate.domain.port.RecommendationFeedbackRepository
 import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlinx.coroutines.flow.Flow
@@ -77,6 +80,24 @@ class FakeScrapRepository(initial: List<Scrap> = emptyList()) : ScrapRepository 
         val change = s?.change ?: return@update map
         map + (apartmentId to s.copy(change = change.copy(seen = true)))
     }
+}
+
+class FakeRecommendationFeedbackRepository : RecommendationFeedbackRepository {
+    val feedback = linkedMapOf<String, RecommendationFeedback>()
+    override suspend fun getAll(): List<RecommendationFeedback> = feedback.values.toList()
+    override suspend fun recordDetailOpen(recommendation: DriveRecommendation) {
+        val previous = feedback[recommendation.apartmentId]
+        feedback[recommendation.apartmentId] = RecommendationFeedback(
+            apartmentId = recommendation.apartmentId,
+            priceManwon = recommendation.priceManwon,
+            areaPyeong = recommendation.areaPyeong,
+            neighborhoodName = recommendation.neighborhoodName,
+            households = recommendation.households,
+            builtYear = recommendation.builtYear,
+            detailOpenCount = ((previous?.detailOpenCount ?: 0) + 1).coerceAtMost(10),
+        )
+    }
+    override suspend fun deleteAll() = feedback.clear()
 }
 
 class FakeApartmentRepository(

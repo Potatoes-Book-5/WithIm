@@ -13,6 +13,7 @@ import com.potatoes.book5.realestate.data.repository.LiveMarketRepository
 import com.potatoes.book5.realestate.data.local.LegacySampleCleanup
 import com.potatoes.book5.realestate.data.local.RoomDriveRecordRepository
 import com.potatoes.book5.realestate.data.local.RoomScrapRepository
+import com.potatoes.book5.realestate.data.local.RoomRecommendationFeedbackRepository
 import com.potatoes.book5.realestate.data.local.db.AppDatabase
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
 import com.potatoes.book5.realestate.domain.port.InterestRepository
@@ -23,6 +24,7 @@ import com.potatoes.book5.realestate.domain.usecase.GetInterestConditionUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetNeighborhoodSuggestionsUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetOnboardingStepUseCase
 import com.potatoes.book5.realestate.domain.usecase.DeleteUserDataUseCase
+import com.potatoes.book5.realestate.domain.usecase.RecordRecommendationDetailOpenUseCase
 import com.potatoes.book5.realestate.domain.usecase.DriveSessionRecorder
 import com.potatoes.book5.realestate.domain.usecase.GetConsentUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetApartmentDetailUseCase
@@ -95,6 +97,7 @@ class AppContainer(context: Context) {
     private val rankingRepository get() = marketRepository
     private val database = AppDatabase.create(context)
     private val scrapRepository: ScrapRepository = RoomScrapRepository(database.scrapDao())
+    private val recommendationFeedbackRepository = RoomRecommendationFeedbackRepository(database.recommendationFeedbackDao())
     private val apartmentRepository get() = marketRepository
     private val driveRecordRepository = RoomDriveRecordRepository(database)
     /** 개발 빌드의 수동 전환. 기어를 읽지 못하는 환경의 대체 흐름이기도 하다(T-034). */
@@ -127,6 +130,7 @@ class AppContainer(context: Context) {
         scrapRepository,
         interestRepository = interestRepository,
         driveRecordRepository = driveRecordRepository,
+        recommendationFeedbackRepository = recommendationFeedbackRepository,
     )
 
     val simulateDriving = SimulateDrivingUseCase(vehicleSimulation)
@@ -150,16 +154,21 @@ class AppContainer(context: Context) {
         rankingRepository,
         driveRecordRepository,
         interestRepository = interestRepository,
+        scrapRepository = scrapRepository,
+        recommendationFeedbackRepository = recommendationFeedbackRepository,
     )
     val observeDriveSummary = ObserveDriveSummaryUseCase(driveRecordRepository)
     val observeUnseenDriveSummary = ObserveUnseenDriveSummaryUseCase(driveRecordRepository)
     val markDriveSummarySeen = MarkDriveSummarySeenUseCase(driveRecordRepository)
     val observeScrappedIds = ObserveScrappedIdsUseCase(scrapRepository)
     val toggleScrapById = ToggleScrapByIdUseCase(apartmentRepository, toggleScrap)
+    val recordRecommendationDetailOpen = RecordRecommendationDetailOpenUseCase(recommendationFeedbackRepository)
     val simulateDriveEnd = SimulateDriveEndUseCase(vehicleSimulation, driveSessionRecorder)
 
     val getConsent = GetConsentUseCase(consentRepository)
-    val deleteUserData by lazy { DeleteUserDataUseCase(interestRepository, scrapRepository, driveRecordRepository, tourStore, voiceContext) }
+    val deleteUserData by lazy {
+        DeleteUserDataUseCase(interestRepository, scrapRepository, driveRecordRepository, recommendationFeedbackRepository, tourStore, voiceContext)
+    }
 
     suspend fun prepareRealData() {
         LegacySampleCleanup(database)()
