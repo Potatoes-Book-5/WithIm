@@ -14,8 +14,12 @@ class DeleteUserDataUseCase(
     private val scrapRepository: ScrapRepository,
     private val driveRecordRepository: DriveRecordRepository,
     private val recommendationFeedbackRepository: RecommendationFeedbackRepository,
+    private val tourStore: com.potatoes.book5.realestate.domain.port.TourStore? = null,
+    private val voiceContext: com.potatoes.book5.realestate.domain.model.appaction.VoiceContextPort? = null,
 ) {
     suspend operator fun invoke() {
+        voiceContext?.invalidate()
+        tourStore?.deleteAll()
         interestRepository.clear()
         scrapRepository.deleteAll()
         driveRecordRepository.deleteAll()

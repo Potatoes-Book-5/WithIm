@@ -68,3 +68,14 @@
 | SCR-011 | screen | 주차 후 관심 매물 모아보기 | draft | `design/screens/SCR-011-interest-catch-up.md` | T-026 | F-009, F-008, F-005, S-009 |
 | F-010 | feature | 주행 관심 매물 추천 | draft | `product/features/F-010-drive-interest-recommendation.md` | T-037 | F-002, F-004, F-005, F-006, F-009, S-011, SCR-008 |
 | S-011 | scenario | 주행 추천 수집과 종료 요약 | draft | `product/scenarios/S-011-drive-recommendations-summary.md` | T-037 | F-010, S-003, S-009, SCR-008 |
+| F-011 | feature | Gleo 음성 앱 제어 | draft | `product/features/F-011-gleo-app-control.md` | T-040 | - |
+| F-012 | feature | 관심 지역 저장 | draft | `product/features/F-012-interest-area-booking.md` | T-040 | - |
+| F-013 | feature | 아파트 내비게이션 | draft | `product/features/F-013-apartment-navigation.md` | T-040 | - |
+| F-014 | feature | 지역 데일리 브리핑 | draft | `product/features/F-014-area-daily-briefing.md` | T-040 | - |
+| F-015 | feature | 카메라 임장 스캔 | draft | `product/features/F-015-camera-site-scan.md` | T-040 | - |
+| S-012 | scenario | 대화형 부동산 임장 | draft | `product/scenarios/S-012-conversational-property-tour.md` | T-040 | - |
+| ADR-010 | decision | Gleo Intent adapter | draft | `decisions/ADR-010-gleo-intent-adapter.md` | T-040 | - |
+| SCR-012 | screen | 관심 지역 목록 | draft | `design/screens/SCR-012-interest-area-list.md` | T-040 | - |
+| SCR-013 | screen | 데일리 브리핑 | draft | `design/screens/SCR-013-daily-briefing.md` | T-040 | - |
+| ADR-011 | decision | 주행 데이터 read model과 음성 조회 분리 | reserved | `decisions/ADR-011-prepared-market-read-model.md` | T-042 | - |
+| ADR-012 | decision | 관심 지역과 브리핑 로컬 저장 및 공급자 경계 | draft | `decisions/ADR-012-tour-area-briefing.md` | T-045 | - |

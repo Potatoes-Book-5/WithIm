@@ -79,11 +79,19 @@ class AppContainer(context: Context) {
     val vehicleLocationProvider by lazy { VehicleLocationInput(consentRepository) }
     /** Pleos FusedLocation → [vehicleLocationProvider](T-029). RealEstateApplication이 시작한다. */
     val fusedLocationBridge by lazy { PleosFusedLocationBridge(context, vehicleLocationProvider, consentRepository) }
+    val appSessionId = java.util.UUID.randomUUID().toString()
+    val profileScope = "local-device-scope"
+    val voiceContext: com.potatoes.book5.realestate.domain.model.appaction.VoiceContextPort =
+        com.potatoes.book5.realestate.data.repository.InMemoryVoiceContext()
+    val preparedMarket = com.potatoes.book5.realestate.data.repository.InMemoryPreparedMarket()
+    private val priceLocations = com.potatoes.book5.realestate.data.repository.InMemoryPriceLocation()
+    private val districtResolver by lazy { VworldDistrictResolverFactory.create(BuildConfig.VWORLD_API_KEY) }
     val marketRepository by lazy {
         LiveMarketRepository(MolitRepositoryFactory.create(BuildConfig.MOLIT_API_KEY),
             VworldGeocoderFactory.create(BuildConfig.VWORLD_API_KEY), interestRepository, vehicleLocationProvider,
-            VworldDistrictResolverFactory.create(BuildConfig.VWORLD_API_KEY),
-            householdRepository = KaptRepositoryFactory.create(BuildConfig.KAPT_API_KEY))
+            districtResolver,
+            householdRepository = KaptRepositoryFactory.create(BuildConfig.KAPT_API_KEY), preparedMarket = preparedMarket,
+            priceLocations = priceLocations)
     }
     private val neighborhoodRepository get() = marketRepository
     private val rankingRepository get() = marketRepository
@@ -158,7 +166,9 @@ class AppContainer(context: Context) {
     val simulateDriveEnd = SimulateDriveEndUseCase(vehicleSimulation, driveSessionRecorder)
 
     val getConsent = GetConsentUseCase(consentRepository)
-    val deleteUserData = DeleteUserDataUseCase(interestRepository, scrapRepository, driveRecordRepository, recommendationFeedbackRepository)
+    val deleteUserData by lazy {
+        DeleteUserDataUseCase(interestRepository, scrapRepository, driveRecordRepository, recommendationFeedbackRepository, tourStore, voiceContext)
+    }
 
     suspend fun prepareRealData() {
         LegacySampleCleanup(database)()
@@ -167,4 +177,35 @@ class AppContainer(context: Context) {
             if (liveNeighborhoods != condition.neighborhoods) interestRepository.save(condition.copy(neighborhoods = liveNeighborhoods))
         }
     }
+    val scrapVoiceTarget by lazy { com.potatoes.book5.realestate.domain.usecase.ScrapVoiceTargetUseCase(scrapRepository, preparedMarket, voiceContext) }
+    private val liveAreaPrices by lazy {
+        com.potatoes.book5.realestate.data.repository.LiveAreaPriceSummaryRepository(preparedMarket, priceLocations, voiceContext)
+    }
+    val tourStore by lazy { com.potatoes.book5.realestate.data.local.RoomTourStore(database) }
+    val tourAccess by lazy { com.potatoes.book5.realestate.domain.usecase.TourAccess(voiceContext) }
+    val tourAreas by lazy { com.potatoes.book5.realestate.data.repository.PreparedTourAreas(tourStore,preparedMarket,
+        liveAreaPrices::lastReferenced,tourAccess,com.potatoes.book5.realestate.data.remote.VworldTourPlaceFactory.create(BuildConfig.VWORLD_API_KEY,districtResolver)) }
+    val saveTourArea by lazy { com.potatoes.book5.realestate.domain.usecase.SaveTourAreaUseCase(tourAreas,tourStore,tourAccess) }
+    val liveInterestAreas by lazy { com.potatoes.book5.realestate.data.repository.LiveInterestAreaRepository(saveTourArea,liveAreaPrices::lastReferenced) }
+    private val tourNoticeSources by lazy { listOf(com.potatoes.book5.realestate.data.remote.MolitRssNoticeSource(),com.potatoes.book5.realestate.data.remote.ApplyhomeNoticeSource()) }
+    val tourNoticeCollector by lazy { com.potatoes.book5.realestate.data.repository.TourNoticeCollector(tourNoticeSources,tourStore,preparedMarket,tourAccess,voiceContext,::captureTourContext) }
+    val liveBriefing by lazy { com.potatoes.book5.realestate.data.repository.LiveDailyBriefingRepository(tourStore,preparedMarket,tourAccess,tourNoticeSources) }
+    val tourBriefingCollector by lazy { com.potatoes.book5.realestate.data.repository.TourBriefingCollector(tourStore,preparedMarket,profileScope) }
+    val tourEntries by lazy { com.potatoes.book5.realestate.domain.usecase.TrackTourEntriesUseCase(tourStore,tourAccess) }
+    val tourNavigator by lazy { com.potatoes.book5.realestate.vehicle.nav.PleosTourNavigator(context,vehicleScope) }
+    val tourActions by lazy { com.potatoes.book5.realestate.vehicle.gleo.TourIntentAdapter(
+        com.potatoes.book5.realestate.domain.usecase.GetAreaPriceSummaryUseCase(liveAreaPrices),saveTourArea,scrapVoiceTarget,
+        com.potatoes.book5.realestate.domain.usecase.CheckTourAreaUseCase(tourAreas,tourStore,
+            com.potatoes.book5.realestate.domain.usecase.RecommendTourApartmentsUseCase(preparedMarket,interestRepository),tourEntries,tourAccess),
+        com.potatoes.book5.realestate.domain.usecase.GetTourAnalyticsUseCase(preparedMarket,tourAccess),
+        com.potatoes.book5.realestate.domain.usecase.NavigateTourApartmentUseCase(tourNavigator,tourAccess),
+        com.potatoes.book5.realestate.domain.usecase.ScanTourAreaUseCase(object:com.potatoes.book5.realestate.domain.port.TourCamera {
+            override fun supported()=false
+            override suspend fun scan(record:Boolean)=com.potatoes.book5.realestate.domain.error.Outcome.Failure(com.potatoes.book5.realestate.domain.error.DomainError.Unsupported("camera_access_unverified"))
+        },tourAccess),
+        com.potatoes.book5.realestate.domain.usecase.GetDailyBriefingUseCase(liveBriefing),
+        com.potatoes.book5.realestate.domain.usecase.ConfirmTourBriefingUseCase(tourStore,tourAccess),tourAccess) }
+    fun captureTourContext() = com.potatoes.book5.realestate.domain.model.appaction.AppCallContext(
+        java.util.UUID.randomUUID().toString(),appSessionId,profileScope,voiceContext.snapshot(),priceLocations.snapshot())
+    val gleoIntentHandler by lazy { GleoBindings.create(context,scrapVoiceTarget,liveAreaPrices,liveInterestAreas,liveBriefing,::captureTourContext) }
 }

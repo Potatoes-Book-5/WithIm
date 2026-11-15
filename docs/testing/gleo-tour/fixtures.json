@@ -1,0 +1,216 @@
+{
+  "synthetic": true,
+  "notice": "All prices, complex names, region associations and events are synthetic test data, not market facts.",
+  "clock": "2026-11-14T12:00:00+09:00",
+  "filters": {
+    "areaId": "synthetic-area-a",
+    "periodStart": "2026-08-17",
+    "periodEndExclusive": "2026-11-15",
+    "propertyType": "APARTMENT",
+    "transactionType": "SALE",
+    "areaMinM2": 80,
+    "areaMaxExclusiveM2": 90,
+    "minimumSamples": 3
+  },
+  "profile": {
+    "id": "profile-a",
+    "budgetMaxKrw": 1300000000,
+    "transitWeight": 0.6,
+    "parkWeight": 0.4
+  },
+  "complexes": [
+    {
+      "id": "A",
+      "name": "가상 솔빛아파트",
+      "distanceFromVehicleM": 1000,
+      "transitDistanceM": 400,
+      "parkDistanceM": 400
+    },
+    {
+      "id": "B",
+      "name": "가상 한결아파트",
+      "distanceFromVehicleM": 2000,
+      "transitDistanceM": 200,
+      "parkDistanceM": 200
+    },
+    {
+      "id": "C",
+      "name": "가상 푸른아파트",
+      "distanceFromVehicleM": 3000,
+      "transitDistanceM": 600,
+      "parkDistanceM": 600
+    }
+  ],
+  "BASE": [
+    {
+      "id": "sale-a-1",
+      "complexId": "A",
+      "priceKrw": 1000000000,
+      "date": "2026-10-01",
+      "areaId": "synthetic-area-a",
+      "propertyType": "APARTMENT",
+      "transactionType": "SALE",
+      "exclusiveAreaM2": 84,
+      "cancelled": false,
+      "version": 1
+    },
+    {
+      "id": "sale-a-2",
+      "complexId": "A",
+      "priceKrw": 1100000000,
+      "date": "2026-11-10",
+      "areaId": "synthetic-area-a",
+      "propertyType": "APARTMENT",
+      "transactionType": "SALE",
+      "exclusiveAreaM2": 84,
+      "cancelled": false,
+      "version": 1
+    },
+    {
+      "id": "sale-b-1",
+      "complexId": "B",
+      "priceKrw": 1150000000,
+      "date": "2026-10-15",
+      "areaId": "synthetic-area-a",
+      "propertyType": "APARTMENT",
+      "transactionType": "SALE",
+      "exclusiveAreaM2": 84,
+      "cancelled": false,
+      "version": 1
+    },
+    {
+      "id": "sale-b-2",
+      "complexId": "B",
+      "priceKrw": 1200000000,
+      "date": "2026-11-12",
+      "areaId": "synthetic-area-a",
+      "propertyType": "APARTMENT",
+      "transactionType": "SALE",
+      "exclusiveAreaM2": 84,
+      "cancelled": false,
+      "version": 1
+    },
+    {
+      "id": "sale-c-1",
+      "complexId": "C",
+      "priceKrw": 1550000000,
+      "date": "2026-11-13",
+      "areaId": "synthetic-area-a",
+      "propertyType": "APARTMENT",
+      "transactionType": "SALE",
+      "exclusiveAreaM2": 84,
+      "cancelled": false,
+      "version": 1
+    }
+  ],
+  "EXCLUDED": [
+    {
+      "id": "excluded-area",
+      "complexId": "A",
+      "priceKrw": 3000000000,
+      "date": "2026-10-01",
+      "areaId": "synthetic-area-a",
+      "propertyType": "APARTMENT",
+      "transactionType": "SALE",
+      "exclusiveAreaM2": 120,
+      "cancelled": false,
+      "version": 1
+    },
+    {
+      "id": "excluded-cancelled",
+      "complexId": "A",
+      "priceKrw": 3000000000,
+      "date": "2026-10-01",
+      "areaId": "synthetic-area-a",
+      "propertyType": "APARTMENT",
+      "transactionType": "SALE",
+      "exclusiveAreaM2": 84,
+      "cancelled": true,
+      "version": 1
+    },
+    {
+      "id": "excluded-rent",
+      "complexId": "A",
+      "priceKrw": 3000000000,
+      "date": "2026-10-01",
+      "areaId": "synthetic-area-a",
+      "propertyType": "APARTMENT",
+      "transactionType": "JEONSE",
+      "exclusiveAreaM2": 84,
+      "cancelled": false,
+      "version": 1
+    },
+    {
+      "id": "excluded-period",
+      "complexId": "A",
+      "priceKrw": 3000000000,
+      "date": "2026-08-16",
+      "areaId": "synthetic-area-a",
+      "propertyType": "APARTMENT",
+      "transactionType": "SALE",
+      "exclusiveAreaM2": 84,
+      "cancelled": false,
+      "version": 1
+    },
+    {
+      "id": "excluded-region",
+      "complexId": "A",
+      "priceKrw": 3000000000,
+      "date": "2026-10-01",
+      "areaId": "synthetic-area-b",
+      "propertyType": "APARTMENT",
+      "transactionType": "SALE",
+      "exclusiveAreaM2": 84,
+      "cancelled": false,
+      "version": 1
+    }
+  ],
+  "expected": {
+    "sampleCount": 5,
+    "averagePriceKrw": 1200000000,
+    "highestPriceKrw": 1550000000,
+    "highestComplexId": "C",
+    "priceRanking": [
+      "C",
+      "B",
+      "A"
+    ],
+    "crownComplexId": "C",
+    "recommendationRanking": [
+      "B",
+      "A"
+    ],
+    "scores": {
+      "A": 80,
+      "B": 90,
+      "C": 70
+    }
+  },
+  "briefing": [
+    {
+      "sourceId": "synthetic-sale-new",
+      "version": 1,
+      "areaId": "synthetic-area-a",
+      "type": "SALE",
+      "transactionDate": "2026-11-04",
+      "publishedAt": "2026-11-14T08:00:00+09:00",
+      "ingestedAt": "2026-11-14T09:00:00+09:00"
+    },
+    {
+      "sourceId": "synthetic-subscription-1",
+      "version": 1,
+      "areaId": "synthetic-area-a",
+      "type": "SUBSCRIPTION",
+      "publishedAt": "2026-11-14T08:00:00+09:00",
+      "ingestedAt": "2026-11-14T09:00:00+09:00"
+    },
+    {
+      "sourceId": "synthetic-news-1",
+      "version": 1,
+      "areaId": "synthetic-area-a",
+      "type": "NEWS",
+      "publishedAt": "2026-11-14T08:00:00+09:00",
+      "ingestedAt": "2026-11-14T09:00:00+09:00"
+    }
+  ]
+}

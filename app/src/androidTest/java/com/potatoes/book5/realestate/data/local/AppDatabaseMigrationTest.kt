@@ -55,9 +55,22 @@ class AppDatabaseMigrationTest {
     }
 
     @Test
-    fun migrate6To7AddsEmptyRecommendationFeedbackTable() {
-        helper.createDatabase(DB, 6).close()
+    fun migrate6To7KeepsScrapsAndCreatesTourTables() {
+        helper.createDatabase(DB, 6).use { db ->
+            db.execSQL("INSERT INTO scraps (apartment_id,name,neighborhood,area_pyeong,scrapped_at,baseline_price_manwon,baseline_deal_date,last_price_manwon,last_deal_date,last_checked_at,change_seen) VALUES ('tour-old','Old unit','dong',25,1000,100000,20000,100000,20000,1000,1)")
+        }
         val db = helper.runMigrationsAndValidate(DB, 7, true)
+        db.query("SELECT name FROM scraps WHERE apartment_id='tour-old'").use { c -> assertTrue(c.moveToFirst()); assertEquals("Old unit", c.getString(0)) }
+        listOf("tour_areas", "tour_briefings", "tour_entries", "tour_notices", "tour_sources").forEach { table ->
+            db.query("SELECT COUNT(*) FROM $table").use { c -> assertTrue(c.moveToFirst()); assertEquals(0, c.getInt(0)) }
+        }
+        db.close()
+    }
+
+    @Test
+    fun migrate7To8AddsEmptyRecommendationFeedbackTable() {
+        helper.createDatabase(DB, 7).close()
+        val db = helper.runMigrationsAndValidate(DB, 8, true)
         db.query("SELECT COUNT(*) FROM recommendation_feedback").use { c ->
             assertTrue(c.moveToFirst())
             assertEquals(0, c.getInt(0))

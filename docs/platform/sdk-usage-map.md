@@ -54,3 +54,13 @@ T-027은 SDK 위치 획득을 구현하지 않고 [차량 위치 입력](locatio
 - 수동 변속기 차량의 주행 완료 기준. P가 없어 지금은 기어로 판정하지 않고 대체 흐름(개발용 수동 전환)을 따른다
 - 차량 서비스 재연결 때 이벤트 순서
 - 주행 중(D)에는 플랫폼이 DO 미선언 앱을 `주행 중에는 사용할 수 없습니다` 화면으로 가린다. 앱은 DO를 선언했다(T-035)
+
+## Gleo debug 통합
+
+T-040: SDK 추가 없이 Android broadcast를 app/vehicle/gleo에 격리한다. debug assets/schema.json·GleoActionReceiver로 가격·브리핑 합성 action과 실제 단지 스크랩 action을 받고 APP_ACTION_RESPONSE로 반환한다. T-040에서 Nudge와 앱 상태의 실행 context를 연결했다. release에는 외부 진입점이 없다. 설치 버전의 schema 승인·음성 동작은 [E2E](../testing/gleo-tour/e2e.md)에서 확인한다.
+
+## T-045 내비와 플랫폼 Gate
+
+NaviHelper 3.0.5를 vehicle/nav에 격리한다(ADR-012). 해당 SDK에는 isSupported가 없어 automotive/공식 NAVI_ROUTE/NAVI_ROUTE_SEARCH 권한을 먼저 확인하고 initialize 성공 콜백으로 실제 연결을 확인한 뒤 명시적으로 확인된 출입구만 requestRoute한다. 접수를 안내 시작으로 표시하지 않는다. 기존 SDK 버전은 유지하며 SDK 미호환/권한 없음은 Unsupported다. 카메라와 시동 자동 발화는 실제 표준 API 확인 전 미지원으로 유지한다.
+
+근거(2026-11-15): [NaviHelper 도입](https://document.pleos.ai/docs/pleos-only/connect-sdk-pleos/NaviHelper/importing-sdk), [권한](https://document.pleos.ai/docs/pleos-only/connect-sdk-pleos/NaviHelper/declaring-permissions), [초기화](https://document.pleos.ai/docs/pleos-only/connect-sdk-pleos/NaviHelper/initialization-and-release).

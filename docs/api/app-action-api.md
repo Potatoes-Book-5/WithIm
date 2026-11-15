@@ -1,0 +1,137 @@
+---
+task: T-040
+---
+
+# UseCase 기반 App Action API 초안
+
+T-039의 초기 계약과 후속 구현을 기록한다. 현재 가격의 실제 데이터 계약은 하단 T-044 절을 따른다. 실제 Gleo 음성 연동은 별도 검증이다. [ARCHITECTURE](../ARCHITECTURE.md)의 domain/port/usecase 규칙과 [ADR-003](../decisions/ADR-003-clean-architecture-mvi.md)을 따른다. Android wire 규칙은 [어댑터 계약](gleo-intent-adapter.md)에서 별도로 정의한다.
+
+## 1. API의 의미와 소유 계층
+
+`Intent handling API`는 이 문서의 App API를 뜻한다. Android Intent 자체를 받는 함수는 vehicle.gleo에만 존재한다. domain은 원래 자연어 발화·BroadcastReceiver·Bundle·JSONObject·Gleo status를 알지 못한다.
+
+App API는 다음 세 UseCase의 공개 계약이다. 별도 Service 계층이나 단순 전달용 facade를 추가하지 않는다. 각 UseCase는 한 동작을 담당하고 기존 `Outcome<T>`를 반환한다.
+
+| 외부 액션 | 내부 API/UseCase | 입력 | 결과 |
+|---|---|---|---|
+| GET_AREA_PRICE_SUMMARY | GetAreaPriceSummaryUseCase | AreaTarget + AppCallContext | Outcome<ActionResult<PriceSummaryPayload>> |
+| SAVE_INTEREST_AREA | SaveInterestAreaUseCase | AreaTarget + AppCallContext | Outcome<ActionResult<InterestAreaSavePayload>> |
+| GET_REAL_ESTATE_BRIEFING | GetDailyBriefingUseCase | AppCallContext | Outcome<ActionResult<DailyBriefingPayload>> |
+
+호출 형태는 `suspend operator fun invoke(input, context)`다. 기존 domain/error/Outcome.kt를 재사용하며 새 Outcome을 만들지 않았다. 최신 main에는 DomainError와 Outcome이 `domain/error/Outcome.kt`에 함께 있으므로 다시 정의하지 않는다.
+
+## 2. 공통 입력
+
+### AreaTarget
+
+| 필드 | 타입 | 규칙 |
+|---|---|---|
+| kind | enum | CURRENT_LOCATION / LAST_REFERENCED_AREA / NAMED_AREA |
+| query | String? | NAMED_AREA일 때 비어 있지 않아야 함. 다른 kind에서는 값이 있으면 입력 충돌 |
+
+이는 제품 대상의 명시적 표현이며 GPS 좌표나 Gleo의 원문을 뜻하지 않는다. 정규화한 target을 Android와 무관한 타입으로 전달한다. 대상 입력의 누락을 ‘현재 위치’로 임의 보정하지 않는다.
+
+### AppCallContext
+
+| 필드 | 값의 출처 | 의미 |
+|---|---|---|
+| requestId | 어댑터가 생성 | 앱 내부 추적용. Gleo correlation ID라는 의미 없음 |
+| appSessionId | DI가 제공하는 앱 실행 세션 | Gleo 대화 세션을 추정하지 않음 |
+| profileScope | 신뢰 가능한 앱 상태/이번 단계의 합성 프로필 | Intent extras에서 profileId를 받지 않음 |
+| 실행 모드 | DI가 선택한 Dummy Repository | context 입력 필드가 아니며 결과 metadata에 DUMMY로 표시 |
+
+앱 세션/프로필 타입은 구현 시 기존 모델을 먼저 재사용한다. dummy 프로필은 실제 사용자 로그인·동의·부부 식별을 구현한 것이 아니다. 실행 기한과 취소의 소유자는 외부 호출 어댑터이며 domain에는 Android 시계 타입을 전달하지 않는다.
+
+## 3. 공통 결과와 예상 실패
+
+기존 `Outcome`을 유지하면서 `ActionResult<T>`를 다음 두 가지 의미로 제안한다.
+
+- `Completed<T>`: API 평가가 끝났고 typed payload와 `ResultMetadata`를 반환함. 저장 성공은 payload의 mutation 상태로 별도 확인한다.
+- `NeedsInput`: 필요한 필드 코드를 반환함. 선택 후보를 이용한 후속 대화는 미구현. 사용자에게 보여 줄 영문 문장·Gleo `asking` 문자열은 어댑터에서 생성한다.
+
+`ResultMetadata`는 `executionMode`, `sourceId`, `sourceAsOf`, `synthetic`를 갖는다. dummy에서는 `executionMode=DUMMY`, `synthetic=true`, 원천 식별자는 합성임을 명시한다. UI/Callback 표시용 억 단위 문자열 대신 원 단위 정수 금액을 반환한다.
+
+예상 실패는 `Outcome.Failure(DomainError)`로 표현한다. 기존 DomainError 유형을 재사용하고 provider·HTTP 오류도 adapter에서 구분한다. 취소 예외를 Unknown으로 잡아 성공/실패 응답을 다시 생성하지 않는다. 외부 오류 코드와 domain 오류의 변환은 어댑터 계약에 둔다.
+
+## 4. 가격 요약 계약
+
+- 입력: AreaTarget. 면적/기간의 음성 변경은 이번 스키마 범위 밖이다.
+- PriceSummaryPayload: 확정된 합성 지역, 집계 면적/기간, 표본수, 평균 원 단위 가격, 최고 거래 금액/단지, 원천 메타데이터.
+- 수치/집계 의미는 F-002가 소유한다. dummy는 기존 합성 fixture의 값만 반환하며 실제 가격 공급자·현재 위치를 조회하지 않는다.
+- CURRENT_LOCATION은 실제 좌표 대신 문서화한 합성 현재 지역을 사용한다. NAMED_AREA는 합성 fixture의 알려진 이름에만 응답하고, 실제 지역명은 `Unsupported`로 반환한다. 실제 지역명에 합성 가격을 붙여 답하지 않는다.
+- LAST_REFERENCED_AREA는 명시적으로 주입한 합성 문맥이 있을 때만 사용한다. 문맥이 없으면 NeedsInput이며 마지막 지역을 만들어내지 않는다.
+- 동일 fixture와 입력에는 동일 payload를 반환한다. 랜덤 가격·현재 시각 기반의 변동을 넣지 않는다.
+
+## 5. 관심 지역 저장 계약
+
+- 입력: AreaTarget.
+- InterestAreaSavePayload: 합성 지역, `mutationState`, `persisted`, 메타데이터.
+- 초기 dummy 결과는 `mutationState=NOT_APPLIED`, `persisted=false`다. Completed는 호출 평가 완료만 의미하고 실제 저장 완료를 뜻하지 않는다.
+- SharedPreferences/Room/파일/네트워크/기존 단지 스크랩을 변경하지 않는다. 단지 스크랩 저장소를 지역 저장의 대용으로 호출하지 않는다.
+- 전송 계층은 이 결과를 Gleo `success`로 바꾸지 않는다. 정확한 매핑은 어댑터 계약에 있다.
+- 실제 저장 구현으로 교체할 때만 COMMITTED/ALREADY_EXISTS를 추가하고 영속 저장 확인 후 성공을 허용한다. timeout과 commit 경계, 재시도·결과 불명 상태는 그 구현의 별도 명세가 필요하다.
+
+## 6. 데일리 브리핑 계약
+
+- 입력: AppCallContext를 통한 기본 요약 요청. 원천 접근·프로필 선택·읽음 변경을 외부 입력에 포함하지 않는다.
+- DailyBriefingPayload: 합성 항목 목록, 항목 유형/ID, 합성 게시/수집 시점, 원천별 조회 상태, 메타데이터.
+- 초기 결과는 고정된 합성 데이터다. 실거래·청약·뉴스를 수집하거나 읽음 체크포인트를 변경하지 않는다.
+- 조회 API가 읽음/자동 브리핑 완료 처리를 겸하지 않는다. 실제 열람 확인 API는 후속 범위다.
+
+## 7. 포트와 dummy 구현의 배치
+
+각 UseCase는 domain/port의 인터페이스를 통해 값을 얻는다. 예: AreaPriceSummaryRepository, InterestAreaRepository, DailyBriefingRepository. Dummy 구현은 `data/sample/gleo/`에 둔다. 기존 main의 sample 패턴을 따르고 파일의 JSON/DB 타입을 반환하지 않는다.
+
+domain UseCase는 입력 검증·필요 정보 판단 등 비즈니스 규칙을 갖고, wire action에 따른 분기는 vehicle.gleo가 맡는다. Repository 교체는 AppContainer에서 한다. dummy 값을 Adapter 또는 ViewModel에 하드코딩하지 않는다.
+
+## 8. 내부 API 인수 조건
+
+- 정상 입력·잘못된 대상 조합·합성 문맥 없음·미지원 실제 지역명·예상 실패를 JVM 테스트로 검증한다.
+- domain 파일에는 android.*, androidx.*, org.json, vehicle/data/ui import가 없다.
+- 같은 입력/fixture의 결과가 결정적이며 모든 dummy 결과의 메타데이터가 합성임을 명시한다.
+- 저장과 브리핑 호출이 기존 Room/설정/읽음 상태를 변경하지 않는다.
+- API 테스트는 Android Intent 없이 수행할 수 있다. Android Intent 성공을 자연어 E2E 성공으로 기록하지 않는다.
+
+## 요청형 지역 확인 API 확장 요구 — 미구현 계약
+
+[F-011 R-AREA-CHECK](../product/features/F-011-gleo-app-control.md)의 입력은 비교 대상 지역과 앱이 확보한 실행 context다. 기존 AppCallContext에 이미 전체 context가 구현됐다고 간주하지 않는다. 다음 정보의 구체 타입·포트·UseCase 명칭은 후속 구현 계획에서 확정한다.
+
+- 입력: 대상의 안정적 지역 ID/영역 정의, 수신 시점의 차량 위치·정확도·관측 시각, 활성 프로필·동의·UX 상태·요청 세대, 선호 조건과 조회 마감.
+- 결과: INSIDE/OUTSIDE/UNCERTAIN 및 이유, SAVED/NOT_SAVED/UNKNOWN, 동일 방문 진입 증거와 진입 시각(없으면 null), 추천 목록·근거·조회 상태, 실거래 순위·범위·기간·원천 시각, 요청·지역·스냅샷 식별 정보.
+- 실행: 대상 명확화 → context 확보·검증 → 영역 비교/저장·진입 이력 확인 → 추천·순위 조회 → typed 결과 반환. 위치는 실행 중 재해석하지 않고, 결과 반환/화면 적용 전 프로필·동의·세대 유효성을 확인한다. 본 요청 자체는 읽기 전용이다.
+- 반환: 대상 모호는 NeedsInput, 필수 위치 사용 불가는 Failure, OUTSIDE는 정상 판정, 위치는 유효하지만 경계가 불확실하면 UNCERTAIN. 추천 실패·빈 추천·순위 데이터 없음은 개별 상태로 구분한다. 응답 마감과 중복 방지는 기존 adapter 계약을 따른다.
+- 표시: 기존 MVI와 callback은 같은 확정 지역·조회 결과를 소비한다. 가격 순위는 F-002/F-003, 맞춤 추천은 F-004 규칙을 재사용하며 두 순위를 혼합하지 않는다.
+
+현재 3개 dummy UseCase와 schema는 이 확장 API를 구현한 것이 아니다. 실제 context 전달 방식·공간 판정 포트·원천 데이터·함수 교체 호환성은 후속 결정 사항이다.
+
+## T-041 단지 스크랩 API
+
+`ScrapVoiceTargetUseCase(AppCallContext)` → `Outcome<ActionResult<VoiceScrapResult>>`. AppCallContext에는 nullable VoiceContextSnapshot을 추가했다. snapshot에는 revision·foreground·enabled·selectedApartmentId·Nudge·capturedAt이 있으며 DI의 앱 상태 포트에서 얻는다. wire/LLM 파라미터에서 공급하지 않는다.
+
+repository 상세 조회 후 snapshot 세대를 재검증하고 Room ScrapRepository에 저장한다. 이미 저장됐으면 alreadySaved=true로 반환한다. 동일 UseCase의 ensure(id)는 배너 탭이 공유하는 멱등 명령이다. NeedsInput이면 fetch/저장하지 않는다. 가격·지역 저장·브리핑의 기존 dummy API와 분리한다. [전체 context 계약](voice-context.md).
+
+## T-042 준비된 데이터 읽기
+
+단지 스크랩은 `PreparedScrapReader.readScrapCandidate(id)`만 읽는다. 12개월 상세·세대수 API와 수집 Mutex에 접근하지 않는다. 준비된 최신 거래 baseline을 저장하며 이미 저장된 경우 cache miss여도 성공한다. 미준비는 DATA_NOT_READY, 5분 이상/미래 기준 시각은 STALE_DATA로 즉시 실패한다. 누락 세대수는 null로 저장한 뒤 기존 상세/갱신 경로에서 보강할 수 있다.
+
+core/data의 InMemoryPreparedMarket은 최대 256개 단지·8개 구 집계를 유지한다. 완료된 구 전체 배치는 빠진 단지를 제거하고, 부분 게시에는 수집 세대로 검증한 provenance를 사용한다. TTL 기준 sourceAsOf는 실제 응답 완료 시각이며 재표시로 늘리지 않는다. 조회용 모델은 영속 DB가 아니다.
+
+가격 집계 준비는 구 전체·달력 3개월·전용 80㎡ 이상 90㎡ 미만·해제 거래 제외 원본 평균이다. 식별자 없는 유효 거래도 표본에 포함하며 최고 단지 ID는 null일 수 있다. 원 단위 안전 변환과 큰 정수 누적을 사용한다. scope=DISTRICT로 3km 순위와 구별한다. 현재 가격 음성 API는 여전히 dummy이며 이 집계를 실제 응답에 연결하는 작업은 별도다.
+
+## T-044 실제 가격 API
+
+Runtime debug DI는 `LiveAreaPriceSummaryRepository`를 사용한다. 기존 dummy 클래스는 테스트 fixture용으로 남고 실제 요청에 연결하지 않는다. 관심 지역 저장·브리핑은 실제 공급자/영속 구현이 없어 `Unsupported`이며 합성 성공을 반환하지 않는다.
+
+- 입력: 기존 `AreaTarget`과 수신 시 동결한 `AppCallContext`. 내부 context에 `priceLocation`(시군구·위치 관측 시각·제공된 정확도·출처·권한 세대)을 추가했다. 좌표/프로필을 외부 extras에서 받지 않는다.
+- 실제 가격: 완료된 MOLIT 구 전체 배치, 최근 달력 3개월, 전용 [80,90)㎡, 해제 거래 제외. 현재 구 3km 순위/법정동 평균이 아니며 `scope=DISTRICT`다.
+- 결과: `executionMode=LIVE`, `synthetic=false`, `sourceId=molit-apartment-sale`, 실제 수집 기준 시각. 금액은 원 단위다. 기간 끝은 원천의 당일 포함→다음날 exclusive로 변환한다.
+- `averagePriceKrw`, `highestPriceKrw`, `highestComplexId/Name`은 nullable이다. 표본 0이면 가격 null, 1~2이면 INSUFFICIENT, 3 이상이면 AVAILABLE이다. 단지 ID/이름이 원천에 없으면 생성하지 않는다.
+- 읽기: immutable prepared batch만 읽으며 수집 Mutex/fetch/geocode/districtAt을 호출하지 않는다. 미준비 DATA_NOT_READY, 5분 이상/미래 시각 STALE_DATA. 완료된 빈 표본은 success/EMPTY이며 공급자 실패와 구분한다.
+- 지역명: 준비된 시군구의 전체 이름 또는 유일한 마지막 시군구 이름만 일치시킨다. 동명/법정동/미준비 지역은 `NeedsInput(areaQuery)`이고 네트워크 검색을 기다리지 않는다.
+- 내부 CURRENT_LOCATION: 실제 SDK 입력의 공식 POINT 판별 snapshot만 허용한다. 10초/50m 기준, 권한 세대, 참고 좌표 제외를 확인한다. 정확도 미제공이면 추정하지 않고 areaQuery를 요청한다. 현재 bridge의 정확도는 null이므로 named-area 경로가 필요하다. 경계 비중첩/법정동 내부 판정은 지원하지 않는다.
+- 내부 LAST_REFERENCED_AREA: 성공 조회의 세션·프로필·동의 세대가 같고 60초 이내일 때만 사용한다. 재참조로 TTL을 연장하지 않는다. 현재 위치 요청을 직전 지역으로 대체하지 않는다.
+- 공개 debug 경로는 호출자 인증이 미확인이라 `contextualTargetsAllowed=false`다. CURRENT_LOCATION/LAST_REFERENCED_AREA는 저장소를 읽기 전에 Unsupported로 거부한다. 내부 구현 가능 범위와 공개 schema 범위를 구분한다.
+
+## T-045 현재 내부 임장 API
+
+현재 구현은 [임장 Intent API](tour-intent-api.md)를 따른다. 이전 dummy/미구현 설명은 해당 작업 당시 기록이다. 지역 저장·확인·추천·분석·읽음/브리핑·내비 요청은 내부 신뢰 문맥에 실제 구현을 연결했다. 공개 debug 경로는 인증 미확인으로 named-area 가격만 허용하며 스크랩·지역 저장·개인 브리핑은 거부한다. 새 내부 Intent를 공개 Gleo 함수로 등록한 상태가 아니다.

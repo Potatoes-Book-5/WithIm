@@ -1,0 +1,61 @@
+{
+  "packageName": "com.potatoes.book5.realestate",
+  "appDescription": "An apartment exploration app with prepared published district sale summaries. Private contextual operations require an authenticated integration route.",
+  "version": "0.1.0",
+  "actionCalls": [
+    {
+      "type": "function",
+      "function": {
+        "name": "GET_AREA_PRICE_SUMMARY",
+        "description": "Returns previously collected published apartment sales for an explicitly named prepared city or district, using the last three calendar months and exclusive area from 80 up to 90 square meters. Reports district-wide scope, source date and sample limitations. Does not use private location or earlier query context on this public debug route, and does not fetch new regions during the request.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "target": {
+              "type": "string",
+              "enum": [
+                "NAMED_AREA"
+              ],
+              "description": "NAMED_AREA is the only supported target on the public debug route. Current location and earlier query context require a verified authenticated integration route."
+            },
+            "areaQuery": {
+              "type": "string",
+              "description": "The full city or district name for NAMED_AREA. Only unambiguous prepared districts can be answered; neighborhoods and unprepared areas require clarification."
+            }
+          },
+          "required": [
+            "target",
+            "areaQuery"
+          ]
+        },
+        "component": "service"
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "SCRAP_APARTMENT",
+        "description": "Contextual apartment saving is implemented internally, but unavailable on this unauthenticated public debug route. Returns a failure and does not read or change personal data.",
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        },
+        "component": "service"
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "GET_REAL_ESTATE_BRIEFING",
+        "description": "Private saved-area briefing is implemented internally, but unavailable on this unauthenticated public debug route. Returns a failure without accessing personal saved areas.",
+        "parameters": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        },
+        "component": "service"
+      }
+    }
+  ]
+}

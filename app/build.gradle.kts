@@ -60,7 +60,7 @@ android {
         // SDK는 매니페스트 meta-data(com.naver.maps.map.NCP_KEY_ID)에서 Client ID를 읽는다.
         manifestPlaceholders["naverMapClientId"] = naverMapClientId
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.potatoes.book5.realestate.probe.RealEstateTestRunner"
     }
 
     buildTypes {
@@ -107,6 +107,7 @@ dependencies {
     // implementation(libs.pleos.vehicle)
     // 차량 위치(F-001, T-029). 호출은 vehicle/ 패키지에만 둔다.
     implementation(libs.pleos.fused.location)
+    implementation(libs.pleos.navi.helper)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -130,4 +131,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+}
+
+// Export the current Room schema before packaging migration-test assets on a fresh build.
+tasks.matching { it.name == "mergeDebugAndroidTestAssets" }.configureEach {
+    dependsOn(":core:data:kspDebugKotlin")
 }

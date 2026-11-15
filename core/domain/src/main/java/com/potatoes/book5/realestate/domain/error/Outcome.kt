@@ -1,6 +1,9 @@
 package com.potatoes.book5.realestate.domain.error
 
+enum class PreparedDataFailure { NOT_READY, STALE }
+
 sealed interface DomainError {
+    data class DataNotReady(val reason: PreparedDataFailure) : DomainError
     data object Offline : DomainError
     data object Timeout : DomainError
     data object MissingApiKey : DomainError

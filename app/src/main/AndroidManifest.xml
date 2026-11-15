@@ -12,6 +12,9 @@
     <!-- 기어 상태(AAOS GEAR_SELECTION, T-034). normal 보호 수준이라 런타임 요청이 없다. -->
     <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
 
+    <uses-permission android:name="pleos.car.permission.NAVI_ROUTE" />
+    <uses-permission android:name="pleos.car.permission.NAVI_ROUTE_SEARCH" />
+
     <application
         android:name=".RealEstateApplication"
         android:allowBackup="false"

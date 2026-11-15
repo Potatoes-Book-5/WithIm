@@ -38,7 +38,7 @@ object AppViewModels {
             val c = container()
             AppViewModel(
                 c.getOnboardingStep, c.observeDrivingState, c.refreshScrapChanges, c.simulateDriving,
-                c.observeUnseenDriveSummary, c.simulateDriveEnd, c.refreshMarket, c.observeUxRestricted,
+                c.observeUnseenDriveSummary, c.simulateDriveEnd, c.refreshMarket, c.observeUxRestricted, c.voiceContext,
             )
         }
         initializer {
@@ -65,7 +65,7 @@ object AppViewModels {
             val c = container()
             DrivingViewModel(
                 createSavedStateHandle(), c.observeNearbyRanking, c.observeLeaderChanges, c.refreshMarket,
-                c.observeInterestAlerts, c.toggleScrapById,
+                c.observeInterestAlerts, c.toggleScrapById, c.voiceContext, c.observeScrappedIds, c.scrapVoiceTarget,
             )
         }
         initializer { MyPageViewModel(container().observeMyPage) }

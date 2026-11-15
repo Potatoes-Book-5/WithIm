@@ -17,10 +17,10 @@ class DrivingMapTest {
     }
 
     @Test
-    fun `줌은 보이는 길이에 5_5km가 들어가게 정한다`() {
+    fun `줌은 보이는 길이에 1km가 들어가게 정한다`() {
         val metersPerDpAtZoom0 = 60_000.0
         val zoom = zoomFor(metersPerDpAtZoom0, visibleDp = 300f)
-        assertEquals(5_500.0, metersPerDpAtZoom0 / 2.0.pow(zoom) * 300, 1e-6)
+        assertEquals(1_000.0, metersPerDpAtZoom0 / 2.0.pow(zoom) * 300, 1e-6)
         // 화면이 넓을수록 더 확대한다.
         assertTrue(zoomFor(metersPerDpAtZoom0, 600f) > zoom)
     }

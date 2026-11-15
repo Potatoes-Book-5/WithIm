@@ -91,7 +91,7 @@ flowchart TD
 
 ### 현재 실거래 데이터 흐름 (T-027)
 
-`app/vehicle/location/VehicleLocationInput`은 친구가 연결할 Pleos 위치 콜백의 입력 브리지다. `updateLocation(pose, accuracyMeters, observedAt, source)`로 받은 좌표를 `VehicleLocationProvider` 포트에 전달한다. 이 앱은 GPS 센서를 직접 읽거나 위치 권한을 요청하지 않는다. 브리지는 위치 동의, 정확도 100m 이하, 관측 시각 30초 이내를 확인한다. 개발 빌드의 경로 주입은 `EMULATOR_ROUTE` 출처로 구분한다. `app`이 `LiveMarketRepository.run`을 시작하고, 데이터 계층은 현재 위치 10km 경계 상자와 교차하는 시군구를 Vworld `LT_C_ADSIGG_INFO`에서 조회한 뒤 각 시군구의 최근 1개월 국토부 거래와 Vworld 주소 좌표를 조합한다. 실제 거래 좌표로 10km를 다시 거른다. 조회기간·시군구별 월별 원본은 메모리에서 재사용하며 Vworld 좌표를 DB에 저장하지 않는다. 유효 위치 갱신마다 현재 위치·지도 중심을 반영하고, 500m 이상 이동하거나 10km 포함 경계가 바뀌면 순위를 다시 평가한다.
+`app/vehicle/location/VehicleLocationInput`은 친구가 연결할 Pleos 위치 콜백의 입력 브리지다. `updateLocation(pose, accuracyMeters, observedAt, source)`로 받은 좌표를 `VehicleLocationProvider` 포트에 전달한다. 이 앱은 GPS 센서를 직접 읽거나 위치 권한을 요청하지 않는다. 브리지는 위치 동의, 정확도 100m 이하, 관측 시각 30초 이내를 확인한다. 개발 빌드의 경로 주입은 `EMULATOR_ROUTE` 출처로 구분한다. `app`이 `LiveMarketRepository.run`을 시작하고, 데이터 계층은 현재 위치가 속한 시군구를 Vworld `LT_C_ADSIGG_INFO`에서 조회한 뒤 각 시군구의 최근 달력 3개월 국토부 거래와 Vworld 주소 좌표를 조합한다. 실제 거래 좌표로 3km를 다시 거른다. 조회기간·시군구별 월별 원본은 메모리에서 재사용하며 Vworld 좌표를 DB에 저장하지 않는다. 유효 위치 갱신마다 현재 위치·지도 중심을 반영하고, 500m 이상 이동하거나 3km 포함 경계가 바뀌면 순위를 다시 평가한다.
 
 홈, `:feature:driving`의 지도·순위, 상세, 관심 동네, 스크랩, 주행 기록은 같은 실제 단지 ID와 거래 흐름을 사용한다. 국토부 응답에 없는 세대수 등은 `null`과 `정보 없음`으로 유지한다. 전달 위치에 진행 방향이 없으면 지도는 북쪽을 위로 표시하고 앞·뒤를 추정하지 않는다. 주행 상태는 AAOS 기어(`GEAR_SELECTION`)로 정하고, 수동 주행 상태 전환은 기어를 읽지 못할 때와 개발 빌드에서만 쓴다(T-034). 조회 범위는 전달 위치 주변의 시군구로 동적으로 정한다.
 
@@ -351,4 +351,20 @@ King-of-real-estate/
 
 ### T-031 지역 순위
 
-MarketRoundTracker(domain)는 공식 지역 코드가 연속 확인된 관측 시각으로 30초 전환을 판정한다. LiveMarketRepository(data)는 현재 구 안 3km의 실제 거래만 선정한다. 지도 축척은 feature/driving에서 독립적으로 근거리 배율(최소 줌 18.5)로 유지한다. 주행 기록은 Room v4의 지역 방문·최고가 기록을 사용하며 기존 기록을 보존한다. SDK 환경과 차량 위치 입력 포트는 변경하지 않는다.
+MarketRoundTracker(domain)는 공식 지역 코드가 연속 확인된 관측 시각으로 30초 전환을 판정한다. LiveMarketRepository(data)는 현재 구 안 3km의 실제 거래만 선정한다. 지도 축척은 feature/driving에서 독립적으로 정한다. T-046부터 차량 주변 1km를 담는 줌을 `Projection.getMetersPerDp`와 지도 크기로 계산한다. 주행 기록은 Room v4의 지역 방문·최고가 기록을 사용하며 기존 기록을 보존한다. SDK 환경과 차량 위치 입력 포트는 변경하지 않는다.
+
+## Gleo 앱 호출
+
+`app/vehicle/gleo`는 wire decode → domain AppAction UseCase → callback을 담당한다. 모델·포트·UseCase는 core/domain, 합성 repository는 core/data/src/debug, DI는 app의 variant별 GleoBindings에 둔다. debug만 schema asset·외부 receiver를 제공한다. [계약](api/gleo-intent-adapter.md), [E2E](testing/gleo-tour/e2e.md).
+
+T-041: app 상태·DrivingViewModel은 domain VoiceContextPort로 화면/Nudge 상태만 발행한다. core/data InMemoryVoiceContext가 process-local snapshot을 관리하고, adapter 진입점이 수신 시 동결한다. ScrapVoiceTargetUseCase는 core/domain에서 대상·실행 세대를 검증하고 domain repository 포트로 상세 조회 및 실제 스크랩을 처리한다. UI/vehicle은 서로 참조하지 않는다. 배너와 음성은 멱등 저장 객체를 공유한다.
+
+## 준비된 시장 데이터 read model
+
+[ADR-011](decisions/ADR-011-prepared-market-read-model.md): LiveMarketRepository가 완료된 원본 거래로 최소 저장 후보와 구 가격 집계를 준비한다. InMemoryPreparedMarket은 bounded immutable snapshot을 AtomicReference로 게시한다. domain PreparedScrapReader는 즉시 읽기만 허용한다. 음성·배너 저장은 네트워크 수집/지오코딩/12개월 상세/세대수 조회와 분리되며 Room 영속 저장만 수행한다. cold/stale는 빠른 명시적 실패다.
+
+Android 실행·계측 검증은 Pleos Connect에서만 수행한다. 일반 Phone AVD는 유효한 개발/실행 환경이 아니며 대체 검증으로 사용하지 않는다. JVM 단위 테스트와 Android APK 빌드는 기존 하네스로 검증한다.
+
+T-044: 가격 API는 domain PreparedPriceReader를 통해 실제 완료 배치를 읽고 LiveAreaPriceSummaryRepository가 시군구/문맥/기준시각을 검증한다. LiveMarketRepository의 백그라운드 공식 POINT 결과는 InMemoryPriceLocation에 게시하며 DI가 수신 snapshot을 제공한다. voice 요청에서 resolver/HTTP/collector 잠금을 호출하지 않는다. 공개 debug 경로는 이름을 명시한 시군구만 허용하고 위치·직전 지역은 domain UseCase policy로 사전 차단한다. 가격 runtime dummy를 제거하고, 미구현 지역 저장/브리핑은 Unsupported로 구성한다. 테스트 runner는 기본 JUnit과 opt-in 실제 공급자 probe를 지원하며 SDK/DB 환경을 바꾸지 않는다.
+
+T-045([ADR-012](decisions/ADR-012-tour-area-briefing.md)): `TourIntentAdapter`는 정규화된 `TourIntent`를 domain UseCase와 준비된 시장/상세 모델·Room v7(`RoomTourStore`)·공식 RSS/청약홈 클라이언트·`PleosTourNavigator`(`vehicle/nav`)에 연결한다. 공개 debug receiver는 named-area 가격만 허용하고 개인 저장·스크랩·브리핑은 거부한다. [내부 API](api/tour-intent-api.md), [검증](testing/gleo-tour/spec-actions.md).

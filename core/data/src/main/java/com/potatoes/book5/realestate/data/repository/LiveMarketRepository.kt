@@ -73,6 +73,9 @@ class LiveMarketRepository(
     private val districtResolver: MarketDistrictResolver,
     private val clock: Clock = Clock.system(ZoneId.of("Asia/Seoul")),
     private val householdRepository: ApartmentHouseholdRepository? = null,
+    private val preparedMarket: InMemoryPreparedMarket = InMemoryPreparedMarket(clock),
+    private val traceSink: ((String) -> Unit)? = null,
+    private val priceLocations: InMemoryPriceLocation = InMemoryPriceLocation(clock),
 ) : MarketRepository {
     private data class MarketState(
         val snapshot: RankingSnapshot,
@@ -87,6 +90,7 @@ class LiveMarketRepository(
         val districts: List<MarketDistrict>,
         val roundId: String,
         val dataAsOf: LocalDateTime,
+        val preparedRevision: Long,
     )
 
     private val mutex = Mutex()
@@ -240,8 +244,12 @@ class LiveMarketRepository(
             recentRecords = window
             representativeById = representatives.toMap()
             val dataAt = keys.mapNotNull { monthFetchedAt[it] }.minOrNull() ?: now
+            val batch = prepareMarketBatch(selectedRound.districtCode, selectedRound.districtName, from, today,
+                dataAt, window.map { t -> stableId(t) to t })
+            val preparedRevision = preparedMarket.publish(batch.candidates, batch.prices)
+            trimMonthCache(keys.toSet())
             loadedCoverage = LoadedCoverage(from, today, pose.location, districts, selectedRound.id,
-                LocalDateTime.ofInstant(dataAt, clock.zone))
+                LocalDateTime.ofInstant(dataAt, clock.zone), preparedRevision)
             when (val ranked = rankAtPose(pose, representatives, from, today, selectedRound, generation)) {
                 is Outcome.Failure -> return@withLock fail(ranked.error, generation)
                 is Outcome.Success -> Unit
@@ -276,8 +284,13 @@ class LiveMarketRepository(
     }
 
     /** Opt-in diagnostics contain only sequence numbers and counts, never locations or request URLs. */
+    // Both calls use the same literal; AGP 8.8 lint reports a false positive here.
+    @android.annotation.SuppressLint("LogTagMismatch")
     private fun traceLookup(message: String) {
-        android.util.Log.d("LiveMarketRequest", message)
+        traceSink?.let { it(message); return }
+        if (android.util.Log.isLoggable("LiveMarketRequest", android.util.Log.DEBUG)) {
+            android.util.Log.d("LiveMarketRequest", message)
+        }
     }
 
     /** Finish the active scan; retain only the newest pending spatial request. */
@@ -345,6 +358,7 @@ class LiveMarketRepository(
                 lastCheck = clock.instant()
                 lastEpoch = epoch
                 val districtGeneration = requestGeneration
+                val priceLocationRevision = priceLocations.revision()
                 districtJob = launch {
                     traceLookup("district-start generation=$districtGeneration")
                     val resolved = districtResolver.districtAt(livePose.location)
@@ -360,6 +374,7 @@ class LiveMarketRepository(
                                 GeoMath.distanceKm(currentPose.location, livePose.location) < RERANK_DISTANCE_KM &&
                                 Duration.between(fix.observedAt, clock.instant()) <= MAX_FIX_AGE) {
                                 val district = resolved.value
+                                priceLocations.publish(fix, district, priceLocationRevision)
                                 districtNamesByCode = districtNamesByCode + (district.code to district.name)
                                 rounds.value = roundTracker.observe(district, fix.observedAt!!)
                             } else roundTracker.interrupt()
@@ -370,6 +385,7 @@ class LiveMarketRepository(
             }
         }
         combine(locationProvider.locations, rounds) { fix, round -> fix to round }.collect { (fix, _) ->
+            priceLocations.updateFix(fix)
             val livePose = fix.usablePose()
             val pose = livePose ?: SAMSUNG_REFERENCE_POSE
             val accessBlocked = fix.status == LocationStatus.CONSENT_REQUIRED || fix.status == LocationStatus.PERMISSION_REQUIRED
@@ -510,6 +526,23 @@ class LiveMarketRepository(
             .filter { it.distanceKm <= RADIUS_KM }
             .sortedWith(compareByDescending<NearbyApartment> { it.apartment.priceManwon }
                 .thenByDescending { it.apartment.dealDate })
+        val visibleIds = displayed.take(MAX_MAP_PINS).mapTo(mutableSetOf()) { it.apartment.id }
+        val coverage = loadedCoverage
+        if (coverage != null) {
+            val prepared = prepareMarketBatch(round.districtCode, round.districtName, from, to,
+                coverage.dataAsOf.atZone(clock.zone).toInstant(),
+                recentRecords.mapNotNull { t -> stableId(t)?.takeIf { it in visibleIds }?.let { it to t } })
+            preparedMarket.publish(prepared.candidates, expectedRevision = coverage.preparedRevision)
+            val summaries=prepared.candidates.associateBy { it.apartmentId }
+            val tourCandidates=displayed.mapNotNull { nearby ->
+                val c=summaries[nearby.apartment.id] ?: return@mapNotNull null
+                com.potatoes.book5.realestate.domain.model.tour.TourCandidate(c.apartmentId,c.name,c.districtCode,c.neighborhood,
+                    nearby.apartment.location,c.latest,c.areaPyeong,c.households,c.builtYear,c.sourceAsOf,
+                    com.potatoes.book5.realestate.domain.model.PriceRecord(nearby.apartment.priceManwon,nearby.apartment.dealDate))
+            }
+            preparedMarket.publishMarket(com.potatoes.book5.realestate.domain.model.tour.TourMarket(round.districtCode,tourCandidates,
+                coverage.dataAsOf.atZone(clock.zone).toInstant(),priceLeaderId=displayed.firstOrNull()?.apartment?.id),coverage.preparedRevision)
+        }
         lastRankedPose = displayPose
         lastRequestedPose = displayPose
         state.value = MarketState(
@@ -549,6 +582,7 @@ class LiveMarketRepository(
     }
 
     override suspend fun detail(apartmentId: String): Outcome<ApartmentDetail> = mutex.withLock {
+        val preparedRevision = preparedMarket.currentRevision()
         val districtCode = Regex("^molit:([0-9]{5}):.+$").matchEntire(apartmentId)?.groupValues?.get(1)
             ?: return@withLock Outcome.Failure(DomainError.Invalid("unknown-apartment"))
         val end = YearMonth.from(LocalDate.now(clock))
@@ -556,20 +590,32 @@ class LiveMarketRepository(
         for (offset in 11 downTo 0) {
             val month = end.minusMonths(offset.toLong())
             val cacheKey = districtCode to month
-            val cached = monthRecords[cacheKey]
+            val cached = monthRecords[cacheKey]?.takeIf { monthIsFresh(cacheKey, clock.instant()) }
             val monthTrades = if (cached != null) cached else when (val response = fetchMonth(districtCode, month)) {
                 is Outcome.Failure -> return@withLock response
-                is Outcome.Success -> response.value.also { monthRecords[cacheKey] = it }
+                is Outcome.Success -> response.value.also {
+                    monthRecords[cacheKey] = it
+                    monthFetchedAt[cacheKey] = clock.instant()
+                    trimMonthCache((0L..11L).mapTo(mutableSetOf()) { districtCode to end.minusMonths(it) })
+                }
             }
             records += monthTrades
         }
         val trades = records.filter { !it.hasCancellationNotice && stableId(it) == apartmentId && usable(it) }
             .sortedWith(compareByDescending<ApartmentTrade> { it.contractDate }.thenByDescending { it.priceManwon })
         val newest = trades.firstOrNull() ?: return@withLock Outcome.Failure(DomainError.Invalid("unknown-apartment"))
+        val detailTimes = (0L..11L).mapNotNull { monthFetchedAt[districtCode to end.minusMonths(it)] }
+        val sourceAsOf = detailTimes.takeIf { it.size == 12 }?.minOrNull()
+        if (sourceAsOf != null) {
+            val prepared = prepareMarketBatch(districtCode, districtNamesByCode[districtCode] ?: districtCode,
+                end.minusMonths(11).atDay(1), LocalDate.now(clock), sourceAsOf,
+                trades.map { stableId(it) to it })
+            preparedMarket.publish(prepared.candidates.filter { it.apartmentId == apartmentId }, expectedRevision = preparedRevision)
+        }
+        trimMonthCache((0L..11L).mapTo(mutableSetOf()) { districtCode to end.minusMonths(it) })
         val deals = trades.map { it.toDeal() }
         val located = state.value.located.find { it.apartment.id == apartmentId }
-        Outcome.Success(
-            ApartmentDetail(
+        val detail=ApartmentDetail(
                 id = apartmentId,
                 name = newest.apartmentName ?: "이름 미제공",
                 district = districtNamesByCode[districtCode] ?: "법정동 코드 $districtCode",
@@ -591,12 +637,22 @@ class LiveMarketRepository(
                 }.sortedBy { it.month },
                 recentDeals = deals.take(3),
             )
-        )
+        if(sourceAsOf!=null) preparedMarket.publishAnalytics(detail,sourceAsOf)
+        Outcome.Success(detail)
     }
 
     override suspend fun latestDeal(apartmentId: String): Outcome<Deal> = when (val result = detail(apartmentId)) {
         is Outcome.Failure -> result
         is Outcome.Success -> Outcome.Success(result.value.latestDeal)
+    }
+
+    /** Writer-side bound; callers hold the collection mutex. Prepared snapshots retain no raw rows. */
+    private fun trimMonthCache(protect: Set<Pair<String, YearMonth>> = emptySet()) {
+        val ordered = monthFetchedAt.entries.sortedByDescending { it.value }
+        val keep = (ordered.filter { it.key in protect } + ordered.filterNot { it.key in protect })
+            .take(48).mapTo(mutableSetOf()) { it.key }
+        monthRecords.keys.retainAll(keep)
+        monthFetchedAt.keys.retainAll(keep)
     }
 
     private suspend fun fetchMonth(districtCode: String, month: YearMonth): Outcome<List<ApartmentTrade>> {
