@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.potatoes.book5.realestate.R
 import com.potatoes.book5.realestate.domain.model.DriveSummary
+import com.potatoes.book5.realestate.domain.model.DriveRecommendation
 import com.potatoes.book5.realestate.domain.model.PassedInterest
 import com.potatoes.book5.realestate.ui.common.BackButton
 import com.potatoes.book5.realestate.ui.common.MinTouchHeight
@@ -56,13 +57,25 @@ fun InterestCatchUpScreen(state: DriveSummaryState, onIntent: (DriveSummaryInten
             .padding(horizontal = 48.wpx),
     ) {
         Header(summary, onBack = { onIntent(DriveSummaryIntent.Close) })
-        val items = summary?.passedInterests.orEmpty()
+        val recommendations = summary?.recommendations.orEmpty()
+        val passedItems = summary?.additionalPassedInterests.orEmpty()
         LazyColumn(
             modifier = Modifier.fillMaxWidth().weight(1f),
             contentPadding = PaddingValues(top = 40.wpx, bottom = 16.wpx),
             verticalArrangement = Arrangement.spacedBy(24.wpx),
         ) {
-            items(items, key = { it.apartmentId }) { item ->
+            if (recommendations.isNotEmpty()) {
+                items(recommendations, key = { "recommendation-${it.apartmentId}" }) { item ->
+                    CatchUpRecommendationRow(
+                        item = item,
+                        scrapped = item.apartmentId in state.scrappedIds,
+                        toggling = item.apartmentId in state.togglingIds,
+                        onOpen = { onIntent(DriveSummaryIntent.OpenApartment(item.apartmentId)) },
+                        onToggle = { onIntent(DriveSummaryIntent.ToggleScrap(item.apartmentId)) },
+                    )
+                }
+            }
+            items(passedItems, key = { it.apartmentId }) { item ->
                 CatchUpRow(
                     item = item,
                     scrapped = item.apartmentId in state.scrappedIds,
@@ -98,10 +111,49 @@ private fun Header(summary: DriveSummary?, onBack: () -> Unit) {
         if (summary != null) {
             val date = summary.endedAt.toLocalDate()
             Text(
-                stringResource(R.string.catch_up_meta, summary.passedInterests.size, date.monthValue, date.dayOfMonth),
+                stringResource(
+                    R.string.catch_up_meta,
+                    summary.interestSummaryCount,
+                    date.monthValue,
+                    date.dayOfMonth,
+                ),
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Normal),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+    }
+}
+
+@Composable
+private fun CatchUpRecommendationRow(
+    item: DriveRecommendation,
+    scrapped: Boolean,
+    toggling: Boolean,
+    onOpen: () -> Unit,
+    onToggle: () -> Unit,
+) {
+    Surface(
+        onClick = onOpen,
+        modifier = Modifier.fillMaxWidth().heightIn(min = 176.wpx),
+        shape = RoundedCornerShape(28.wpx),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+    ) {
+        Row(Modifier.padding(horizontal = 40.wpx, vertical = 24.wpx), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Filled.Star, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(56.wpx))
+            Spacer(Modifier.width(32.wpx))
+            Column(Modifier.weight(1f)) {
+                Text(text = item.name, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = stringResource(R.string.catch_up_closest, formatDistance(item.closestKm)),
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Normal),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Spacer(Modifier.width(24.wpx))
+            Text(text = formatPrice(item.priceManwon), style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.width(40.wpx))
+            ScrapToggleButton(scrapped = scrapped, enabled = !toggling, onToggle = onToggle, modifier = Modifier.width(300.wpx))
         }
     }
 }

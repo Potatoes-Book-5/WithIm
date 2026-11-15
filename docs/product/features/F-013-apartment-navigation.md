@@ -1,9 +1,9 @@
 ---
-id: F-012
-task: T-039
+id: F-013
+task: T-040
 ---
 
-# F-012 단지 방문 내비게이션
+# F-013 단지 방문 내비게이션
 
 ## 목적
 
@@ -52,7 +52,7 @@ task: T-039
 
 ## 관련 문서
 
-- 시나리오: [S-011](../scenarios/S-011-conversational-property-tour.md)
+- 시나리오: [S-012](../scenarios/S-012-conversational-property-tour.md)
 - 화면: SCR-002
 - 플랫폼: [연동 확인](../../platform/gleo-integration.md)
 - 검증: [테스트](../../testing/gleo-tour/README.md)

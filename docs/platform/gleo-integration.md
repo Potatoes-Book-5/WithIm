@@ -1,6 +1,6 @@
 # Gleo·위치·내비 연동 확인 사항
 
-기능 정의: [F-010](../product/features/F-010-gleo-app-control.md) · 여정: [S-011](../product/scenarios/S-011-conversational-property-tour.md)
+기능 정의: [F-011](../product/features/F-011-gleo-app-control.md) · 여정: [S-012](../product/scenarios/S-012-conversational-property-tour.md)
 
 공식 문서 확인일은 모두 2026-11-14이다. 아래는 문서에 있는 설명과 이 제품의 제안을 구분한 것이다.
 

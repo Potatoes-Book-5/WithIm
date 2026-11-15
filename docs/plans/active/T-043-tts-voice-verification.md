@@ -1,7 +1,7 @@
 ---
-task: T-042
+task: T-043
 ---
-# T-042 TTS 기반 음성 검증
+# T-043 TTS 기반 음성 검증
 
 ## 목표
 실 마이크 없이 생성된 한국어 TTS WAV를 Pleos Connect의 가상 마이크에 주입하고, 음성 수락·Gleo 해석·앱 action·callback/저장 결과를 단계별로 기록한다. 기존 TC의 자동 검증 가능 범위와 외부 Gate를 분리한다.

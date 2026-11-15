@@ -1,9 +1,9 @@
 ---
-id: F-014
-task: T-039
+id: F-015
+task: T-040
 ---
 
-# F-014 차량 카메라 현장 스캔
+# F-015 차량 카메라 현장 스캔
 
 ## 목적
 
@@ -53,7 +53,7 @@ task: T-039
 
 ## 관련 문서
 
-- 시나리오: [S-011](../scenarios/S-011-conversational-property-tour.md)
+- 시나리오: [S-012](../scenarios/S-012-conversational-property-tour.md)
 - 플랫폼: [하드웨어 접근](../../platform/hardware-access.md), [연동 확인](../../platform/gleo-integration.md)
 - 규칙: HW-001, HW-002
 - 검증: [카메라 Gate](../../testing/gleo-tour/README.md)

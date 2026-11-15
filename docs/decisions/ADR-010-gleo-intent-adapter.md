@@ -1,6 +1,6 @@
 ---
 id: ADR-010
-task: T-039
+task: T-040
 ---
 
 # ADR-010 Gleo Intent 어댑터와 App API 경계
@@ -48,7 +48,7 @@ flowchart LR
 - Android Intent, MVI Intent, domain API 입력은 서로 다른 타입으로 취급한다.
 - 초기 구현은 debug 전용의 비영속 dummy로 하고 release에서 외부 호출할 수 없도록 한다.
 - 카테고리·DO·개인정보 처리 방식과 운영 Gleo 호출자 인증은 이 ADR로 승인하지 않는다.
-- 상세 순서와 검증은 [T-039 계획](../plans/active/T-039-gleo-integration.md)을 따른다.
+- 상세 순서와 검증은 [T-040 계획](../plans/active/T-040-gleo-integration.md)을 따른다.
 
 ## 미결 사항
 

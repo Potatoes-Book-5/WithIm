@@ -1,9 +1,9 @@
 ---
-id: F-013
-task: T-039
+id: F-014
+task: T-040
 ---
 
-# F-013 관심 지역 데일리 브리핑
+# F-014 관심 지역 데일리 브리핑
 
 ## 목적
 
@@ -32,7 +32,7 @@ task: T-039
 
 | 구분 | 항목 | 설명 |
 |---|---|---|
-| 입력 | 활성 프로필의 InterestArea, 원천별 체크포인트 | F-011, F-007 |
+| 입력 | 활성 프로필의 InterestArea, 원천별 체크포인트 | F-012, F-007 |
 | 저장 | BriefingItem | 원천 ID/버전, 지역, 유형, 게시/거래일, 수집 시각, 읽음 상태 |
 | 출력 | 최대 3개 요약 카드와 요청형 음성 | 출처/기준일/부분 실패 표시 |
 
@@ -61,9 +61,9 @@ task: T-039
 
 ## 관련 문서
 
-- 시나리오: [S-011](../scenarios/S-011-conversational-property-tour.md), S-008
+- 시나리오: [S-012](../scenarios/S-012-conversational-property-tour.md), S-008
 - 화면: [SCR-013](../../design/screens/SCR-013-daily-briefing.md)
-- 기능: F-002, F-006, F-007, F-008, F-010, F-011
+- 기능: F-002, F-006, F-007, F-008, F-011, F-012
 - 검증: [테스트](../../testing/gleo-tour/README.md)
 
 ## 미결 사항

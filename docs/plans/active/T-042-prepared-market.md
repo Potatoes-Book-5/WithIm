@@ -1,9 +1,9 @@
 ---
-task: T-041
+task: T-042
 ---
-# T-041 음성용 조회 스냅샷
+# T-042 음성용 조회 스냅샷
 
-후속 검증(2026-11-15): [T-042 TTS 검증](../../testing/gleo-tour/synthesized-speech.md)에서 실제 Pleos Connect 전체 계측 17개가 통과했다. 수집 대기 중 준비 데이터 조회 1,000회 10ms를 확인해 아래 실행 당시 미확인이었던 Android 경계 계측을 보완했다. 실제 Gleo 음성 연결은 별도 BLOCKED다.
+후속 검증(2026-11-15): [T-043 TTS 검증](../../testing/gleo-tour/synthesized-speech.md)에서 실제 Pleos Connect 전체 계측 17개가 통과했다. 수집 대기 중 준비 데이터 조회 1,000회 10ms를 확인해 아래 실행 당시 미확인이었던 Android 경계 계측을 보완했다. 실제 Gleo 음성 연결은 별도 BLOCKED다.
 
 ## 목표
 주행 수집과 음성 읽기를 분리한다. 네트워크·수집 Mutex 없이 준비된 단지 저장 정보와 지역 가격 집계를 읽고, 음성/배너 스크랩에서 12개월 상세·세대수 fetch를 제거한다.
@@ -22,7 +22,7 @@ task: T-041
 네트워크 중단/잠금 대기 중에도 스냅샷 읽기 완료, 완료 전 미게시, stale·cold·future clock 거부, 원본 평균/해제·기간·면적 필터, bounded eviction, 준비된 단지의 네트워크 없는 실제 Room 저장. 1초 목표는 측정 범위를 명시하고 플랫폼 보장으로 쓰지 않는다.
 
 ## 결정 로그
-기존 geocoder 좌표 정책을 유지하고 메모리 파생 모델만 추가한다. current main fetch 후 기존 geonu 브랜치에서 T-041/ADR-011을 등록한다. 사용자 지시에 따라 선등록 문서와 구현을 단계별 커밋하며 main 직접 push는 하지 않는다.
+기존 geocoder 좌표 정책을 유지하고 메모리 파생 모델만 추가한다. current main fetch 후 기존 geonu 브랜치에서 T-042/ADR-011을 등록한다. 사용자 지시에 따라 선등록 문서와 구현을 단계별 커밋하며 main 직접 push는 하지 않는다.
 
 ## 진행 기록
 2026-11-15: 현재 detail()의 12개월 fetch·세대수 조회·수집 Mutex 경합을 확인했다.

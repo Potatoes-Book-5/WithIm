@@ -1,9 +1,9 @@
 ---
-task: T-039
+task: T-040
 ---
 # Gleo E2E
 
-최신 실제 가격 계약/검증은 [T-043 실제 가격](live-price.md), 이전 합성 음성/기기 기록은 [T-042](synthesized-speech.md)을 따른다. T-042 당시 생성 음성 주입 3개와 Pleos 계측 17개를 확인했다. T-043 현재 전체 계측은 18개이며, 실제 Gleo 음성 실행은 assistant 연결 부재로 BLOCKED다. 아래 이전 실행 기록과 구분한다.
+최신 실제 가격 계약/검증은 [T-044 실제 가격](live-price.md), 이전 합성 음성/기기 기록은 [T-043](synthesized-speech.md)을 따른다. T-043 당시 생성 음성 주입 3개와 Pleos 계측 17개를 확인했다. T-044 현재 전체 계측은 18개이며, 실제 Gleo 음성 실행은 assistant 연결 부재로 BLOCKED다. 아래 이전 실행 기록과 구분한다.
 
 ## 자동 검증
 
@@ -51,19 +51,19 @@ Broadcast completed는 수신 완료일 뿐 비동기 API 성공 증거가 아�
 
 2026-11-15 emulator-5556(Pleos API 35)에서 GleoWireTest 8개 통과. debug schema/receiver 존재, release APK schema·manifest receiver 부재 및 release 단위 테스트 컴파일 통과를 확인했다. 최초 emulator-5554의 package 서비스 준비 실패·종료는 별도 기기 문제로 기록한다. 실제 Gleo 음성 검증은 아직 수행하지 않았다.
 
-## T-040 Nudge → 스크랩 E2E
+## T-041 Nudge → 스크랩 E2E
 
 `./harness/gleo-e2e.sh`는 기존 wire 검증과 VoiceScrapE2ETest를 함께 실행한다. 후자는 synthetic 단지 fixture와 별도 in-memory Room을 사용하여 Nudge snapshot → SCRAP_APARTMENT Android Intent decode → 상세 fetch → 실제 Room 저장 → 공식 callback → 재요청의 alreadySaved → 배너 만료 뒤 asking을 검증한다. 실제 사용자 DB/동의 설정을 변경하지 않는다. manifest receiver/DI 경로 자체는 GleoWireTest가 별도로 검사한다. 이 둘을 실제 Gleo LLM 음성 E2E와 혼동하지 않는다.
 
 실제 음성 확인은 관심 매물 배너가 표시 중인 상태에서 ‘스크랩해 줘’를 말해 SCRAP_APARTMENT 선택, persisted=true callback, 배너 ‘스크랩함’, 주차 후 목록을 확인한다. P 전환·앱 background·배너 만료 뒤에는 숨겨진 Nudge를 저장하지 않아야 한다. 배너 탭과 음성을 연속 실행해도 해제되지 않아야 한다. 현재 schema의 세 함수 중 지역 저장은 단지 스크랩으로 교체됐다.
 
-T-040 최종 기록: headless emulator-5556에서 verify --device 통과(Android 16개). 별도 Gleo E2E는 9개 통과. JVM 141개 통과, release 빌드·테스트 컴파일 통과. 실제 Gleo 서비스의 자연어 해석/음성 출력·승인은 미검증이다.
+T-041 최종 기록: headless emulator-5556에서 verify --device 통과(Android 16개). 별도 Gleo E2E는 9개 통과. JVM 141개 통과, release 빌드·테스트 컴파일 통과. 실제 Gleo 서비스의 자연어 해석/음성 출력·승인은 미검증이다.
 
 ## 실제 기기 사전 확인 갱신
 
 [2026-11-15 실제 Gleo 확인 기록](voice-e2e-20261115.md). 현재 Gleo는 ai.umos.ambientai로 확인됐다. 이전 단순 패키지명 검색 결과를 Gleo 부재로 해석하지 않는다. 실제 발화·스키마 승인·Nudge 스크랩은 여전히 미검증이다.
 
-## T-041 수집과 음성 읽기 분리 검증
+## T-042 수집과 음성 읽기 분리 검증
 
 `./harness/gleo-e2e.sh`에 PreparedMarketE2ETest를 추가했다. fake 거래 공급자의 완료를 지연한 동안 새 후보가 미준비인지 확인하고, 완료 뒤 지오코딩이 대기하며 수집 Mutex가 점유된 상태에서 새 후보 1,000회 읽기가 1초 이내인지 검사한다. 이는 메모리 조회 부분의 계측이며 Gleo 전체 발화·LLM·DB 저장까지 1초를 보장하는 결과가 아니다. 로그 태그 PreparedMarketPerf에 실제 시간을 남긴다.
 
@@ -71,6 +71,6 @@ VoiceScrapE2ETest는 cold read의 DATA_NOT_READY와 저장 없음, 준비된 데
 
 Android 실행·계측 대상은 Pleos Connect로 제한한다. 하네스는 automotive 기능과 Pleos 핵심 차량 서비스 패키지를 사전 확인하며, 일반 Phone AVD·미확인 기기에서는 설치 전에 종료한다. ANDROID_SERIAL 지정 시 해당 기기만, 미지정 시 연결된 모든 온라인 기기를 검사한다. 이는 개발 환경 검사이며 앱의 차량 모델별 분기가 아니다.
 
-T-041 검증 범위: JVM 155개, debug/release 빌드·lint·release 테스트 컴파일·Android 계측 APK 빌드 통과. JVM 경합 테스트의 1,000회 읽기는 3ms였다. Pleos 기기에서 새 계측은 package/계측 서비스 불안정으로 미완료다. 이전 T-040 기기 통과 기록을 T-041의 기기 통과로 재사용하지 않는다. 일반 Phone AVD 시도는 유효 검증에서 제외한다. 안정적인 Pleos 환경에서 `./harness/gleo-e2e.sh`로 재검증한다.
+T-042 검증 범위: JVM 155개, debug/release 빌드·lint·release 테스트 컴파일·Android 계측 APK 빌드 통과. JVM 경합 테스트의 1,000회 읽기는 3ms였다. Pleos 기기에서 새 계측은 package/계측 서비스 불안정으로 미완료다. 이전 T-041 기기 통과 기록을 T-041의 기기 통과로 재사용하지 않는다. 일반 Phone AVD 시도는 유효 검증에서 제외한다. 안정적인 Pleos 환경에서 `./harness/gleo-e2e.sh`로 재검증한다.
 
-T-042 후속 실행: read-only Pleos Connect에서 Gleo 경계 10개와 전체 Android 계측 17개가 통과했다. PreparedMarketPerf의 1,000회 조회는 10ms였다. [기계 판독 증거](runs/2026-11-15-tts.json)에 계측 이벤트와 음성 경로의 별도 BLOCKED 상태를 남긴다.
+T-043 후속 실행: read-only Pleos Connect에서 Gleo 경계 10개와 전체 Android 계측 17개가 통과했다. PreparedMarketPerf의 1,000회 조회는 10ms였다. [기계 판독 증거](runs/2026-11-15-tts.json)에 계측 이벤트와 음성 경로의 별도 BLOCKED 상태를 남긴다.

@@ -39,7 +39,7 @@ am broadcast의 콘솔 메시지는 전달 요청 결과이며 앱 Callback JSON
 | GleoIntentAdapterTest | 3개 dispatch, asking/fail/success 매핑, 합성 저장의 실패 표시 |
 | GleoWireTest | Android JSON/Intent/Callback envelope와 실제 debug Receiver round trip |
 
-기존 test-cases.csv의 제품/Gleo E2E 케이스를 dummy 테스트 통과로 바꾸지 않는다. 실제 실행 결과와 환경은 [구현 계획](../../plans/active/T-039-gleo-integration.md)의 진행 기록에 남긴다.
+기존 test-cases.csv의 제품/Gleo E2E 케이스를 dummy 테스트 통과로 바꾸지 않는다. 실제 실행 결과와 환경은 [구현 계획](../../plans/active/T-040-gleo-integration.md)의 진행 기록에 남긴다.
 
 ## 이전 단일 모듈 브랜치의 2026-11-14 참고 기록
 

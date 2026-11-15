@@ -11,6 +11,8 @@ import androidx.room.RoomDatabase
  * 버전을 올릴 때는 마이그레이션을 함께 추가한다.
  * - v2(T-017): scraps에 households, built_year 추가(값 없음으로 시작)
  * - v3(T-018): 주행 요약 테이블 4개 추가
+ * - v5(T-037): 세션 추천 후보와 main_reco_key 추가
+ * - v6(T-037): 추천 키워드 문맥(동네·세대수·준공연도) 추가
  */
 @Database(
     entities = [
@@ -24,12 +26,20 @@ import androidx.room.RoomDatabase
         DriveRankEntity::class,
         DriveLeaderChangeEntity::class,
         DrivePassedInterestEntity::class,
+        DriveRecommendationEntity::class,
         DriveRegionRoundEntity::class,
         DriveRegionRankEntity::class,
     ],
-    version = 5,
+    version = 7,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4), AutoMigration(from = 4, to = 5)],
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2),
+        AutoMigration(from = 2, to = 3),
+        AutoMigration(from = 3, to = 4),
+        AutoMigration(from = 4, to = 5),
+        AutoMigration(from = 5, to = 6),
+        AutoMigration(from = 6, to = 7),
+    ],
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun scrapDao(): ScrapDao

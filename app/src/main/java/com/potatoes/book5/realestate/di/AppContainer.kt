@@ -121,7 +121,13 @@ class AppContainer(context: Context) {
     /** 플랫폼 주행 규제(T-035). 규제 중에는 DO 화면만 보여 준다. */
     val observeUxRestricted = ObserveUxRestrictedUseCase(CarUxRestrictionSource(context))
     val observeLeaderChanges = ObserveLeaderChangesUseCase(rankingRepository, consentRepository)
-    val observeInterestAlerts = ObserveInterestMatchAlertsUseCase(rankingRepository, consentRepository, scrapRepository)
+    val observeInterestAlerts = ObserveInterestMatchAlertsUseCase(
+        rankingRepository,
+        consentRepository,
+        scrapRepository,
+        interestRepository = interestRepository,
+        driveRecordRepository = driveRecordRepository,
+    )
 
     val simulateDriving = SimulateDrivingUseCase(vehicleSimulation)
     val refreshMarket = RefreshMarketUseCase(marketRepository)
@@ -139,7 +145,12 @@ class AppContainer(context: Context) {
     val observeMyPage = ObserveMyPageUseCase(interestRepository, scrapRepository)
 
     /** 앱 프로세스 동안 주행 세션을 기록한다. RealEstateApplication이 시작한다. */
-    val driveSessionRecorder = DriveSessionRecorder(drivingStateProvider, rankingRepository, driveRecordRepository)
+    val driveSessionRecorder = DriveSessionRecorder(
+        drivingStateProvider,
+        rankingRepository,
+        driveRecordRepository,
+        interestRepository = interestRepository,
+    )
     val observeDriveSummary = ObserveDriveSummaryUseCase(driveRecordRepository)
     val observeUnseenDriveSummary = ObserveUnseenDriveSummaryUseCase(driveRecordRepository)
     val markDriveSummarySeen = MarkDriveSummarySeenUseCase(driveRecordRepository)

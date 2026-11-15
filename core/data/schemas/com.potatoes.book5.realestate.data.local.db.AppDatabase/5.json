@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "149831e74cda0978375851ac700d5baf",
+    "identityHash": "c7afef2f6c6bf7b6d0d0315762c31f0a",
     "entities": [
       {
         "tableName": "scraps",
@@ -109,435 +109,6 @@
           "autoGenerate": false,
           "columnNames": [
             "apartment_id"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "tour_areas",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profile` TEXT NOT NULL, `area_id` TEXT NOT NULL, `name` TEXT NOT NULL, `district_code` TEXT NOT NULL, `shape` TEXT NOT NULL, `latitude` REAL, `longitude` REAL, `radius_meters` REAL, `source_id` TEXT NOT NULL, `source_as_of` INTEGER NOT NULL, `saved_at` INTEGER NOT NULL, `generation` TEXT NOT NULL, `district_name` TEXT, PRIMARY KEY(`profile`, `area_id`))",
-        "fields": [
-          {
-            "fieldPath": "profile",
-            "columnName": "profile",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "areaId",
-            "columnName": "area_id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "name",
-            "columnName": "name",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "districtCode",
-            "columnName": "district_code",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "shape",
-            "columnName": "shape",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "latitude",
-            "columnName": "latitude",
-            "affinity": "REAL",
-            "notNull": false
-          },
-          {
-            "fieldPath": "longitude",
-            "columnName": "longitude",
-            "affinity": "REAL",
-            "notNull": false
-          },
-          {
-            "fieldPath": "radiusMeters",
-            "columnName": "radius_meters",
-            "affinity": "REAL",
-            "notNull": false
-          },
-          {
-            "fieldPath": "sourceId",
-            "columnName": "source_id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sourceAsOf",
-            "columnName": "source_as_of",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "savedAt",
-            "columnName": "saved_at",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "generation",
-            "columnName": "generation",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "districtName",
-            "columnName": "district_name",
-            "affinity": "TEXT",
-            "notNull": false
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "profile",
-            "area_id"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "tour_briefings",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profile` TEXT NOT NULL, `area_id` TEXT NOT NULL, `version` TEXT NOT NULL, `average_krw` INTEGER, `highest_krw` INTEGER, `sample_count` INTEGER NOT NULL, `period_start` INTEGER NOT NULL, `period_end` INTEGER NOT NULL, `source_as_of` INTEGER NOT NULL, `observed_at` INTEGER NOT NULL, `read_version` TEXT, PRIMARY KEY(`profile`, `area_id`), FOREIGN KEY(`profile`, `area_id`) REFERENCES `tour_areas`(`profile`, `area_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
-        "fields": [
-          {
-            "fieldPath": "profile",
-            "columnName": "profile",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "areaId",
-            "columnName": "area_id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "version",
-            "columnName": "version",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "averageKrw",
-            "columnName": "average_krw",
-            "affinity": "INTEGER",
-            "notNull": false
-          },
-          {
-            "fieldPath": "highestKrw",
-            "columnName": "highest_krw",
-            "affinity": "INTEGER",
-            "notNull": false
-          },
-          {
-            "fieldPath": "sampleCount",
-            "columnName": "sample_count",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "periodStart",
-            "columnName": "period_start",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "periodEnd",
-            "columnName": "period_end",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sourceAsOf",
-            "columnName": "source_as_of",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "observedAt",
-            "columnName": "observed_at",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "readVersion",
-            "columnName": "read_version",
-            "affinity": "TEXT",
-            "notNull": false
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "profile",
-            "area_id"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": [
-          {
-            "table": "tour_areas",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "profile",
-              "area_id"
-            ],
-            "referencedColumns": [
-              "profile",
-              "area_id"
-            ]
-          }
-        ]
-      },
-      {
-        "tableName": "tour_entries",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profile` TEXT NOT NULL, `area_id` TEXT NOT NULL, `session` TEXT NOT NULL, `visit` INTEGER NOT NULL, `at` INTEGER NOT NULL, `context_revision` INTEGER NOT NULL, `area_generation` TEXT NOT NULL, PRIMARY KEY(`profile`, `area_id`), FOREIGN KEY(`profile`, `area_id`) REFERENCES `tour_areas`(`profile`, `area_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
-        "fields": [
-          {
-            "fieldPath": "profile",
-            "columnName": "profile",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "areaId",
-            "columnName": "area_id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "session",
-            "columnName": "session",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "visit",
-            "columnName": "visit",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "at",
-            "columnName": "at",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "contextRevision",
-            "columnName": "context_revision",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "areaGeneration",
-            "columnName": "area_generation",
-            "affinity": "TEXT",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "profile",
-            "area_id"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": [
-          {
-            "table": "tour_areas",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "profile",
-              "area_id"
-            ],
-            "referencedColumns": [
-              "profile",
-              "area_id"
-            ]
-          }
-        ]
-      },
-      {
-        "tableName": "tour_notices",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profile` TEXT NOT NULL, `area_id` TEXT NOT NULL, `notice_id` TEXT NOT NULL, `source` TEXT NOT NULL, `type` TEXT NOT NULL, `title` TEXT NOT NULL, `url` TEXT NOT NULL, `published_at` INTEGER, `published_date` INTEGER, `address` TEXT, `scope` TEXT NOT NULL, `version` TEXT NOT NULL, `collected_at` INTEGER NOT NULL, `observed_at` INTEGER NOT NULL, `read_version` TEXT, PRIMARY KEY(`profile`, `area_id`, `notice_id`), FOREIGN KEY(`profile`, `area_id`) REFERENCES `tour_areas`(`profile`, `area_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
-        "fields": [
-          {
-            "fieldPath": "profile",
-            "columnName": "profile",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "areaId",
-            "columnName": "area_id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "noticeId",
-            "columnName": "notice_id",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "source",
-            "columnName": "source",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "type",
-            "columnName": "type",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "title",
-            "columnName": "title",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "url",
-            "columnName": "url",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "publishedAt",
-            "columnName": "published_at",
-            "affinity": "INTEGER",
-            "notNull": false
-          },
-          {
-            "fieldPath": "publishedDate",
-            "columnName": "published_date",
-            "affinity": "INTEGER",
-            "notNull": false
-          },
-          {
-            "fieldPath": "address",
-            "columnName": "address",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "scope",
-            "columnName": "scope",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "version",
-            "columnName": "version",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "collectedAt",
-            "columnName": "collected_at",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "observedAt",
-            "columnName": "observed_at",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "readVersion",
-            "columnName": "read_version",
-            "affinity": "TEXT",
-            "notNull": false
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "profile",
-            "area_id",
-            "notice_id"
-          ]
-        },
-        "indices": [
-          {
-            "name": "index_tour_notices_profile_notice_id",
-            "unique": false,
-            "columnNames": [
-              "profile",
-              "notice_id"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_tour_notices_profile_notice_id` ON `${TABLE_NAME}` (`profile`, `notice_id`)"
-          }
-        ],
-        "foreignKeys": [
-          {
-            "table": "tour_areas",
-            "onDelete": "CASCADE",
-            "onUpdate": "NO ACTION",
-            "columns": [
-              "profile",
-              "area_id"
-            ],
-            "referencedColumns": [
-              "profile",
-              "area_id"
-            ]
-          }
-        ]
-      },
-      {
-        "tableName": "tour_sources",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profile` TEXT NOT NULL, `source` TEXT NOT NULL, `state` TEXT NOT NULL, `attempted_at` INTEGER NOT NULL, PRIMARY KEY(`profile`, `source`))",
-        "fields": [
-          {
-            "fieldPath": "profile",
-            "columnName": "profile",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "source",
-            "columnName": "source",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "state",
-            "columnName": "state",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "attemptedAt",
-            "columnName": "attempted_at",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "profile",
-            "source"
           ]
         },
         "indices": [],
@@ -799,6 +370,93 @@
         ]
       },
       {
+        "tableName": "drive_recommendations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`session_id` INTEGER NOT NULL, `apartment_id` TEXT NOT NULL, `name` TEXT NOT NULL, `price_manwon` INTEGER NOT NULL, `area_pyeong` INTEGER NOT NULL, `score_percent` INTEGER NOT NULL, `closest_km` REAL NOT NULL, `main_reco_key` TEXT NOT NULL, PRIMARY KEY(`session_id`, `apartment_id`), FOREIGN KEY(`session_id`) REFERENCES `drive_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apartmentId",
+            "columnName": "apartment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceManwon",
+            "columnName": "price_manwon",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "areaPyeong",
+            "columnName": "area_pyeong",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scorePercent",
+            "columnName": "score_percent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "closestKm",
+            "columnName": "closest_km",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mainRecoKey",
+            "columnName": "main_reco_key",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "session_id",
+            "apartment_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_drive_recommendations_session_id_score_percent_closest_km",
+            "unique": false,
+            "columnNames": [
+              "session_id",
+              "score_percent",
+              "closest_km"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_drive_recommendations_session_id_score_percent_closest_km` ON `${TABLE_NAME}` (`session_id`, `score_percent`, `closest_km`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "drive_sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
         "tableName": "drive_region_rounds",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`session_id` INTEGER NOT NULL, `round_id` TEXT NOT NULL, `district_code` TEXT NOT NULL, `district_name` TEXT NOT NULL, `started_at` INTEGER NOT NULL, `ended_at` INTEGER, PRIMARY KEY(`session_id`, `round_id`), FOREIGN KEY(`session_id`) REFERENCES `drive_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
@@ -931,7 +589,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '149831e74cda0978375851ac700d5baf')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c7afef2f6c6bf7b6d0d0315762c31f0a')"
     ]
   }
 }

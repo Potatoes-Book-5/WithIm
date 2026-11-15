@@ -1,10 +1,10 @@
-# Gleo 임장 테스트 — S-011
+# Gleo 임장 테스트 — S-012
 
 작성일: 2026-11-14 · 실행 상태: **90개 모두 미실행**. 이 문서는 테스트 설계이며 기능 구현/지원/승인 완료를 의미하지 않는다.
 
 ## 원본과 변경 규칙
 
-- 기능: [S-011 시나리오와 기능 지도](../../product/scenarios/S-011-conversational-property-tour.md)
+- 기능: [S-012 시나리오와 기능 지도](../../product/scenarios/S-012-conversational-property-tour.md)
 - 상세 케이스 원본: [test-cases.csv](test-cases.csv). ID·선행 조건·절차·기대 결과·우선순위·환경·Gate·실제 결과·증거·명세 경로를 관리한다.
 - 합성 입력/기대값: [fixtures.json](fixtures.json). 실제 지역 가격/개인 위치 데이터가 아니다.
 - 제품 숫자 원본: [gleo-tour-defaults](../../product/gleo-tour-defaults.md). 변경 시 관련 케이스와 fixture를 함께 검토한다.
@@ -44,17 +44,17 @@
 
 | 로컬 요구사항 | 단일 기준 문서 | 케이스 |
 |---|---|---|
-| R-AREA-CHECK | [F-010](../../product/features/F-010-gleo-app-control.md), [F-011](../../product/features/F-011-interest-area-booking.md) | TC-083~TC-090 |
-| R-01 | [F-010-gleo-app-control](../../product/features/F-010-gleo-app-control.md), [F-002-nearby-price-lookup](../../product/features/F-002-nearby-price-lookup.md) | TC-009, TC-010, TC-011, TC-013, TC-014, TC-015, TC-016, TC-017, TC-018, TC-020, TC-071, TC-082 |
-| R-02 | [F-011-interest-area-booking](../../product/features/F-011-interest-area-booking.md) | TC-021, TC-022, TC-023, TC-024, TC-025, TC-026, TC-027, TC-028, TC-058, TC-075, TC-082 |
-| R-03 | [F-011-interest-area-booking](../../product/features/F-011-interest-area-booking.md), [F-003-apartment-ranking](../../product/features/F-003-apartment-ranking.md) | TC-029, TC-030, TC-031, TC-032, TC-033, TC-034, TC-035, TC-036, TC-037, TC-040, TC-042, TC-075, TC-082 |
+| R-AREA-CHECK | [F-011](../../product/features/F-011-gleo-app-control.md), [F-012](../../product/features/F-012-interest-area-booking.md) | TC-083~TC-090 |
+| R-01 | [F-011-gleo-app-control](../../product/features/F-011-gleo-app-control.md), [F-002-nearby-price-lookup](../../product/features/F-002-nearby-price-lookup.md) | TC-009, TC-010, TC-011, TC-013, TC-014, TC-015, TC-016, TC-017, TC-018, TC-020, TC-071, TC-082 |
+| R-02 | [F-012-interest-area-booking](../../product/features/F-012-interest-area-booking.md) | TC-021, TC-022, TC-023, TC-024, TC-025, TC-026, TC-027, TC-028, TC-058, TC-075, TC-082 |
+| R-03 | [F-012-interest-area-booking](../../product/features/F-012-interest-area-booking.md), [F-003-apartment-ranking](../../product/features/F-003-apartment-ranking.md) | TC-029, TC-030, TC-031, TC-032, TC-033, TC-034, TC-035, TC-036, TC-037, TC-040, TC-042, TC-075, TC-082 |
 | R-04 | [SCR-002-apartment-detail](../../design/screens/SCR-002-apartment-detail.md), [F-002-nearby-price-lookup](../../product/features/F-002-nearby-price-lookup.md) | TC-001, TC-002, TC-003, TC-005, TC-043, TC-044, TC-045, TC-046, TC-047, TC-048, TC-082 |
-| R-05 | [F-012-apartment-navigation](../../product/features/F-012-apartment-navigation.md), [F-014-camera-site-scan](../../product/features/F-014-camera-site-scan.md) | TC-049, TC-050, TC-051, TC-052, TC-053, TC-054, TC-055, TC-056, TC-057, TC-082 |
-| R-06 | [F-013-area-daily-briefing](../../product/features/F-013-area-daily-briefing.md) | TC-019, TC-058, TC-059, TC-060, TC-061, TC-062, TC-063, TC-064, TC-065, TC-066, TC-067, TC-082 |
+| R-05 | [F-013-apartment-navigation](../../product/features/F-013-apartment-navigation.md), [F-015-camera-site-scan](../../product/features/F-015-camera-site-scan.md) | TC-049, TC-050, TC-051, TC-052, TC-053, TC-054, TC-055, TC-056, TC-057, TC-082 |
+| R-06 | [F-014-area-daily-briefing](../../product/features/F-014-area-daily-briefing.md) | TC-019, TC-058, TC-059, TC-060, TC-061, TC-062, TC-063, TC-064, TC-065, TC-066, TC-067, TC-082 |
 | R-MODE | [feature-state-matrix](../../product/feature-state-matrix.md) | TC-001, TC-002, TC-003, TC-004, TC-005, TC-006, TC-007, TC-008, TC-028, TC-047, TC-054, TC-056 |
 | R-PRICE | [F-002-nearby-price-lookup](../../product/features/F-002-nearby-price-lookup.md), [F-003-apartment-ranking](../../product/features/F-003-apartment-ranking.md), [F-004-interest-conditions](../../product/features/F-004-interest-conditions.md) | TC-009, TC-011, TC-012, TC-013, TC-017, TC-019, TC-020, TC-037, TC-038, TC-039, TC-040, TC-041, TC-044, TC-060, TC-074 |
-| R-CONTEXT | [F-010-gleo-app-control](../../product/features/F-010-gleo-app-control.md) | TC-010, TC-014, TC-015, TC-018, TC-021, TC-022, TC-023, TC-069, TC-078 |
-| R-GLEO | [F-010-gleo-app-control](../../product/features/F-010-gleo-app-control.md), [gleo-integration](../../platform/gleo-integration.md) | TC-026, TC-035, TC-065, TC-068, TC-069, TC-070, TC-071, TC-072, TC-074 |
+| R-CONTEXT | [F-011-gleo-app-control](../../product/features/F-011-gleo-app-control.md) | TC-010, TC-014, TC-015, TC-018, TC-021, TC-022, TC-023, TC-069, TC-078 |
+| R-GLEO | [F-011-gleo-app-control](../../product/features/F-011-gleo-app-control.md), [gleo-integration](../../platform/gleo-integration.md) | TC-026, TC-035, TC-065, TC-068, TC-069, TC-070, TC-071, TC-072, TC-074 |
 | R-AUDIO | [F-006-tts-alert](../../product/features/F-006-tts-alert.md) | TC-034, TC-072, TC-073 |
 | R-PRIVACY | [F-007-consent-settings](../../product/features/F-007-consent-settings.md) | TC-016, TC-027, TC-033, TC-057, TC-064, TC-075, TC-076, TC-077, TC-080 |
 | R-LIFECYCLE | [gleo-integration](../../platform/gleo-integration.md) | TC-032, TC-036, TC-066, TC-078, TC-079, TC-080 |
@@ -70,16 +70,16 @@
 
 ## 검증 기록
 
-현재 실제 가격 API와 공급자 검증은 [T-043 실제 가격](live-price.md)을 따른다. 과거 dummy/TTS 검증과 실행 범위를 구분한다.
+현재 실제 가격 API와 공급자 검증은 [T-044 실제 가격](live-price.md)을 따른다. 과거 dummy/TTS 검증과 실행 범위를 구분한다.
 
-원본 90개 제품 TC는 미실행 상태를 유지한다. 설계 초기 문서·fixture 검사는 [T-039 계획](../../plans/active/T-039-gleo-integration.md), 이후 앱 구현의 하위 계층 검증은 아래 별도 기록에서 확인한다. 앱 Intent/계측 성공을 실제 Gleo/차량 여정 TC의 PASS로 올리지 않는다.
+원본 90개 제품 TC는 미실행 상태를 유지한다. 설계 초기 문서·fixture 검사는 [T-040 계획](../../plans/active/T-040-gleo-integration.md), 이후 앱 구현의 하위 계층 검증은 아래 별도 기록에서 확인한다. 앱 Intent/계측 성공을 실제 Gleo/차량 여정 TC의 PASS로 올리지 않는다.
 
 ## Dummy 처리 경로의 별도 검증
 
-[T-039 개발 검증](dummy-adapter.md)은 debug Intent/API 경로의 단위·Android 테스트다. 이 결과는 위 90개 제품/Gleo E2E 케이스의 실행 상태와 별도로 관리한다.
+[T-040 개발 검증](dummy-adapter.md)은 debug Intent/API 경로의 단위·Android 테스트다. 이 결과는 위 90개 제품/Gleo E2E 케이스의 실행 상태와 별도로 관리한다.
 
-[T-042 합성 음성 검증](synthesized-speech.md)은 생성 TTS→Pleos 가상 마이크→앱 이벤트 자동화, 전체 Android 계측 17개, 음성 연결 BLOCKED 결과와 기존 TC의 검증 범위를 기록한다.
+[T-043 합성 음성 검증](synthesized-speech.md)은 생성 TTS→Pleos 가상 마이크→앱 이벤트 자동화, 전체 Android 계측 17개, 음성 연결 BLOCKED 결과와 기존 TC의 검증 범위를 기록한다.
 
 STEP 3 확장 TC-083~TC-090은 문서상 인수 조건이며 현재 dummy E2E 통과로 PASS 처리하지 않는다. 기존 가격 함수의 지역 확인 확장 계약 및 실제 Gleo·화면 검증이 필요하다.
 
-[T-044 명세 발화 하위 계층 검증](spec-actions.md)은 실제 구현에 연결한 정규화 Intent 15개와 안전/저장/원천 테스트를 관리한다. 자연어 Gleo E2E와 원본 90개 TC의 실행 상태와 구분한다.
+[T-045 명세 발화 하위 계층 검증](spec-actions.md)은 실제 구현에 연결한 정규화 Intent 15개와 안전/저장/원천 테스트를 관리한다. 자연어 Gleo E2E와 원본 90개 TC의 실행 상태와 구분한다.

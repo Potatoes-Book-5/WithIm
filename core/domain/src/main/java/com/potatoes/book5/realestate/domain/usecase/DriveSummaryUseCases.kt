@@ -7,9 +7,11 @@ import com.potatoes.book5.realestate.domain.model.DriveSummary
 import com.potatoes.book5.realestate.domain.model.LeaderEventKind
 import com.potatoes.book5.realestate.domain.model.DrivingState
 import com.potatoes.book5.realestate.domain.model.PassedInterest
+import com.potatoes.book5.realestate.domain.policy.DriveRecommendationPolicy
 import com.potatoes.book5.realestate.domain.port.ApartmentRepository
 import com.potatoes.book5.realestate.domain.port.DriveRecordRepository
 import com.potatoes.book5.realestate.domain.port.DrivingStateProvider
+import com.potatoes.book5.realestate.domain.port.InterestRepository
 import com.potatoes.book5.realestate.domain.port.RankingRepository
 import com.potatoes.book5.realestate.domain.port.ScrapRepository
 import com.potatoes.book5.realestate.domain.port.VehicleSimulation
@@ -38,6 +40,7 @@ class DriveSessionRecorder(
     private val now: () -> LocalDateTime = LocalDateTime::now,
     private val endDelay: Duration = Duration.ZERO,
     private val keep: Int = 10,
+    private val interestRepository: InterestRepository? = null,
 ) {
     /** 개발 빌드에서 기다리지 않고 세션을 닫는 신호. 받을 때까지 남아 있다. */
     private val endSignal = Channel<Unit>(Channel.CONFLATED)
@@ -65,7 +68,7 @@ class DriveSessionRecorder(
                             return@collect
                         }
                         if (snapshot.loading || snapshot.error != null) return@collect
-                        if (snapshot.top.isEmpty() && sessionId == null) return@collect
+                        if (snapshot.top.isEmpty() && snapshot.recommendationCandidates.isEmpty() && sessionId == null) return@collect
                         val at = now()
                         val id = sessionId ?: repository.startSession(at, snapshot.radiusKm).also { sessionId = it }
                         val top = snapshot.top.mapIndexed { i, n -> DriveRank(i + 1, n.apartment.id, n.apartment.name, n.apartment.priceManwon) }
@@ -75,6 +78,9 @@ class DriveSessionRecorder(
                             at = at,
                             top = top,
                             passed = snapshot.interestMatches.map { PassedInterest(it.apartment.id, it.apartment.name, it.distanceKm, it.apartment.priceManwon) },
+                            recommendations = interestRepository?.get()?.let { condition ->
+                                DriveRecommendationPolicy.rank(condition, snapshot.recommendationCandidates, at.year)
+                            }.orEmpty(),
                         )
                         val newRound = snapshot.round?.id != lastRoundId
                         if (newRound) lastLeaderId = null

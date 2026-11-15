@@ -66,6 +66,9 @@ interface DriveDao {
     @Query("SELECT COUNT(*) FROM drive_ranks WHERE session_id = :id")
     suspend fun rankCount(id: Long): Int
 
+    @Query("SELECT COUNT(*) FROM drive_passed_interests WHERE session_id = :id")
+    suspend fun passedCount(id: Long): Int
+
     @Query("UPDATE drive_sessions SET ended_at = :endedAt WHERE id = :id")
     suspend fun end(id: Long, endedAt: Long)
 
@@ -96,6 +99,18 @@ interface DriveDao {
 
     @Query("SELECT * FROM drive_passed_interests WHERE session_id = :id ORDER BY first_seen_at, apartment_id")
     fun observePassed(id: Long): Flow<List<DrivePassedInterestEntity>>
+
+    @Query("SELECT * FROM drive_recommendations WHERE session_id = :id AND apartment_id = :apartmentId")
+    suspend fun recommendation(id: Long, apartmentId: String): DriveRecommendationEntity?
+
+    @Upsert
+    suspend fun upsertRecommendation(item: DriveRecommendationEntity)
+
+    @Query("SELECT * FROM drive_recommendations WHERE session_id = :id ORDER BY score_percent DESC, closest_km, apartment_id")
+    fun observeRecommendations(id: Long): Flow<List<DriveRecommendationEntity>>
+
+    @Query("SELECT COUNT(*) FROM drive_recommendations WHERE session_id = :id")
+    suspend fun recommendationCount(id: Long): Int
 
     @Query("SELECT id FROM drive_sessions WHERE ended_at IS NOT NULL ORDER BY ended_at DESC LIMIT 1")
     fun observeLatestId(): Flow<Long?>

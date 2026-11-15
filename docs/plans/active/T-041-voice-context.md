@@ -1,7 +1,7 @@
 ---
-task: T-040
+task: T-041
 ---
-# T-040 Nudge and app-state voice context
+# T-041 Nudge and app-state voice context
 
 ## 목표
 SCR-005의 ‘스크랩해 줘’ Nudge와 현재 상세 화면을 신뢰 가능한 실행 context로 연결한다. 수신 시 context를 동결하고 단지 조회→멱등 스크랩→배너 반영→callback까지 구현한다.
@@ -26,6 +26,6 @@ harness verify --device, context 정책 JVM 테스트, 실제 Room을 통한 음
 - 등록 선병합을 기다리지 않고 사용자가 승인한 구현 범위에서 같은 브랜치에 등록·구현 커밋을 제공한다. main 직접 push는 하지 않는다.
 
 ## 진행 기록
-2026-11-15: 기존 검증된 통합을 1103e87로 커밋. T-040 등록 후 구현 시작.
+2026-11-15: 기존 검증된 통합을 1103e87로 커밋. T-041 등록 후 구현 시작.
 
 2026-11-15 검증 완료: JVM 141개(core/domain 21, core/data 18, app 94, feature/driving 8), Android 계측 16개(기존 Gleo 8 + 신규 Intent/Room 스크랩 1 포함) 통과. 최종 전체 기기 로그 harness/runs/20261115-010657-device.log. assembleRelease와 app/core:data release 단위 테스트 컴파일 통과. debug 전용 소스 폴더에서 누락됐던 adapter 테스트 3개를 공통 JVM source set으로 이동하고 fake 포트로 교체한 뒤 app:testDebugUnitTest 및 release 테스트 컴파일 재통과. 독립 리뷰에서 hidden Nudge·탭 경합·초기 저장 상태·응답 메타데이터·asking 문구 지적을 반영했다. GUI emulator의 QEMU hang 이후 headless emulator-5556에서 전체 검증했다. 실제 Gleo 음성·스키마 승인·주행 심사는 별도 외부 검증으로 남는다.
