@@ -94,8 +94,8 @@ adb shell pm grant com.potatoes.book5.realestate pleos.car.permission.TTS_SERVIC
 
 1. **저장소 클론 및 Git 훅 설정**
    ```bash
-   git clone https://github.com/Potatoes-Book-5/King-of-real-estate.git
-   cd King-of-real-estate
+   git clone https://github.com/Potatoes-Book-5/WithIm.git
+   cd WithIm
    ./harness/setup.sh
    cp local.properties.example local.properties   # API 키 입력
    ```
@@ -158,8 +158,8 @@ Pleos Connect 에뮬레이터에서 실제 주행(기어 변속, 차량 위치 �
   - Release APK 빌드: `./gradlew assembleRelease`
     - 생성 경로: `app/build/outputs/apk/release/app-release-unsigned.apk`
 - **GitHub 저장소 및 Release 링크**:
-  - GitHub Repository: <https://github.com/Potatoes-Book-5/King-of-real-estate> (공모전 제출 미러: <https://github.com/Potatoes-Book-5/WithIm>)
-  - GitHub Releases (APK 다운로드): <https://github.com/Potatoes-Book-5/King-of-real-estate/releases>
+  - GitHub Repository: <https://github.com/Potatoes-Book-5/WithIm>
+  - GitHub Releases (APK 다운로드): <https://github.com/Potatoes-Book-5/WithIm/releases>
 
 ---
 

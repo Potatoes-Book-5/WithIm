@@ -71,13 +71,13 @@ AVD는 Device Manager의 ▶ 버튼으로 실행합니다. 에뮬레이터 UI는
 ## 4. 프로젝트 열기
 
 ```bash
-git clone https://github.com/Potatoes-Book-5/King-of-real-estate.git ~/AndroidStudioProjects/King-of-real-estate
+git clone https://github.com/Potatoes-Book-5/WithIm.git ~/AndroidStudioProjects/WithIm
 ```
 
-1. Android Studio > **Open** > `King-of-real-estate` 폴더 선택
+1. Android Studio > **Open** > `WithIm` 폴더 선택
 2. `local.properties` 만들기 (git에 올라가지 않는 파일)
    ```bash
-   cd ~/AndroidStudioProjects/King-of-real-estate
+   cd ~/AndroidStudioProjects/WithIm
    cp local.properties.example local.properties
    ```
    Pleos Playground > Workspace > **My Project** > 프로젝트 정보에서 값을 채웁니다.
