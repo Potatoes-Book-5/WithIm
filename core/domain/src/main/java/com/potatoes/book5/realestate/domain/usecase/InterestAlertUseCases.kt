@@ -7,6 +7,7 @@ import com.potatoes.book5.realestate.domain.port.DriveRecordRepository
 import com.potatoes.book5.realestate.domain.port.RankingRepository
 import com.potatoes.book5.realestate.domain.port.ScrapRepository
 import com.potatoes.book5.realestate.domain.port.InterestRepository
+import com.potatoes.book5.realestate.domain.port.RecommendationFeedbackRepository
 import com.potatoes.book5.realestate.domain.policy.DriveRecommendationPolicy
 import java.time.Duration
 import java.time.LocalDateTime
@@ -33,6 +34,7 @@ class ObserveInterestMatchAlertsUseCase(
     private val now: () -> LocalDateTime = LocalDateTime::now,
     private val interestRepository: InterestRepository? = null,
     private val driveRecordRepository: DriveRecordRepository? = null,
+    private val recommendationFeedbackRepository: RecommendationFeedbackRepository? = null,
 ) {
     private val alertedAt = mutableMapOf<String, LocalDateTime>()
 
@@ -40,10 +42,17 @@ class ObserveInterestMatchAlertsUseCase(
         rankingRepository.observeNearbyRanking().collect { snapshot ->
             if (snapshot.loading || snapshot.error != null || snapshot.vehicle == null) return@collect
             val at = now()
+            val scraps = scrapRepository.getAll()
             val recommendations = if (interestRepository != null) {
                 val condition = interestRepository.get()
                 if (condition == null || condition.isEmpty) return@collect
-                DriveRecommendationPolicy.rank(condition, snapshot.recommendationCandidates, at.year)
+                DriveRecommendationPolicy.rank(
+                    condition,
+                    snapshot.recommendationCandidates,
+                    at.year,
+                    scraps = scraps,
+                    feedback = recommendationFeedbackRepository?.getAll().orEmpty(),
+                )
             } else {
                 emptyList()
             }
@@ -59,7 +68,7 @@ class ObserveInterestMatchAlertsUseCase(
             }
             if (near.isEmpty()) return@collect
             if (consentRepository.get()?.interestAlertEnabled != true) return@collect
-            val scrapped = scrapRepository.getAll().mapTo(HashSet()) { it.apartmentId }
+            val scrapped = scraps.mapTo(HashSet()) { it.apartmentId }
             val target = near
                 .filter { it.apartment.id !in scrapped }
                 .filter { candidate -> alertedAt[candidate.apartment.id]?.let { Duration.between(it, at) >= suppress } ?: true }

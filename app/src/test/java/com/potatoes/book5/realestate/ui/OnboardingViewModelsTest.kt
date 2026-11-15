@@ -18,6 +18,7 @@ import com.potatoes.book5.realestate.fakes.FakeInterestRepository
 import com.potatoes.book5.realestate.fakes.scrapOf
 import com.potatoes.book5.realestate.fakes.FakeDriveRecordRepository
 import com.potatoes.book5.realestate.fakes.FakeScrapRepository
+import com.potatoes.book5.realestate.fakes.FakeRecommendationFeedbackRepository
 import com.potatoes.book5.realestate.domain.usecase.DeleteUserDataUseCase
 import com.potatoes.book5.realestate.domain.usecase.GetConsentUseCase
 import com.potatoes.book5.realestate.fakes.FakeNeighborhoodRepository
@@ -64,10 +65,11 @@ class OnboardingViewModelsTest {
         interest: FakeInterestRepository = FakeInterestRepository(),
         scraps: FakeScrapRepository = FakeScrapRepository(),
         drives: FakeDriveRecordRepository = FakeDriveRecordRepository(),
+        feedback: FakeRecommendationFeedbackRepository = FakeRecommendationFeedbackRepository(),
     ) = ConsentViewModel(
         SaveConsentUseCase(repo),
         GetConsentUseCase(repo),
-        DeleteUserDataUseCase(interest, scraps, drives),
+        DeleteUserDataUseCase(interest, scraps, drives, feedback),
         editing = editing,
     )
 
@@ -204,8 +206,12 @@ class OnboardingViewModelsTest {
         val interest = FakeInterestRepository(InterestCondition(areaRanges = setOf(AreaRange.PY_30S)))
         val scraps = FakeScrapRepository(listOf(scrapOf("a")))
         val drives = FakeDriveRecordRepository()
+        val feedback = FakeRecommendationFeedbackRepository()
+        feedback.recordDetailOpen(com.potatoes.book5.realestate.domain.model.DriveRecommendation(
+            "a", "단지-a", 100_000, 30, 90, 1.0, com.potatoes.book5.realestate.domain.model.RecommendationKey.PRICE,
+        ))
         drives.startSession(java.time.LocalDateTime.of(2026, 11, 14, 9, 0), 10)
-        val vm = consentViewModel(repo, editing = true, interest = interest, scraps = scraps, drives = drives)
+        val vm = consentViewModel(repo, editing = true, interest = interest, scraps = scraps, drives = drives, feedback = feedback)
 
         vm.onIntent(ConsentIntent.RequestDeleteData)
         assertTrue(vm.state.value.confirmingDelete)
@@ -219,6 +225,7 @@ class OnboardingViewModelsTest {
         assertEquals(null, interest.stored)
         assertTrue(scraps.getAll().isEmpty())
         assertTrue(drives.sessions.value.isEmpty())
+        assertTrue(feedback.getAll().isEmpty())
         // 동의와 알림 설정은 남는다.
         assertTrue(repo.stored!!.locationConsented)
     }

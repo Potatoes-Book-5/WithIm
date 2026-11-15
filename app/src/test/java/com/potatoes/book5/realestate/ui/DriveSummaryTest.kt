@@ -10,9 +10,11 @@ import com.potatoes.book5.realestate.domain.usecase.ObserveDriveSummaryUseCase
 import com.potatoes.book5.realestate.domain.usecase.ObserveScrappedIdsUseCase
 import com.potatoes.book5.realestate.domain.usecase.ToggleScrapByIdUseCase
 import com.potatoes.book5.realestate.domain.usecase.ToggleScrapUseCase
+import com.potatoes.book5.realestate.domain.usecase.RecordRecommendationDetailOpenUseCase
 import com.potatoes.book5.realestate.fakes.FakeApartmentRepository
 import com.potatoes.book5.realestate.fakes.FakeDriveRecordRepository
 import com.potatoes.book5.realestate.fakes.FakeScrapRepository
+import com.potatoes.book5.realestate.fakes.FakeRecommendationFeedbackRepository
 import com.potatoes.book5.realestate.fakes.dealOf
 import com.potatoes.book5.realestate.ui.summary.DriveSummaryEffect
 import com.potatoes.book5.realestate.ui.summary.DriveSummaryIntent
@@ -20,6 +22,7 @@ import com.potatoes.book5.realestate.ui.summary.DriveSummaryViewModel
 import java.time.LocalDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -52,14 +55,39 @@ class DriveSummaryTest {
         return id
     }
 
-    private fun vm(id: Long?, drives: FakeDriveRecordRepository, scraps: FakeScrapRepository, apartments: FakeApartmentRepository = FakeApartmentRepository()) =
+    private fun vm(
+        id: Long?,
+        drives: FakeDriveRecordRepository,
+        scraps: FakeScrapRepository,
+        apartments: FakeApartmentRepository = FakeApartmentRepository(),
+        feedback: FakeRecommendationFeedbackRepository = FakeRecommendationFeedbackRepository(),
+    ) =
         DriveSummaryViewModel(
             id,
             ObserveDriveSummaryUseCase(drives),
             ObserveScrappedIdsUseCase(scraps),
             MarkDriveSummarySeenUseCase(drives),
             ToggleScrapByIdUseCase(apartments, ToggleScrapUseCase(scraps)),
+            RecordRecommendationDetailOpenUseCase(feedback),
         )
+
+    @Test
+    fun `추천 카드 상세 진입 반응을 기록하고 상세를 연다`() = runTest(dispatcher) {
+        val drives = FakeDriveRecordRepository()
+        val id = drives.finished(0)
+        val feedback = FakeRecommendationFeedbackRepository()
+        val recommendation = DriveRecommendation("a", "추천", 100_000, 30, 88, 1.0, RecommendationKey.PRICE)
+        val vm = vm(id, drives, FakeScrapRepository(), feedback = feedback)
+        val effects = mutableListOf<DriveSummaryEffect>()
+        val job = backgroundScope.launch { vm.effect.collect(effects::add) }
+
+        vm.onIntent(DriveSummaryIntent.OpenRecommendation(recommendation))
+        runCurrent()
+
+        assertEquals(1, feedback.getAll().single().detailOpenCount)
+        assertEquals(DriveSummaryEffect.Navigate(Screen.Detail("a")), effects.single())
+        job.cancel()
+    }
 
     @Test
     fun `요약을 열면 확인 처리하고 지나친 관심 매물을 바로 스크랩한다`() = runTest(dispatcher) {

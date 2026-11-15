@@ -84,6 +84,18 @@ data class DriveRecommendationEntity(
     @ColumnInfo(name = "built_year") val builtYear: Int?,
 )
 
+/** Aggregate feedback for recommendation detail opens; no trip id or event timestamp is retained. */
+@Entity(tableName = "recommendation_feedback")
+data class RecommendationFeedbackEntity(
+    @PrimaryKey @ColumnInfo(name = "apartment_id") val apartmentId: String,
+    @ColumnInfo(name = "price_manwon") val priceManwon: Long,
+    @ColumnInfo(name = "area_pyeong") val areaPyeong: Int,
+    @ColumnInfo(name = "neighborhood_name") val neighborhoodName: String?,
+    @ColumnInfo(name = "households") val households: Int?,
+    @ColumnInfo(name = "built_year") val builtYear: Int?,
+    @ColumnInfo(name = "detail_open_count") val detailOpenCount: Int,
+)
+
 @Entity(
     tableName = "drive_region_rounds",
     primaryKeys = ["session_id", "round_id"],

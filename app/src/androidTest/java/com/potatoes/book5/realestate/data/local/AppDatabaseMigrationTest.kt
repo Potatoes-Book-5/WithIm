@@ -54,6 +54,17 @@ class AppDatabaseMigrationTest {
         db.close()
     }
 
+    @Test
+    fun migrate6To7AddsEmptyRecommendationFeedbackTable() {
+        helper.createDatabase(DB, 6).close()
+        val db = helper.runMigrationsAndValidate(DB, 7, true)
+        db.query("SELECT COUNT(*) FROM recommendation_feedback").use { c ->
+            assertTrue(c.moveToFirst())
+            assertEquals(0, c.getInt(0))
+        }
+        db.close()
+    }
+
     private companion object {
         const val DB = "migration-test.db"
     }

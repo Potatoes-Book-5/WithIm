@@ -1,0 +1,669 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 7,
+    "identityHash": "89fb034b6e7d2ad0aa88836614719128",
+    "entities": [
+      {
+        "tableName": "scraps",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`apartment_id` TEXT NOT NULL, `name` TEXT NOT NULL, `neighborhood` TEXT NOT NULL, `area_pyeong` INTEGER NOT NULL, `scrapped_at` INTEGER NOT NULL, `baseline_price_manwon` INTEGER NOT NULL, `baseline_deal_date` INTEGER NOT NULL, `last_price_manwon` INTEGER NOT NULL, `last_deal_date` INTEGER NOT NULL, `last_checked_at` INTEGER NOT NULL, `change_kind` TEXT, `change_delta_manwon` INTEGER, `change_detected_at` INTEGER, `change_seen` INTEGER NOT NULL, `households` INTEGER, `built_year` INTEGER, PRIMARY KEY(`apartment_id`))",
+        "fields": [
+          {
+            "fieldPath": "apartmentId",
+            "columnName": "apartment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "neighborhood",
+            "columnName": "neighborhood",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "areaPyeong",
+            "columnName": "area_pyeong",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scrappedAt",
+            "columnName": "scrapped_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "baselinePriceManwon",
+            "columnName": "baseline_price_manwon",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "baselineDealDate",
+            "columnName": "baseline_deal_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastPriceManwon",
+            "columnName": "last_price_manwon",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastDealDate",
+            "columnName": "last_deal_date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastCheckedAt",
+            "columnName": "last_checked_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "changeKind",
+            "columnName": "change_kind",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "changeDeltaManwon",
+            "columnName": "change_delta_manwon",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "changeDetectedAt",
+            "columnName": "change_detected_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "changeSeen",
+            "columnName": "change_seen",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "households",
+            "columnName": "households",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "builtYear",
+            "columnName": "built_year",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "apartment_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "drive_sessions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `started_at` INTEGER NOT NULL, `ended_at` INTEGER, `last_recorded_at` INTEGER NOT NULL, `radius_km` INTEGER NOT NULL, `distance_km` REAL, `seen` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAt",
+            "columnName": "started_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endedAt",
+            "columnName": "ended_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastRecordedAt",
+            "columnName": "last_recorded_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "radiusKm",
+            "columnName": "radius_km",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "distanceKm",
+            "columnName": "distance_km",
+            "affinity": "REAL",
+            "notNull": false
+          },
+          {
+            "fieldPath": "seen",
+            "columnName": "seen",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "drive_ranks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`session_id` INTEGER NOT NULL, `rank` INTEGER NOT NULL, `apartment_id` TEXT NOT NULL, `name` TEXT NOT NULL, `price_manwon` INTEGER NOT NULL, PRIMARY KEY(`session_id`, `rank`), FOREIGN KEY(`session_id`) REFERENCES `drive_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rank",
+            "columnName": "rank",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apartmentId",
+            "columnName": "apartment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceManwon",
+            "columnName": "price_manwon",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "session_id",
+            "rank"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "drive_sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "drive_leader_changes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `session_id` INTEGER NOT NULL, `at` INTEGER NOT NULL, `apartment_id` TEXT NOT NULL, `name` TEXT NOT NULL, `kind` TEXT NOT NULL DEFAULT 'REPLACED', `district_name` TEXT, FOREIGN KEY(`session_id`) REFERENCES `drive_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "at",
+            "columnName": "at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apartmentId",
+            "columnName": "apartment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true,
+            "defaultValue": "'REPLACED'"
+          },
+          {
+            "fieldPath": "districtName",
+            "columnName": "district_name",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_drive_leader_changes_session_id",
+            "unique": false,
+            "columnNames": [
+              "session_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_drive_leader_changes_session_id` ON `${TABLE_NAME}` (`session_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "drive_sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "drive_passed_interests",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`session_id` INTEGER NOT NULL, `apartment_id` TEXT NOT NULL, `name` TEXT NOT NULL, `closest_km` REAL NOT NULL, `price_manwon` INTEGER NOT NULL, `first_seen_at` INTEGER NOT NULL, PRIMARY KEY(`session_id`, `apartment_id`), FOREIGN KEY(`session_id`) REFERENCES `drive_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apartmentId",
+            "columnName": "apartment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "closestKm",
+            "columnName": "closest_km",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceManwon",
+            "columnName": "price_manwon",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "firstSeenAt",
+            "columnName": "first_seen_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "session_id",
+            "apartment_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "drive_sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "drive_recommendations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`session_id` INTEGER NOT NULL, `apartment_id` TEXT NOT NULL, `name` TEXT NOT NULL, `price_manwon` INTEGER NOT NULL, `area_pyeong` INTEGER NOT NULL, `score_percent` INTEGER NOT NULL, `closest_km` REAL NOT NULL, `main_reco_key` TEXT NOT NULL, `neighborhood_name` TEXT, `households` INTEGER, `built_year` INTEGER, PRIMARY KEY(`session_id`, `apartment_id`), FOREIGN KEY(`session_id`) REFERENCES `drive_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apartmentId",
+            "columnName": "apartment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceManwon",
+            "columnName": "price_manwon",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "areaPyeong",
+            "columnName": "area_pyeong",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scorePercent",
+            "columnName": "score_percent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "closestKm",
+            "columnName": "closest_km",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mainRecoKey",
+            "columnName": "main_reco_key",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "neighborhoodName",
+            "columnName": "neighborhood_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "households",
+            "columnName": "households",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "builtYear",
+            "columnName": "built_year",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "session_id",
+            "apartment_id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_drive_recommendations_session_id_score_percent_closest_km",
+            "unique": false,
+            "columnNames": [
+              "session_id",
+              "score_percent",
+              "closest_km"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_drive_recommendations_session_id_score_percent_closest_km` ON `${TABLE_NAME}` (`session_id`, `score_percent`, `closest_km`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "drive_sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "recommendation_feedback",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`apartment_id` TEXT NOT NULL, `price_manwon` INTEGER NOT NULL, `area_pyeong` INTEGER NOT NULL, `neighborhood_name` TEXT, `households` INTEGER, `built_year` INTEGER, `detail_open_count` INTEGER NOT NULL, PRIMARY KEY(`apartment_id`))",
+        "fields": [
+          {
+            "fieldPath": "apartmentId",
+            "columnName": "apartment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceManwon",
+            "columnName": "price_manwon",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "areaPyeong",
+            "columnName": "area_pyeong",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "neighborhoodName",
+            "columnName": "neighborhood_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "households",
+            "columnName": "households",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "builtYear",
+            "columnName": "built_year",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "detailOpenCount",
+            "columnName": "detail_open_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "apartment_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "drive_region_rounds",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`session_id` INTEGER NOT NULL, `round_id` TEXT NOT NULL, `district_code` TEXT NOT NULL, `district_name` TEXT NOT NULL, `started_at` INTEGER NOT NULL, `ended_at` INTEGER, PRIMARY KEY(`session_id`, `round_id`), FOREIGN KEY(`session_id`) REFERENCES `drive_sessions`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "roundId",
+            "columnName": "round_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "districtCode",
+            "columnName": "district_code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "districtName",
+            "columnName": "district_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAt",
+            "columnName": "started_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endedAt",
+            "columnName": "ended_at",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "session_id",
+            "round_id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "drive_sessions",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "drive_region_ranks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`session_id` INTEGER NOT NULL, `round_id` TEXT NOT NULL, `rank` INTEGER NOT NULL, `apartment_id` TEXT NOT NULL, `name` TEXT NOT NULL, `price_manwon` INTEGER NOT NULL, PRIMARY KEY(`session_id`, `round_id`, `rank`), FOREIGN KEY(`session_id`, `round_id`) REFERENCES `drive_region_rounds`(`session_id`, `round_id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "sessionId",
+            "columnName": "session_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "roundId",
+            "columnName": "round_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rank",
+            "columnName": "rank",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "apartmentId",
+            "columnName": "apartment_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priceManwon",
+            "columnName": "price_manwon",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "session_id",
+            "round_id",
+            "rank"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "drive_region_rounds",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "session_id",
+              "round_id"
+            ],
+            "referencedColumns": [
+              "session_id",
+              "round_id"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '89fb034b6e7d2ad0aa88836614719128')"
+    ]
+  }
+}
