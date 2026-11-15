@@ -60,13 +60,26 @@ class FakeDriveRecordRepository : DriveRecordRepository {
         s.copy(top = top, passed = merged.values.toList(), recommendations = recommendationsById.values.toList(), lastRecordedAt = at)
     }
 
-    override suspend fun recordAlertedInterest(at: LocalDateTime, radiusKm: Int, interest: PassedInterest) {
+    override suspend fun recordAlertedRecommendation(
+        at: LocalDateTime,
+        radiusKm: Int,
+        recommendation: DriveRecommendation,
+    ) {
         val id = openSessionId() ?: startSession(at, radiusKm)
         edit(id) { s ->
-            val old = s.passed.firstOrNull { it.apartmentId == interest.apartmentId }
-            val merged = s.passed.filterNot { it.apartmentId == interest.apartmentId } +
-                interest.copy(closestKm = minOf(interest.closestKm, old?.closestKm ?: interest.closestKm))
-            s.copy(passed = merged, lastRecordedAt = at)
+            val oldPassed = s.passed.firstOrNull { it.apartmentId == recommendation.apartmentId }
+            val passed = s.passed.filterNot { it.apartmentId == recommendation.apartmentId } + PassedInterest(
+                recommendation.apartmentId,
+                recommendation.name,
+                minOf(recommendation.closestKm, oldPassed?.closestKm ?: recommendation.closestKm),
+                recommendation.priceManwon,
+            )
+            val recommendations = s.recommendations.associateBy { it.apartmentId }.toMutableMap()
+            val oldRecommendation = recommendations[recommendation.apartmentId]
+            recommendations[recommendation.apartmentId] = recommendation.copy(
+                closestKm = minOf(recommendation.closestKm, oldRecommendation?.closestKm ?: recommendation.closestKm),
+            )
+            s.copy(passed = passed, recommendations = recommendations.values.toList(), lastRecordedAt = at)
         }
     }
 

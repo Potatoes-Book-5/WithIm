@@ -57,7 +57,7 @@ fun InterestCatchUpScreen(state: DriveSummaryState, onIntent: (DriveSummaryInten
             .padding(horizontal = 48.wpx),
     ) {
         Header(summary, onBack = { onIntent(DriveSummaryIntent.Close) })
-        val recommendations = summary?.recommendationTop.orEmpty()
+        val recommendations = summary?.recommendations.orEmpty()
         val passedItems = summary?.additionalPassedInterests.orEmpty()
         LazyColumn(
             modifier = Modifier.fillMaxWidth().weight(1f),

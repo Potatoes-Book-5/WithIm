@@ -144,6 +144,7 @@
     <string name="summary_leader_changes">지역 대장 기록 %d건</string>
     <string name="summary_no_leader_change">지역 대장 기록 없음</string>
     <string name="summary_passed">지나친 관심 매물 %d</string>
+    <string name="summary_recommendations">지나친 관심 매물 3</string>
     <string name="recommendation_keyword_price_under_5">5억 이하 선호</string>
     <string name="recommendation_keyword_price_5_10">실속 가격대</string>
     <string name="recommendation_keyword_price_10_15">선호 가격대</string>

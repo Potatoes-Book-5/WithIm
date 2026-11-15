@@ -103,27 +103,35 @@ class DriveSummaryTest {
     }
 
     @Test
-    fun `추천 카드와 별도 알림 매물을 모두 지나친 관심 목록에 중복 없이 포함한다`() = runTest(dispatcher) {
+    fun `요약은 추천 상위 세 개만 계산하고 전체 추천과 추가 관심 매물은 보존한다`() = runTest(dispatcher) {
         val drives = FakeDriveRecordRepository()
         val id = drives.startSession(t, 10)
         drives.recordSnapshot(
             sessionId = id,
             at = t,
             top = emptyList(),
-            passed = listOf(PassedInterest("featured", "추천 단지", 1.0, 120_000)),
+            passed = listOf(
+                PassedInterest("featured", "추천 단지", 1.0, 120_000),
+                PassedInterest("legacy", "기존 관심 단지", 2.5, 90_000),
+            ),
             recommendations = listOf(
                 DriveRecommendation("featured", "추천 단지", 120_000, 30, 95, 1.0, RecommendationKey.PRICE),
                 DriveRecommendation("second", "다른 추천", 110_000, 28, 90, 1.5, RecommendationKey.AREA),
                 DriveRecommendation("third", "세 번째 추천", 100_000, 25, 85, 1.8, RecommendationKey.NEWNESS),
             ),
         )
-        drives.recordAlertedInterest(t.plusMinutes(1), 10, PassedInterest("outside-top3", "알림 단지", 1.9, 130_000))
+        drives.recordAlertedRecommendation(
+            t.plusMinutes(1), 10,
+            DriveRecommendation("outside-top3", "알림 단지", 130_000, 30, 98, 1.9, RecommendationKey.PRICE),
+        )
         drives.finishSession(id, null)
 
         val summary = drives.observeSummary(id).first()!!
 
-        assertEquals(listOf("outside-top3"), summary.additionalPassedInterests.map { it.apartmentId })
-        assertEquals(4, summary.interestSummaryCount)
+        assertEquals(listOf("legacy"), summary.additionalPassedInterests.map { it.apartmentId })
+        assertEquals(5, summary.interestSummaryCount)
+        assertEquals(listOf("featured", "second", "third", "outside-top3"), summary.recommendations.map { it.apartmentId })
+        assertEquals(3, summary.recommendationTop.size)
     }
 
     @Test

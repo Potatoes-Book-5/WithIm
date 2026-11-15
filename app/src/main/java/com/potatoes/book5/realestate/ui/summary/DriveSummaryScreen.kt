@@ -229,23 +229,18 @@ private fun PassedInterests(
     modifier: Modifier,
 ) {
     Column(modifier) {
-        val featuredIds = recommendations.mapTo(HashSet()) { it.apartmentId }
-        val additionalItems = items.filterNot { it.apartmentId in featuredIds }
-        if (additionalItems.isEmpty() && recommendations.isEmpty()) {
+        if (items.isEmpty() && recommendations.isEmpty()) {
             Spacer(Modifier.weight(1f))
         } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                contentPadding = PaddingValues(bottom = 16.wpx),
-                verticalArrangement = Arrangement.spacedBy(24.wpx),
-            ) {
-                item(key = "passed-title") {
-                    Text(
-                        text = stringResource(R.string.summary_passed, recommendations.size + additionalItems.size),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                }
-                if (recommendations.isNotEmpty()) {
+            if (recommendations.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().weight(1f),
+                    contentPadding = PaddingValues(bottom = 16.wpx),
+                    verticalArrangement = Arrangement.spacedBy(24.wpx),
+                ) {
+                    item(key = "recommendations-title") {
+                        Text(text = stringResource(R.string.summary_recommendations), style = MaterialTheme.typography.titleMedium)
+                    }
                     items(recommendations, key = { "recommendation-${it.apartmentId}" }) { item ->
                         RecommendationRow(
                             item = item,
@@ -256,15 +251,8 @@ private fun PassedInterests(
                         )
                     }
                 }
-                items(additionalItems, key = { it.apartmentId }) { item ->
-                    PassedRow(
-                        item = item,
-                        scrapped = item.apartmentId in state.scrappedIds,
-                        toggling = item.apartmentId in state.togglingIds,
-                        onOpen = { onIntent(DriveSummaryIntent.OpenApartment(item.apartmentId)) },
-                        onToggle = { onIntent(DriveSummaryIntent.ToggleScrap(item.apartmentId)) },
-                    )
-                }
+            } else {
+                Spacer(Modifier.weight(1f))
             }
             Spacer(Modifier.height(24.wpx))
             // SCR-011: 이번 주행에서 만난 관심 매물만 모아 본다(T-026).

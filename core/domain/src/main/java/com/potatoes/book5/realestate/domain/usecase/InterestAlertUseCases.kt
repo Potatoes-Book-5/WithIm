@@ -40,11 +40,15 @@ class ObserveInterestMatchAlertsUseCase(
         rankingRepository.observeNearbyRanking().collect { snapshot ->
             if (snapshot.loading || snapshot.error != null || snapshot.vehicle == null) return@collect
             val at = now()
-            val near = if (interestRepository != null) {
+            val recommendations = if (interestRepository != null) {
                 val condition = interestRepository.get()
                 if (condition == null || condition.isEmpty) return@collect
-                val recommendedIds = DriveRecommendationPolicy
-                    .rank(condition, snapshot.recommendationCandidates, at.year)
+                DriveRecommendationPolicy.rank(condition, snapshot.recommendationCandidates, at.year)
+            } else {
+                emptyList()
+            }
+            val near = if (interestRepository != null) {
+                val recommendedIds = recommendations
                     .take(3)
                     .mapTo(HashSet()) { it.apartmentId }
                 snapshot.recommendationCandidates.filter {
@@ -61,16 +65,11 @@ class ObserveInterestMatchAlertsUseCase(
                 .filter { candidate -> alertedAt[candidate.apartment.id]?.let { Duration.between(it, at) >= suppress } ?: true }
                 .minByOrNull { it.distanceKm }
                 ?: return@collect
-            driveRecordRepository?.recordAlertedInterest(
-                at = at,
-                radiusKm = snapshot.radiusKm,
-                interest = PassedInterest(
-                    apartmentId = target.apartment.id,
-                    name = target.apartment.name,
-                    closestKm = target.distanceKm,
-                    priceManwon = target.apartment.priceManwon,
-                ),
-            )
+            recommendations.firstOrNull { it.apartmentId == target.apartment.id }
+                ?.copy(closestKm = target.distanceKm)
+                ?.let { recommendation ->
+                    driveRecordRepository?.recordAlertedRecommendation(at, snapshot.radiusKm, recommendation)
+                }
             alertedAt[target.apartment.id] = at
             emit(InterestMatchAlert(target, at))
         }

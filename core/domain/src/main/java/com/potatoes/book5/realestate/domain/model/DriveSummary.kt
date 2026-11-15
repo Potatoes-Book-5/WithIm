@@ -65,8 +65,8 @@ data class DriveSummary(
     /** Passed items already represented by featured recommendation cards are not repeated. */
     val additionalPassedInterests: List<PassedInterest>
         get() {
-            val featuredIds = recommendationTop.mapTo(HashSet()) { it.apartmentId }
-            return passedInterests.filterNot { it.apartmentId in featuredIds }
+            val recommendationIds = recommendations.mapTo(HashSet()) { it.apartmentId }
+            return passedInterests.filterNot { it.apartmentId in recommendationIds }
         }
-    val interestSummaryCount: Int get() = recommendationTop.size + additionalPassedInterests.size
+    val interestSummaryCount: Int get() = recommendations.size + additionalPassedInterests.size
 }

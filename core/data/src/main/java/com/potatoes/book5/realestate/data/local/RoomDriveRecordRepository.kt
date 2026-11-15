@@ -83,18 +83,38 @@ class RoomDriveRecordRepository(
         }
     }
 
-    override suspend fun recordAlertedInterest(at: LocalDateTime, radiusKm: Int, interest: PassedInterest) {
+    override suspend fun recordAlertedRecommendation(
+        at: LocalDateTime,
+        radiusKm: Int,
+        recommendation: DriveRecommendation,
+    ) {
         db.withTransaction {
             val sessionId = ensureOpenSession(at, radiusKm)
-            val old = dao.passed(sessionId, interest.apartmentId)
+            val oldPassed = dao.passed(sessionId, recommendation.apartmentId)
             dao.upsertPassed(
                 DrivePassedInterestEntity(
                     sessionId = sessionId,
-                    apartmentId = interest.apartmentId,
-                    name = interest.name,
-                    closestKm = minOf(interest.closestKm, old?.closestKm ?: interest.closestKm),
-                    priceManwon = interest.priceManwon,
-                    firstSeenAt = old?.firstSeenAt ?: at.millis(),
+                    apartmentId = recommendation.apartmentId,
+                    name = recommendation.name,
+                    closestKm = minOf(recommendation.closestKm, oldPassed?.closestKm ?: recommendation.closestKm),
+                    priceManwon = recommendation.priceManwon,
+                    firstSeenAt = oldPassed?.firstSeenAt ?: at.millis(),
+                ),
+            )
+            val oldRecommendation = dao.recommendation(sessionId, recommendation.apartmentId)
+            dao.upsertRecommendation(
+                DriveRecommendationEntity(
+                    sessionId = sessionId,
+                    apartmentId = recommendation.apartmentId,
+                    name = recommendation.name,
+                    priceManwon = recommendation.priceManwon,
+                    areaPyeong = recommendation.areaPyeong,
+                    scorePercent = recommendation.scorePercent,
+                    closestKm = minOf(recommendation.closestKm, oldRecommendation?.closestKm ?: recommendation.closestKm),
+                    mainRecoKey = recommendation.mainRecoKey.name,
+                    neighborhoodName = recommendation.neighborhoodName,
+                    households = recommendation.households,
+                    builtYear = recommendation.builtYear,
                 ),
             )
             dao.touch(sessionId, at.millis())

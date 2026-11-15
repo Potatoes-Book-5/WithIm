@@ -91,7 +91,7 @@ class InterestMatchAlertsUseCaseTest {
     }
 
     @Test
-    fun `추천 알림으로 표시한 단지는 주행 요약의 지나친 관심 매물에 기록한다`() = runTest {
+    fun `추천 알림 매물은 전체 추천과 지나친 관심 기록에 저장한다`() = runTest {
         val candidate = match("c", 1.0).let { nearby ->
             nearby.copy(apartment = nearby.apartment.copy(priceManwon = 120_000))
         }
@@ -114,6 +114,7 @@ class InterestMatchAlertsUseCaseTest {
 
         assertEquals(listOf("c"), events.map { it.match.apartment.id })
         assertEquals(listOf("c"), driveRecords.sessions.value.values.single().passed.map { it.apartmentId })
+        assertEquals(listOf("c"), driveRecords.sessions.value.values.single().recommendations.map { it.apartmentId })
         job.cancel()
     }
 }
