@@ -32,7 +32,7 @@ def parse_args():
     ap.add_argument('--live-provider-probe', action='store_true', help='Opt-in real MOLIT/production DI smoke; never changes consent')
     ap.add_argument('--skip-build', action='store_true', help='Use the already built debug APK')
     ap.add_argument('--instrumentation', nargs='?', const='gleo', choices=['gleo', 'all'],
-                    help='Run 11 Gleo boundary tests or all 18 app tests (neither is speech E2E)')
+                    help='Run 11 Gleo boundary tests or all 23 app tests (neither is speech E2E)')
     return ap.parse_args()
 
 
@@ -104,7 +104,7 @@ def execute(args):
                 classes = ','.join('com.potatoes.book5.realestate.vehicle.gleo.' + name for name in
                     ['GleoWireTest', 'VoiceScrapE2ETest', 'PreparedMarketE2ETest', 'LivePriceE2ETest'])
                 filters = ['-e', 'class', classes] if args.instrumentation == 'gleo' else []
-                expected = 11 if args.instrumentation == 'gleo' else 18
+                expected = 11 if args.instrumentation == 'gleo' else 23
                 log_args = ['logcat', '-d', '-v', 'brief', '-s', 'GleoE2E:I', 'PreparedMarketPerf:I', '*:S']
                 before = command(selected + log_args, 6).splitlines()
                 output = command(selected + ['shell', 'am', 'instrument', '-w', '-r'] + filters + [

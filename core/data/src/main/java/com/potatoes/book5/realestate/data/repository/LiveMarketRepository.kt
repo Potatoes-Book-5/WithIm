@@ -515,6 +515,15 @@ class LiveMarketRepository(
                 coverage.dataAsOf.atZone(clock.zone).toInstant(),
                 recentRecords.mapNotNull { t -> stableId(t)?.takeIf { it in visibleIds }?.let { it to t } })
             preparedMarket.publish(prepared.candidates, expectedRevision = coverage.preparedRevision)
+            val summaries=prepared.candidates.associateBy { it.apartmentId }
+            val tourCandidates=displayed.mapNotNull { nearby ->
+                val c=summaries[nearby.apartment.id] ?: return@mapNotNull null
+                com.potatoes.book5.realestate.domain.model.tour.TourCandidate(c.apartmentId,c.name,c.districtCode,c.neighborhood,
+                    nearby.apartment.location,c.latest,c.areaPyeong,c.households,c.builtYear,c.sourceAsOf,
+                    com.potatoes.book5.realestate.domain.model.PriceRecord(nearby.apartment.priceManwon,nearby.apartment.dealDate))
+            }
+            preparedMarket.publishMarket(com.potatoes.book5.realestate.domain.model.tour.TourMarket(round.districtCode,tourCandidates,
+                coverage.dataAsOf.atZone(clock.zone).toInstant(),priceLeaderId=displayed.firstOrNull()?.apartment?.id),coverage.preparedRevision)
         }
         lastRankedPose = displayPose
         lastRequestedPose = displayPose
@@ -586,8 +595,7 @@ class LiveMarketRepository(
         trimMonthCache((0L..11L).mapTo(mutableSetOf()) { districtCode to end.minusMonths(it) })
         val deals = trades.map { it.toDeal() }
         val located = state.value.located.find { it.apartment.id == apartmentId }
-        Outcome.Success(
-            ApartmentDetail(
+        val detail=ApartmentDetail(
                 id = apartmentId,
                 name = newest.apartmentName ?: "이름 미제공",
                 district = districtNamesByCode[districtCode] ?: "법정동 코드 $districtCode",
@@ -609,7 +617,8 @@ class LiveMarketRepository(
                 }.sortedBy { it.month },
                 recentDeals = deals.take(3),
             )
-        )
+        if(sourceAsOf!=null) preparedMarket.publishAnalytics(detail,sourceAsOf)
+        Outcome.Success(detail)
     }
 
     override suspend fun latestDeal(apartmentId: String): Outcome<Deal> = when (val result = detail(apartmentId)) {

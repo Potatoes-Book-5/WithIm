@@ -21,8 +21,16 @@ class LiveAreaPriceSummaryRepository(
                                  val revision: Long, val createdAt: Instant)
     private val last = AtomicReference<Reference?>(null)
     fun captureLocation() = locations.snapshot()
+    fun lastReferenced(context: AppCallContext): ResolvedArea? {
+        val reference=last.get() ?: return null
+        val voice=context.voice ?: return null
+        val age=Duration.between(reference.createdAt,clock.instant())
+        return reference.area.takeIf { voices.isCurrent(voice) && reference.session==context.appSessionId && reference.profile==context.profileScope &&
+            reference.revision==voice.revision && !age.isNegative && age<=Duration.ofSeconds(60) }
+    }
 
     override suspend fun get(target: AreaTarget, context: AppCallContext): Outcome<ActionResult<PriceSummaryPayload>> {
+        if(!context.trusted && target.kind!=AreaTargetKind.NAMED_AREA) return Outcome.Failure(DomainError.Unsupported("authenticated_location_route"))
         val voice = context.voice ?: return unavailableContext()
         if (!voices.isCurrent(voice)) return unavailableContext()
         val now = clock.instant()
@@ -83,7 +91,7 @@ class LiveAreaPriceSummaryRepository(
             locationObservedAt = location?.observedAt?.toString().takeIf { target.kind == AreaTargetKind.CURRENT_LOCATION },
             locationAccuracyMeters = location?.accuracyMeters.takeIf { target.kind == AreaTargetKind.CURRENT_LOCATION },
             locationSource = location?.source?.name.takeIf { target.kind == AreaTargetKind.CURRENT_LOCATION })
-        if (target.kind != AreaTargetKind.LAST_REFERENCED_AREA)
+        if (context.trusted && target.kind != AreaTargetKind.LAST_REFERENCED_AREA)
             last.set(Reference(payload.area, context.appSessionId, context.profileScope, voice.revision, now))
         return Outcome.Success(ActionResult.Completed(payload))
     }

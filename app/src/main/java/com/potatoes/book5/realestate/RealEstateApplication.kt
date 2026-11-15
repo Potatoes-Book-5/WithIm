@@ -21,6 +21,17 @@ class RealEstateApplication : Application() {
             launch { container.refreshScrapChanges() }
             container.driveSessionRecorder.run()
         }
+        appScope.launch { container.tourAreas.run() }
+        appScope.launch { container.tourBriefingCollector.run() }
+        appScope.launch { container.tourNoticeCollector.run() }
+        appScope.launch {
+            container.vehicleLocationProvider.locations.collect { fix ->
+                val context=container.captureTourContext()
+                val current=context.priceLocation?.copy(point=fix.pose?.location.takeIf { fix.status==com.potatoes.book5.realestate.domain.port.LocationStatus.AVAILABLE },
+                    observedAt=fix.observedAt,accuracyMeters=fix.accuracyMeters,source=fix.source)
+                container.tourEntries(context.copy(priceLocation=current))
+            }
+        }
         container.fusedLocationBridge.start(appScope)
         appScope.launch {
             container.consentChanges.collect { container.voiceContext.setConsented(it?.locationConsented == true) }

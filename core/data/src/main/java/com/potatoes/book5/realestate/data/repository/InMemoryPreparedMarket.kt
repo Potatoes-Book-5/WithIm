@@ -5,6 +5,10 @@ import com.potatoes.book5.realestate.domain.model.*
 import com.potatoes.book5.realestate.domain.port.PreparedScrapReader
 import com.potatoes.book5.realestate.domain.port.PreparedPriceReader
 import com.potatoes.book5.realestate.domain.model.appaction.ResolvedArea
+import com.potatoes.book5.realestate.domain.model.tour.*
+import com.potatoes.book5.realestate.domain.port.TourMarketReader
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -16,13 +20,17 @@ class InMemoryPreparedMarket(
     private val ttl: Duration = Duration.ofMinutes(5),
     private val maxCandidates: Int = 256,
     private val maxDistricts: Int = 8,
-) : PreparedScrapReader, PreparedPriceReader {
+) : PreparedScrapReader, PreparedPriceReader, TourMarketReader {
     private data class State(
         val candidates: Map<String, PreparedScrapCandidate> = emptyMap(),
         val districts: Map<String, PreparedDistrictPrices> = emptyMap(),
         val revision: Long = 0,
+        val tourMarkets: Map<String,TourMarket> = emptyMap(),
     )
     private val state = AtomicReference(State())
+    private val publications = MutableStateFlow(0L)
+    val changes = publications.asStateFlow()
+    private val analytics = AtomicReference<Map<String,Pair<ApartmentDetail,Instant>>>(emptyMap())
     init { require(!ttl.isNegative && !ttl.isZero && maxCandidates > 0 && maxDistricts > 0) }
 
     fun publish(candidates: List<PreparedScrapCandidate>, district: PreparedDistrictPrices? = null, expectedRevision: Long? = null): Long {
@@ -57,8 +65,10 @@ class InMemoryPreparedMarket(
             }
             while (rows.size > maxCandidates) rows.remove(rows.keys.first())
             while (regions.size > maxDistricts) regions.remove(regions.keys.first())
-            State(rows.toMap(), regions.toMap(), previous.revision + if (wholeAccepted) 1 else 0)
+            State(rows.toMap(), regions.toMap(), previous.revision + if (wholeAccepted) 1 else 0,
+                previous.tourMarkets.filterKeys { it in regions && (!wholeAccepted || it!=district?.districtCode) })
         }
+        publications.value=updated.revision
         return updated.revision
     }
 
@@ -83,5 +93,39 @@ class InMemoryPreparedMarket(
             clock.instant().atZone(java.time.ZoneId.of("Asia/Seoul")).toLocalDate())
             return Outcome.Failure(DomainError.DataNotReady(PreparedDataFailure.STALE))
         return result
+    }
+
+    fun publishMarket(value: TourMarket, expectedRevision: Long) {
+        val copy=value.copy(candidates=value.candidates.toList())
+        state.updateAndGet { old ->
+            if(old.revision!=expectedRevision || old.districts[value.districtCode]?.sourceAsOf!=value.sourceAsOf) old
+            else old.copy(tourMarkets=old.tourMarkets+(value.districtCode to copy))
+        }
+    }
+    override fun readMarket(districtCode: String): Outcome<TourMarket> {
+        val snapshot=state.get()
+        val today=clock.instant().atZone(java.time.ZoneId.of("Asia/Seoul")).toLocalDate()
+        if(snapshot.districts[districtCode]?.periodEndInclusive?.let { it!=today }==true)
+            return Outcome.Failure(DomainError.DataNotReady(PreparedDataFailure.STALE))
+        return read(snapshot.tourMarkets[districtCode]) { it.sourceAsOf }
+    }
+    fun publishAnalytics(value: ApartmentDetail, at: Instant) {
+        val age=Duration.between(at,clock.instant())
+        if(age.isNegative || age>=ttl) return
+        val copy=value.copy(trend=value.trend.toList(),recentDeals=value.recentDeals.toList())
+        state.updateAndGet { old -> old.copy(tourMarkets=old.tourMarkets.mapValues { (_,market) -> market.copy(candidates=market.candidates.map { c ->
+            if(c.id==value.id) c.copy(households=value.households ?: c.households,builtYear=value.builtYear ?: c.builtYear) else c
+        }) }) }
+        analytics.updateAndGet { old ->
+            val rows=LinkedHashMap(old)
+            if(old[value.id]?.second?.let { it>at }==true) return@updateAndGet old
+            rows.remove(value.id);rows[value.id]=copy to at
+            while(rows.size>32) rows.remove(rows.keys.first())
+            rows.toMap()
+        }
+    }
+    override fun readAnalytics(apartmentId: String): Outcome<ApartmentDetail> = when(val result=read(analytics.get()[apartmentId]) { it.second }) {
+        is Outcome.Failure -> result
+        is Outcome.Success -> Outcome.Success(result.value.first)
     }
 }

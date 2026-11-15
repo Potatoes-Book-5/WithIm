@@ -15,6 +15,11 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [
         ScrapEntity::class,
+        TourAreaEntity::class,
+        TourBriefingEntity::class,
+        TourEntryEntity::class,
+        TourNoticeEntity::class,
+        TourSourceEntity::class,
         DriveSessionEntity::class,
         DriveRankEntity::class,
         DriveLeaderChangeEntity::class,
@@ -22,13 +27,14 @@ import androidx.room.RoomDatabase
         DriveRegionRoundEntity::class,
         DriveRegionRankEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4)],
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(from = 3, to = 4), AutoMigration(from = 4, to = 5)],
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun scrapDao(): ScrapDao
     abstract fun driveDao(): DriveDao
+    abstract fun tourDao(): TourDao
 
     companion object {
         const val NAME = "im_with_you.db"

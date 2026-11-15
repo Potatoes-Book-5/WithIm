@@ -17,7 +17,7 @@
     "id": "speech-scrap-no-target",
     "text": "임과 함께에서 이 단지 스크랩해 줘",
     "action": "SCRAP_APARTMENT",
-    "status": "asking",
-    "scope": "requires no selected detail and no active nudge"
+    "status": "fail",
+    "scope": "public debug route rejects unauthenticated personal writes; trusted normalized API is tested separately"
   }
 ]

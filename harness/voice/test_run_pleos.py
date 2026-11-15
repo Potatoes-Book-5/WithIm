@@ -23,8 +23,8 @@ class LauncherTest(unittest.TestCase):
 
     def test_instrumentation_requires_all_expected_tests(self):
         self.assertTrue(launcher.instrumentation_passed('INSTRUMENTATION_RESULT: stream=\nOK (11 tests)\n'))
-        self.assertTrue(launcher.instrumentation_passed('OK (18 tests)', expected=18))
-        self.assertFalse(launcher.instrumentation_passed('OK (11 tests)', expected=18))
+        self.assertTrue(launcher.instrumentation_passed('OK (23 tests)', expected=23))
+        self.assertFalse(launcher.instrumentation_passed('OK (11 tests)', expected=23))
         for output in ['OK (0 tests)', 'OK (9 tests)', 'OK (11 tests)\nFAILURES!!!',
                        'OK (11 tests)\nINSTRUMENTATION_FAILED', 'Process crashed', '']:
             self.assertFalse(launcher.instrumentation_passed(output))

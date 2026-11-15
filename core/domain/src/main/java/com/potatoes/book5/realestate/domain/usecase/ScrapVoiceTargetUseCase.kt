@@ -17,6 +17,7 @@ class ScrapVoiceTargetUseCase(
 ) {
  private val mutex = Mutex()
  suspend operator fun invoke(context: AppCallContext): Outcome<ActionResult<VoiceScrapResult>> {
+  if(!context.trusted) return Outcome.Failure(DomainError.Unsupported("authenticated_personal_route"))
   val snapshot=context.voice ?: return Outcome.Success(ActionResult.NeedsInput("apartment"))
   val id=snapshot.apartmentId() ?: return Outcome.Success(ActionResult.NeedsInput("apartment"))
   return save(id) { contexts.isCurrent(snapshot) }

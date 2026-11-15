@@ -21,7 +21,7 @@ class GleoIntentAdapterTest {
         assertEquals(listOf("success", "fail", "success"), sent.map { it.status })
         assertEquals(false, sent[1].data.single()["persisted"])
         assertEquals("DUMMY_NOT_PERSISTED", sent[1].data.single()["code"])
-        assertEquals(3, sent[2].data.size)
+        assertEquals(3, (sent[2].data.single()["items"] as List<*>).size)
         assertTrue(sent.all { callback -> callback.data.all { it["synthetic"] == true } })
     }
     @Test fun missingTargetAsksWhileMalformedWireFails() = runTest {

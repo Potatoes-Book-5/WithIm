@@ -162,6 +162,6 @@ class AppViewModel(
         _state.update { reduceApp(it, result) }
         val current=_state.value
         voiceContext?.setAppState(current.onboardingDone,
-            (current.current as? Screen.Detail)?.apartmentId?.takeUnless { current.showDriving }, current.showDriving)
+            (current.current as? Screen.Detail)?.apartmentId?.takeUnless { current.showDriving }, current.showDriving, visualDetailsAllowed = !current.showDriving)
     }
 }

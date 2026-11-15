@@ -44,7 +44,7 @@ class InMemoryPriceLocation(private val clock: Clock = Clock.systemUTC()) {
             GeoMath.distanceKm(latestPoint, verified.fix.pose!!.location) <= 0.05
         return PriceLocationSnapshot(current.revision,
             if (valid) ResolvedArea(verified!!.district.code, verified.district.name) else null,
-            verified?.fix?.observedAt, verified?.fix?.accuracyMeters, verified?.fix?.source)
+            verified?.fix?.observedAt, verified?.fix?.accuracyMeters, verified?.fix?.source, if(valid) verified?.fix?.pose?.location else null)
     }
 
     fun isCurrent(snapshot: PriceLocationSnapshot): Boolean = state.get().revision == snapshot.revision

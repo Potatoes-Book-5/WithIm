@@ -34,12 +34,13 @@ class GetAreaPriceSummaryUseCase(
             else repository.get(target, context)
         }
 }
-class SaveInterestAreaUseCase(private val repository: InterestAreaRepository) {
+class SaveInterestAreaUseCase(private val repository: InterestAreaRepository, private val personalDataAllowed: Boolean = true) {
     suspend operator fun invoke(target: AreaTarget, context: AppCallContext): Outcome<ActionResult<InterestAreaSavePayload>> =
-        withValidTarget(target, context) { repository.save(target, context) }
+        withValidTarget(target, context) { if(personalDataAllowed) repository.save(target, context) else Outcome.Failure(DomainError.Unsupported("authenticated_personal_route")) }
 }
-class GetDailyBriefingUseCase(private val repository: DailyBriefingRepository) {
+class GetDailyBriefingUseCase(private val repository: DailyBriefingRepository, private val personalDataAllowed: Boolean = true) {
     suspend operator fun invoke(context: AppCallContext): Outcome<ActionResult<DailyBriefingPayload>> =
-        if (validContext(context)) repository.get(context)
+        if (validContext(context) && personalDataAllowed) repository.get(context)
+        else if(!personalDataAllowed) Outcome.Failure(DomainError.Unsupported("authenticated_personal_route"))
         else Outcome.Failure(DomainError.Invalid("Missing application context"))
 }

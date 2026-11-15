@@ -9,13 +9,14 @@ import com.potatoes.book5.realestate.domain.usecase.*
 import com.potatoes.book5.realestate.vehicle.gleo.*
 import java.util.UUID
 internal object GleoBindings {
- fun create(context: Context, voiceContext: com.potatoes.book5.realestate.domain.model.appaction.VoiceContextPort, scrap: com.potatoes.book5.realestate.domain.usecase.ScrapVoiceTargetUseCase,
-            prices: AreaPriceSummaryRepository, captureLocation: () -> PriceLocationSnapshot): GleoAndroidHandler {
-  val session = UUID.randomUUID().toString()
+ fun create(context: Context, scrap: com.potatoes.book5.realestate.domain.usecase.ScrapVoiceTargetUseCase,
+            prices: AreaPriceSummaryRepository, areas: com.potatoes.book5.realestate.domain.port.InterestAreaRepository,
+            briefing: com.potatoes.book5.realestate.domain.port.DailyBriefingRepository,
+            captureContext: () -> AppCallContext): GleoAndroidHandler {
   return GleoAndroidHandler(GleoIntentAdapter(
    GetAreaPriceSummaryUseCase(prices, contextualTargetsAllowed = false),
-   SaveInterestAreaUseCase(UnavailableInterestAreaRepository()),
-   GetDailyBriefingUseCase(UnavailableDailyBriefingRepository()),
+   SaveInterestAreaUseCase(areas,personalDataAllowed=false),
+   GetDailyBriefingUseCase(briefing,personalDataAllowed=false),
    object : GleoCallbackSender {
     private val delegate = BroadcastGleoCallbackSender(context, responseAction = BroadcastGleoCallbackSender.GLEO_RESPONSE_ACTION)
     override suspend fun send(callback: GleoCallback) {
@@ -25,7 +26,7 @@ internal object GleoBindings {
      android.util.Log.i("GleoE2E", "event=callback_sent action=${callback.action.name} status=$status persisted=${callback.data.firstOrNull()?.get("persisted") == true} ")
     }
    },
-   { AppCallContext(UUID.randomUUID().toString(), session, "local-device-scope", voiceContext.snapshot(), captureLocation()) },
+   { captureContext().copy(trusted=false) },
    scrapTarget = scrap
   ))
  }

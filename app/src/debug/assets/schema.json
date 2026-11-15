@@ -1,6 +1,6 @@
 {
   "packageName": "com.potatoes.book5.realestate",
-  "appDescription": "An apartment exploration app with contextual scrap saving and previously collected published district sale summaries.",
+  "appDescription": "An apartment exploration app with prepared published district sale summaries. Private contextual operations require an authenticated integration route.",
   "version": "0.1.0",
   "actionCalls": [
     {
@@ -35,7 +35,7 @@
       "type": "function",
       "function": {
         "name": "SCRAP_APARTMENT",
-        "description": "Saves the apartment currently selected in the app or offered in its visible scrap suggestion. Requests clarification when no target is available.",
+        "description": "Contextual apartment saving is implemented internally, but unavailable on this unauthenticated public debug route. Returns a failure and does not read or change personal data.",
         "parameters": {
           "type": "object",
           "properties": {},
@@ -48,7 +48,7 @@
       "type": "function",
       "function": {
         "name": "GET_REAL_ESTATE_BRIEFING",
-        "description": "Interest-area announcements and news are currently unavailable. Returns an unsupported result and never invents briefing items.",
+        "description": "Private saved-area briefing is implemented internally, but unavailable on this unauthenticated public debug route. Returns a failure without accessing personal saved areas.",
         "parameters": {
           "type": "object",
           "properties": {},
