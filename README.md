@@ -165,7 +165,7 @@ Pleos Connect 에뮬레이터에서 실제 주행(기어 변속, 차량 위치 �
 
 ## 6. 시연 영상 및 주요 문서
 
-- **주행 시연 영상**: [docs/demos/README.md](docs/demos/README.md) ([MP4 영상](docs/demos/T037-driving-demo.mp4))
+- **주행 시연 영상**: [docs/demos/README.md](docs/demos/README.md) ([MP4 영상](https://drive.google.com/file/d/1aH7Ps8UlHu33cLEoyVXlRh61iaWbfprE/view?usp=share_link))
 - **아키텍처 (Clean Architecture + MVI, 멀티 모듈 구조)**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - **제품 기능 및 시나리오 명세**: [docs/product/overview.md](docs/product/overview.md)
 - **Pleos SDK 연동 맵**: [docs/platform/sdk-usage-map.md](docs/platform/sdk-usage-map.md)
