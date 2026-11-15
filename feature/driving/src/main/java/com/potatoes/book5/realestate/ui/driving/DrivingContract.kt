@@ -56,6 +56,8 @@ data class DrivingScreenState(
     val radiusKm: Int = 3,
     val ranking: List<RankItemUi> = emptyList(),
     val interestMatches: List<MapPointUi> = emptyList(),
+    /** 추천 알림으로 실제 노출된 후보. 일반 순위 갱신에서 덮어쓰지 않는다. */
+    val alertedRecommendations: List<MapPointUi> = emptyList(),
     val others: List<MapPointUi> = emptyList(),
     /** 확인된 차량 위치. 임시 조회 기준에서는 null이다. */
     val vehicle: VehiclePose? = null,
@@ -90,6 +92,7 @@ sealed interface DrivingResult {
     ) : DrivingResult
     data class ModeSelected(val mode: DrivingMode) : DrivingResult
     data class AlertShown(val alert: DrivingAlertUi) : DrivingResult
+    data class RecommendationLocated(val point: MapPointUi) : DrivingResult
     data class AlertExpired(val key: Long) : DrivingResult
     data class AlertScrapChanged(val key: Long, val scrap: ScrapButtonState) : DrivingResult
 }

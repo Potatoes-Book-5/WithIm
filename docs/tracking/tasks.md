@@ -51,3 +51,4 @@
 | T-045 | feature | 명세 발화별 실제 App API와 단위 테스트 완성 | review | geonu | P0 | F-011, S-012, ADR-012 | T-044 |
 | T-046 | feature | 주행 지도 표시 반경을 차량 주변 1km로 확대 | review | - | P1 | F-003, SCR-009 | T-031 |
 | T-047 | feature | 스크랩·행동 피드백 기반 개인화 추천 | review | - | P1 | F-010 | T-037 |
+| T-048 | feature | 추천 알림 매물을 주행 지도 별 핀으로 표시 | review | - | P1 | SCR-009 | T-037, T-047 |
