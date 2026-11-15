@@ -27,6 +27,9 @@ task: T-041
 - 실제 Gleo는 에뮬레이터에서 mBound=true mService=null로 확인됐다. 이 환경 문제를 앱 구현 성공으로 처리하지 않는다.
 
 ## 진행 기록
+- PR #34 이후 에뮬레이터 재시험 성공: 최신 main 기반 APK에서 대장 TTS requested(kind=LEADER) → started → done(4.150초)을 확인했다. 이어 실제 추천 배너가 보일 때만 합성 호출어·명령을 공식 가상 마이크에 넣어 GleoE2E received SCRAP_APARTMENT → callback success/persisted=true를 확인했다(PID 16942, monotonic 3328.471/3328.504). 같은 추천 배너가 ‘스크랩했어요/스크랩함’으로 바뀌었고 주차 요약의 스크랩됨 표시도 확인했다. 추천 TTS 재생은 2.665초였다. 실제 PC 마이크는 계속 꺼져 있으며 사람의 발화 검증과 구분한다.
+- 추천 배너가 없는 대장 알림에서 음성 저장 시험을 시작했던 첫 시도는 asking/persisted=false였다. 이후 진단에 고정 kind만 추가해 추천 requested에서만 호출하도록 바로잡았다. 성공 직후 후속 청취 시험은 준비 신호를 받지 못해 명령을 넣지 않았으며 반복 저장 성공으로 간주하지 않는다.
+- 재현을 위해 기존 debug 위치 수신기에 approachRecommendation/arriveNow를 추가했다. 실제 저장된 관심·피드백과 같은 추천 정책으로 현재 상위 3개 중 미저장 후보의 검증된 위치로 이동하며 가격·알림·저장 결과는 합성하지 않는다. 기존 approachLeader도 arriveNow를 선택할 수 있다. 최종 installDebug 14초 성공. 증거는 ignored harness/runs/t041-arrive-result.json과 t041-arrive-banner.png, t041-ready-round-31.png에 남겼다. 원문 발화·좌표·개인 데이터는 커밋하지 않는다.
 - 최종 후속: origin/main 99e8332를 pull해 기존 작업에 충돌 없이 반영했다. 대장 발견·교체 배너도 ‘새로운 대장 아파트를 발견했어요. {단지명}입니다.’로 안내한다. 도메인 포트와 실행기를 DrivingAlertSpeech/AnnounceDrivingAlertUseCase로 일반화하고, 두 종류의 설정을 독립적으로 검사한다. 해당 설정 해제·화면 숨김·포커스 상실·배너 만료에 재생을 종료한다.
 - 최신 main과 대장 TTS를 포함한 installDebug 성공(34초), 종류별 설정 종료 보완 후 최종 installDebug 성공(14초), emulator-5554 설치 완료. 대장 이벤트의 실제 재생 청취는 아직 확인하지 못했다.
 - 반복 호출 진단: 공식 injectAudio 기본 모드가 이미 큐를 기다리므로 클라이언트의 추가 20ms sleep을 제거했다. Gleo의 onRequestBargeIn/onReadyToSendBuffer 이후 명령을 넣자 독립적인 두 번의 호출 모두 앱 received와 asking/persisted=false가 돌아왔다. 이 두 케이스에는 유효 추천 배너가 없었으므로 저장 성공으로 처리하지 않는다. 최신 main 반영 후 최종 저장 재시험은 새 추천 알림이 발생하지 않아 미완료다.

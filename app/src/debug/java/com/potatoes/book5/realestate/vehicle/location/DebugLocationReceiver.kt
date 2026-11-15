@@ -22,24 +22,44 @@ class DebugLocationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != "com.potatoes.book5.realestate.DEBUG_LOCATION") return
         val container = (context.applicationContext as RealEstateApplication).container
-        if (intent.getBooleanExtra("approachLeader", false)) {
+        val recommendation = intent.getBooleanExtra("approachRecommendation", false)
+        if (intent.getBooleanExtra("approachLeader", false) || recommendation) {
             val name = intent.getStringExtra("apartmentName")
+            val arriveNow = intent.getBooleanExtra("arriveNow", false)
             routeJob?.cancel()
             routeJob = routeScope.launch {
+                val condition = if (recommendation) container.observeInterestCondition().first() else null
+                val scraps = if (recommendation) container.observeScraps().first() else emptyList()
+                val feedback = if (recommendation) {
+                    val database = com.potatoes.book5.realestate.data.local.db.AppDatabase.create(context)
+                    try {
+                        com.potatoes.book5.realestate.data.local.RoomRecommendationFeedbackRepository(database.recommendationFeedbackDao()).getAll()
+                    } finally { database.close() }
+                } else emptyList()
+                fun candidates(state: com.potatoes.book5.realestate.domain.model.RankingSnapshot): List<com.potatoes.book5.realestate.domain.model.NearbyApartment> {
+                    if (!recommendation) return state.top
+                    val preference = condition ?: return emptyList()
+                    val ids = com.potatoes.book5.realestate.domain.policy.DriveRecommendationPolicy.rank(
+                        preference, state.recommendationCandidates, java.time.LocalDate.now(java.time.ZoneId.of("Asia/Seoul")).year, scraps, feedback,
+                    ).take(3).map { it.apartmentId }
+                    return ids.filter { id -> scraps.none { it.apartmentId == id } }.mapNotNull { id ->
+                        state.recommendationCandidates.firstOrNull { it.apartment.id == id }
+                    }
+                }
                 val snapshot = withTimeoutOrNull(15_000) {
                     container.marketRepository.observeNearbyRanking().first { state ->
-                        !state.loading && state.error == null && state.top.any {
+                        !state.loading && state.error == null && candidates(state).any {
                             (name == null || it.apartment.name == name) && it.apartment.location != null
                         }
                     }
                 } ?: return@launch
                 val start = (snapshot.vehicle ?: snapshot.mapCenter)?.location ?: return@launch
-                val target = snapshot.top.first { name == null || it.apartment.name == name }.apartment.location
+                val target = candidates(snapshot).first { name == null || it.apartment.name == name }.apartment.location
                     ?: return@launch
                 // Actual API geocode, synthetic straight-line motion; coordinates stay in memory.
                 android.util.Log.d("DrivingMapDemo", "Approach started")
-                repeat(61) { step ->
-                    val fraction = step / 60.0
+                repeat(if (arriveNow) 1 else 61) { step ->
+                    val fraction = if (arriveNow) 1.0 else step / 60.0
                     container.vehicleLocationProvider.updateLocation(
                         VehiclePose(GeoPoint(
                             start.latitude + (target.latitude - start.latitude) * fraction,

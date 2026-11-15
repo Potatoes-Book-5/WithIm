@@ -65,3 +65,16 @@ RPC는 loopback에만 열고 JWT를 유지한다. [emulator-access.json](emulato
 오디오 전송은 설치 SDK proto의 `MODE_UNSPECIFIED` 흐름 제어를 따른다. 이 모드는 에뮬레이터가 오디오 프레임을 요구할 때까지 서버 큐가 차단하므로 클라이언트에서 20ms씩 추가로 쉬지 않는다. 재생·렌더링 부하가 있는 상태에서도 음성 조각이 연속 전달되도록 한다. `MODE_REAL_TIME`은 별도 실험 모드이며 이 도구에서 사용하지 않는다.
 
 공식 근거(확인 2026-11-15): 설치 SDK의 `emulator/lib/emulator_controller.proto`와 [AOSP inject_audio.py 예제](https://android.googlesource.com/platform/external/qemu/+/08aefd1f57c653d17e9ef972df9d82c978f7695c/android/android-grpc/python/samples/audio/inject_audio.py). 상세 결과·TC 범위는 [TTS 검증 기록](../../docs/testing/gleo-tour/synthesized-speech.md)을 참고한다.
+
+### 실제 추천 배너에서 저장 재현(T-041)
+
+Debug APK에서 위치 동의·관심 조건·관심 알림을 켜고, 유효한 테스트 위치를 공급한 뒤 개발용 ‘주행 시작’을 누른다. 시세 조회가 끝나면 다음 입력으로 실제 추천 상위 3개 중 미저장 후보의 검증된 위치에 접근한다. `arriveNow`를 생략하면 기존과 같이 60초간 이동하고, 도착 후에는 90초 동안 테스트 위치를 유지한다. 현재 조건·피드백을 사용하므로 후보가 없거나 모두 저장돼 있으면 알림이 발생하지 않는다. 동일 단지 24시간 억제 정책은 변경하지 않는다.
+
+```sh
+adb -s emulator-5554 shell am broadcast --user 10 \
+  -a com.potatoes.book5.realestate.DEBUG_LOCATION \
+  -n com.potatoes.book5.realestate/.vehicle.location.DebugLocationReceiver \
+  --ez approachRecommendation true --ez arriveNow true
+```
+
+`RecommendationTts: event=requested kind=RECOMMENDATION`과 실제 추천 배너를 확인한 뒤에만 Gleo를 호출해 스크랩 명령을 발화한다. 대장 알림(`kind=LEADER`)은 TTS만 확인한다. 앱의 `success persisted=true`와 같은 배너의 ‘스크랩했어요/스크랩함’을 모두 확인해야 저장 성공으로 처리한다. `asking persisted=false`는 저장 성공이 아니다. 가상 마이크 합성 음성과 사람의 실제 마이크 발화 결과는 구분한다.

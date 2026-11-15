@@ -81,7 +81,7 @@ class PleosDrivingAlertSpeech(context: Context) : DrivingAlertSpeech {
                                     DrivingAlertSpeechKind.LEADER -> R.string.leader_found_speech
                                 }
                                 session.engine.speak(context.getString(resource, apartmentName), true)
-                                event("requested")
+                                event("requested kind=${kind.name}")
                             } catch (_: Exception) {
                                 event("failed")
                                 finish(session)
