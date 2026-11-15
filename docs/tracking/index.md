@@ -76,4 +76,4 @@
 | SCR-012 | screen | 관심 지역 목록 | draft | `design/screens/SCR-012-interest-area-list.md` | T-039 | - |
 | SCR-013 | screen | 데일리 브리핑 | draft | `design/screens/SCR-013-daily-briefing.md` | T-039 | - |
 | ADR-011 | decision | 주행 데이터 read model과 음성 조회 분리 | reserved | `decisions/ADR-011-prepared-market-read-model.md` | T-041 | - |
-| ADR-012 | decision | 관심 지역과 브리핑 로컬 저장 및 공급자 경계 | reserved | `decisions/ADR-012-tour-area-briefing.md` | T-044 | - |
+| ADR-012 | decision | 관심 지역과 브리핑 로컬 저장 및 공급자 경계 | draft | `decisions/ADR-012-tour-area-briefing.md` | T-044 | - |

@@ -114,3 +114,7 @@ dummy 저장에는 success를 쓰지 않으므로 F-011의 영속 저장 후 성
 - 결과가 없는 fail/asking은 `executionMode=UNAVAILABLE`, `synthetic=false`다. 스크랩은 기존 LOCAL 규칙이다. 가격/저장/브리핑 오류를 DUMMY 실행으로 표시하지 않는다.
 - 관심 지역 저장과 브리핑 runtime은 UNSUPPORTED다. 없는 청약·뉴스 3건이나 지역 저장 성공을 만들어내지 않는다.
 - 실제 Gleo 수락과 출력 검증이 남아 있으므로 callback mode는 silent를 유지한다. 본 변경으로 release receiver, Gleo 권한/공개 정책, 자동 발화를 활성화하지 않는다.
+
+## T-044 현재 내부 임장 API
+
+현재 구현은 [임장 Intent API](tour-intent-api.md)를 따른다. 이전 dummy/미구현 설명은 해당 작업 당시 기록이다. 지역 저장·확인·추천·분석·읽음/브리핑·내비 요청은 내부 신뢰 문맥에 실제 구현을 연결했다. 공개 debug 경로는 인증 미확인으로 named-area 가격만 허용하며 스크랩·지역 저장·개인 브리핑은 거부한다. 새 내부 Intent를 공개 Gleo 함수로 등록한 상태가 아니다.

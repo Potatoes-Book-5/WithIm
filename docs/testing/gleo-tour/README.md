@@ -81,3 +81,5 @@
 [T-042 합성 음성 검증](synthesized-speech.md)은 생성 TTS→Pleos 가상 마이크→앱 이벤트 자동화, 전체 Android 계측 17개, 음성 연결 BLOCKED 결과와 기존 TC의 검증 범위를 기록한다.
 
 STEP 3 확장 TC-083~TC-090은 문서상 인수 조건이며 현재 dummy E2E 통과로 PASS 처리하지 않는다. 기존 가격 함수의 지역 확인 확장 계약 및 실제 Gleo·화면 검증이 필요하다.
+
+[T-044 명세 발화 하위 계층 검증](spec-actions.md)은 실제 구현에 연결한 정규화 Intent 15개와 안전/저장/원천 테스트를 관리한다. 자연어 Gleo E2E와 원본 90개 TC의 실행 상태와 구분한다.

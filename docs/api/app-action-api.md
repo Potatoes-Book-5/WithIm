@@ -131,3 +131,7 @@ Runtime debug DI는 `LiveAreaPriceSummaryRepository`를 사용한다. 기존 dum
 - 내부 CURRENT_LOCATION: 실제 SDK 입력의 공식 POINT 판별 snapshot만 허용한다. 10초/50m 기준, 권한 세대, 참고 좌표 제외를 확인한다. 정확도 미제공이면 추정하지 않고 areaQuery를 요청한다. 현재 bridge의 정확도는 null이므로 named-area 경로가 필요하다. 경계 비중첩/법정동 내부 판정은 지원하지 않는다.
 - 내부 LAST_REFERENCED_AREA: 성공 조회의 세션·프로필·동의 세대가 같고 60초 이내일 때만 사용한다. 재참조로 TTL을 연장하지 않는다. 현재 위치 요청을 직전 지역으로 대체하지 않는다.
 - 공개 debug 경로는 호출자 인증이 미확인이라 `contextualTargetsAllowed=false`다. CURRENT_LOCATION/LAST_REFERENCED_AREA는 저장소를 읽기 전에 Unsupported로 거부한다. 내부 구현 가능 범위와 공개 schema 범위를 구분한다.
+
+## T-044 현재 내부 임장 API
+
+현재 구현은 [임장 Intent API](tour-intent-api.md)를 따른다. 이전 dummy/미구현 설명은 해당 작업 당시 기록이다. 지역 저장·확인·추천·분석·읽음/브리핑·내비 요청은 내부 신뢰 문맥에 실제 구현을 연결했다. 공개 debug 경로는 인증 미확인으로 named-area 가격만 허용하며 스크랩·지역 저장·개인 브리핑은 거부한다. 새 내부 Intent를 공개 Gleo 함수로 등록한 상태가 아니다.
