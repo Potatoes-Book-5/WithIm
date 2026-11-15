@@ -2,8 +2,12 @@ package com.potatoes.book5.realestate.domain.usecase
 
 import com.potatoes.book5.realestate.domain.model.Apartment
 import com.potatoes.book5.realestate.domain.model.ConsentSettings
+import com.potatoes.book5.realestate.domain.model.InterestCondition
 import com.potatoes.book5.realestate.domain.model.NearbyApartment
+import com.potatoes.book5.realestate.domain.model.PriceRange
 import com.potatoes.book5.realestate.fakes.FakeConsentRepository
+import com.potatoes.book5.realestate.fakes.FakeDriveRecordRepository
+import com.potatoes.book5.realestate.fakes.FakeInterestRepository
 import com.potatoes.book5.realestate.fakes.FakeRankingRepository
 import com.potatoes.book5.realestate.fakes.FakeScrapRepository
 import com.potatoes.book5.realestate.fakes.scrapOf
@@ -83,6 +87,34 @@ class InterestMatchAlertsUseCaseTest {
         val events = mutableListOf<InterestMatchAlert>()
         val job = collect(ObserveInterestMatchAlertsUseCase(ranking, consent(false), FakeScrapRepository()), this, events)
         assertTrue(events.isEmpty())
+        job.cancel()
+    }
+
+    @Test
+    fun `추천 알림 매물은 전체 추천과 지나친 관심 기록에 저장한다`() = runTest {
+        val candidate = match("c", 1.0).let { nearby ->
+            nearby.copy(apartment = nearby.apartment.copy(priceManwon = 120_000))
+        }
+        val ranking = FakeRankingRepository(
+            snapshotOf().copy(recommendationCandidates = listOf(candidate)),
+        )
+        val driveRecords = FakeDriveRecordRepository()
+        val events = mutableListOf<InterestMatchAlert>()
+        val useCase = ObserveInterestMatchAlertsUseCase(
+            rankingRepository = ranking,
+            consentRepository = consent(true),
+            scrapRepository = FakeScrapRepository(),
+            interestRepository = FakeInterestRepository(
+                InterestCondition(priceRanges = setOf(PriceRange.FROM_10_TO_15)),
+            ),
+            driveRecordRepository = driveRecords,
+        )
+
+        val job = collect(useCase, this, events)
+
+        assertEquals(listOf("c"), events.map { it.match.apartment.id })
+        assertEquals(listOf("c"), driveRecords.sessions.value.values.single().passed.map { it.apartmentId })
+        assertEquals(listOf("c"), driveRecords.sessions.value.values.single().recommendations.map { it.apartmentId })
         job.cancel()
     }
 }

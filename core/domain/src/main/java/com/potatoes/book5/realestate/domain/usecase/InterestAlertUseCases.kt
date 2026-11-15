@@ -1,7 +1,9 @@
 package com.potatoes.book5.realestate.domain.usecase
 
 import com.potatoes.book5.realestate.domain.model.NearbyApartment
+import com.potatoes.book5.realestate.domain.model.PassedInterest
 import com.potatoes.book5.realestate.domain.port.ConsentRepository
+import com.potatoes.book5.realestate.domain.port.DriveRecordRepository
 import com.potatoes.book5.realestate.domain.port.RankingRepository
 import com.potatoes.book5.realestate.domain.port.ScrapRepository
 import com.potatoes.book5.realestate.domain.port.InterestRepository
@@ -30,6 +32,7 @@ class ObserveInterestMatchAlertsUseCase(
     private val suppress: Duration = Duration.ofHours(24),
     private val now: () -> LocalDateTime = LocalDateTime::now,
     private val interestRepository: InterestRepository? = null,
+    private val driveRecordRepository: DriveRecordRepository? = null,
 ) {
     private val alertedAt = mutableMapOf<String, LocalDateTime>()
 
@@ -37,11 +40,15 @@ class ObserveInterestMatchAlertsUseCase(
         rankingRepository.observeNearbyRanking().collect { snapshot ->
             if (snapshot.loading || snapshot.error != null || snapshot.vehicle == null) return@collect
             val at = now()
-            val near = if (interestRepository != null) {
+            val recommendations = if (interestRepository != null) {
                 val condition = interestRepository.get()
                 if (condition == null || condition.isEmpty) return@collect
-                val recommendedIds = DriveRecommendationPolicy
-                    .rank(condition, snapshot.recommendationCandidates, at.year)
+                DriveRecommendationPolicy.rank(condition, snapshot.recommendationCandidates, at.year)
+            } else {
+                emptyList()
+            }
+            val near = if (interestRepository != null) {
+                val recommendedIds = recommendations
                     .take(3)
                     .mapTo(HashSet()) { it.apartmentId }
                 snapshot.recommendationCandidates.filter {
@@ -58,6 +65,11 @@ class ObserveInterestMatchAlertsUseCase(
                 .filter { candidate -> alertedAt[candidate.apartment.id]?.let { Duration.between(it, at) >= suppress } ?: true }
                 .minByOrNull { it.distanceKm }
                 ?: return@collect
+            recommendations.firstOrNull { it.apartmentId == target.apartment.id }
+                ?.copy(closestKm = target.distanceKm)
+                ?.let { recommendation ->
+                    driveRecordRepository?.recordAlertedRecommendation(at, snapshot.radiusKm, recommendation)
+                }
             alertedAt[target.apartment.id] = at
             emit(InterestMatchAlert(target, at))
         }

@@ -7,6 +7,8 @@ import com.potatoes.book5.realestate.data.local.db.AppDatabase
 import com.potatoes.book5.realestate.domain.model.DriveLeaderChange
 import com.potatoes.book5.realestate.domain.model.DriveRank
 import com.potatoes.book5.realestate.domain.model.PassedInterest
+import com.potatoes.book5.realestate.domain.model.DriveRecommendation
+import com.potatoes.book5.realestate.domain.model.RecommendationKey
 import java.time.LocalDateTime
 import java.time.ZoneId
 import kotlinx.coroutines.flow.first
@@ -75,6 +77,22 @@ class RoomDriveRecordRepositoryTest {
                 assertEquals(0, c.getInt(0))
             }
         }
+    }
+
+    @Test
+    fun alertedRecommendationIsKeptAsPassedInterestEvenOutsideFinalTopThree() = runTest {
+        val alerted = DriveRecommendation("alerted", "알림 단지", 150, 28, 91, 1.8, RecommendationKey.PRICE)
+        repo.recordAlertedRecommendation(t.plusMinutes(2), 10, alerted)
+        val id = repo.openSessionId()!!
+        // The recorder reuses the session if the notification created it first.
+        assertEquals(id, repo.startSession(t.plusMinutes(2), 10))
+        repo.recordAlertedRecommendation(t.plusMinutes(5), 10, alerted.copy(closestKm = 0.7))
+        repo.recordSnapshot(id, t.plusMinutes(6), emptyList(), emptyList())
+
+        assertTrue(repo.finishSession(id, t.plusMinutes(7)))
+        val summary = repo.observeSummary(id).first()!!
+        assertEquals(listOf("alerted" to 0.7), summary.passedInterests.map { it.apartmentId to it.closestKm })
+        assertEquals(listOf("alerted" to 0.7), summary.recommendations.map { it.apartmentId to it.closestKm })
     }
 
     @Test

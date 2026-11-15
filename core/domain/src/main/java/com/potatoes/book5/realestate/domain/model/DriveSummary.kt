@@ -62,4 +62,11 @@ data class DriveSummary(
         .sortedWith(compareByDescending<DriveRank> { it.priceManwon }.thenBy { it.apartmentId })
         .take(3).mapIndexed { index, rank -> rank.copy(rank = index + 1) }
     val recommendationTop: List<DriveRecommendation> get() = recommendations.take(3)
+    /** Passed items already represented by featured recommendation cards are not repeated. */
+    val additionalPassedInterests: List<PassedInterest>
+        get() {
+            val recommendationIds = recommendations.mapTo(HashSet()) { it.apartmentId }
+            return passedInterests.filterNot { it.apartmentId in recommendationIds }
+        }
+    val interestSummaryCount: Int get() = recommendations.size + additionalPassedInterests.size
 }

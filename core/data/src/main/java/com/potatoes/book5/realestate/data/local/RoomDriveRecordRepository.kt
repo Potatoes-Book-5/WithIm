@@ -35,9 +35,9 @@ class RoomDriveRecordRepository(
 
     override suspend fun openSessionId(): Long? = dao.openSessionId()
 
-    override suspend fun startSession(at: LocalDateTime, radiusKm: Int): Long = dao.insertSession(
-        DriveSessionEntity(startedAt = at.millis(), endedAt = null, lastRecordedAt = at.millis(), radiusKm = radiusKm, distanceKm = null, seen = false)
-    )
+    override suspend fun startSession(at: LocalDateTime, radiusKm: Int): Long = db.withTransaction {
+        ensureOpenSession(at, radiusKm)
+    }
 
     override suspend fun recordSnapshot(
         sessionId: Long,
@@ -83,6 +83,44 @@ class RoomDriveRecordRepository(
         }
     }
 
+    override suspend fun recordAlertedRecommendation(
+        at: LocalDateTime,
+        radiusKm: Int,
+        recommendation: DriveRecommendation,
+    ) {
+        db.withTransaction {
+            val sessionId = ensureOpenSession(at, radiusKm)
+            val oldPassed = dao.passed(sessionId, recommendation.apartmentId)
+            dao.upsertPassed(
+                DrivePassedInterestEntity(
+                    sessionId = sessionId,
+                    apartmentId = recommendation.apartmentId,
+                    name = recommendation.name,
+                    closestKm = minOf(recommendation.closestKm, oldPassed?.closestKm ?: recommendation.closestKm),
+                    priceManwon = recommendation.priceManwon,
+                    firstSeenAt = oldPassed?.firstSeenAt ?: at.millis(),
+                ),
+            )
+            val oldRecommendation = dao.recommendation(sessionId, recommendation.apartmentId)
+            dao.upsertRecommendation(
+                DriveRecommendationEntity(
+                    sessionId = sessionId,
+                    apartmentId = recommendation.apartmentId,
+                    name = recommendation.name,
+                    priceManwon = recommendation.priceManwon,
+                    areaPyeong = recommendation.areaPyeong,
+                    scorePercent = recommendation.scorePercent,
+                    closestKm = minOf(recommendation.closestKm, oldRecommendation?.closestKm ?: recommendation.closestKm),
+                    mainRecoKey = recommendation.mainRecoKey.name,
+                    neighborhoodName = recommendation.neighborhoodName,
+                    households = recommendation.households,
+                    builtYear = recommendation.builtYear,
+                ),
+            )
+            dao.touch(sessionId, at.millis())
+        }
+    }
+
     override suspend fun recordLeaderChange(sessionId: Long, change: DriveLeaderChange) {
         dao.insertLeaderChange(DriveLeaderChangeEntity(sessionId = sessionId, at = change.at.millis(),
             apartmentId = change.apartmentId, name = change.name, kind = change.kind.name, districtName = change.districtName))
@@ -107,7 +145,8 @@ class RoomDriveRecordRepository(
 
     override suspend fun finishSession(sessionId: Long, endedAt: LocalDateTime?): Boolean = db.withTransaction {
         val session = dao.session(sessionId) ?: return@withTransaction false
-        if (dao.rankCount(sessionId) == 0 && dao.roundRankCount(sessionId) == 0 && dao.recommendationCount(sessionId) == 0) {
+        if (dao.rankCount(sessionId) == 0 && dao.roundRankCount(sessionId) == 0 &&
+            dao.recommendationCount(sessionId) == 0 && dao.passedCount(sessionId) == 0) {
             dao.deleteSession(sessionId)
             return@withTransaction false
         }
@@ -166,6 +205,15 @@ class RoomDriveRecordRepository(
     override suspend fun deleteAll() = dao.deleteAll()
 
     private fun LocalDateTime.millis(): Long = atZone(zone).toInstant().toEpochMilli()
+
+    /** Reuse the recorder's session if an alert wins the race to create it. */
+    private suspend fun ensureOpenSession(at: LocalDateTime, radiusKm: Int): Long =
+        dao.openSessionId() ?: dao.insertSession(
+            DriveSessionEntity(
+                startedAt = at.millis(), endedAt = null, lastRecordedAt = at.millis(),
+                radiusKm = radiusKm, distanceKm = null, seen = false,
+            ),
+        )
 
     private fun Long.dateTime(): LocalDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(this), zone)
 }

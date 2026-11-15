@@ -36,6 +36,7 @@ class FakeDriveRecordRepository : DriveRecordRepository {
     override suspend fun openSessionId(): Long? = sessions.value.values.filter { it.endedAt == null }.maxByOrNull { it.startedAt }?.id
 
     override suspend fun startSession(at: LocalDateTime, radiusKm: Int): Long {
+        openSessionId()?.let { return it }
         val id = nextId++
         sessions.update { it + (id to Session(id, at, null, at, radiusKm)) }
         return id
@@ -59,6 +60,29 @@ class FakeDriveRecordRepository : DriveRecordRepository {
         s.copy(top = top, passed = merged.values.toList(), recommendations = recommendationsById.values.toList(), lastRecordedAt = at)
     }
 
+    override suspend fun recordAlertedRecommendation(
+        at: LocalDateTime,
+        radiusKm: Int,
+        recommendation: DriveRecommendation,
+    ) {
+        val id = openSessionId() ?: startSession(at, radiusKm)
+        edit(id) { s ->
+            val oldPassed = s.passed.firstOrNull { it.apartmentId == recommendation.apartmentId }
+            val passed = s.passed.filterNot { it.apartmentId == recommendation.apartmentId } + PassedInterest(
+                recommendation.apartmentId,
+                recommendation.name,
+                minOf(recommendation.closestKm, oldPassed?.closestKm ?: recommendation.closestKm),
+                recommendation.priceManwon,
+            )
+            val recommendations = s.recommendations.associateBy { it.apartmentId }.toMutableMap()
+            val oldRecommendation = recommendations[recommendation.apartmentId]
+            recommendations[recommendation.apartmentId] = recommendation.copy(
+                closestKm = minOf(recommendation.closestKm, oldRecommendation?.closestKm ?: recommendation.closestKm),
+            )
+            s.copy(passed = passed, recommendations = recommendations.values.toList(), lastRecordedAt = at)
+        }
+    }
+
     override suspend fun recordLeaderChange(sessionId: Long, change: DriveLeaderChange) = edit(sessionId) { it.copy(changes = it.changes + change) }
 
     override suspend fun recordRound(sessionId: Long, at: LocalDateTime,
@@ -66,7 +90,7 @@ class FakeDriveRecordRepository : DriveRecordRepository {
 
     override suspend fun finishSession(sessionId: Long, endedAt: LocalDateTime?): Boolean {
         val s = sessions.value[sessionId] ?: return false
-        if (s.top.isEmpty() && s.recommendations.isEmpty()) {
+        if (s.top.isEmpty() && s.recommendations.isEmpty() && s.passed.isEmpty()) {
             sessions.update { it - sessionId }
             return false
         }
