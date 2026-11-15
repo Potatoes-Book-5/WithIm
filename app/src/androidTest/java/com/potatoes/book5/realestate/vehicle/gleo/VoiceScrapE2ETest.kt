@@ -43,7 +43,7 @@ class VoiceScrapE2ETest {
     GetAreaPriceSummaryUseCase(DummyAreaPriceSummaryRepository()),SaveInterestAreaUseCase(DummyInterestAreaRepository()),
     GetDailyBriefingUseCase(DummyDailyBriefingRepository()),
     BroadcastGleoCallbackSender(context,responseAction=BroadcastGleoCallbackSender.GLEO_RESPONSE_ACTION),
-    { AppCallContext("r","session","test",store.snapshot()) },scrapTarget=ScrapVoiceTargetUseCase(rows,prepared,store)))
+    { AppCallContext("r","session","test",store.snapshot(),trusted=false) },scrapTarget=ScrapVoiceTargetUseCase(rows,prepared,store)))
    handler.handle(Intent("SCRAP_APARTMENT"))
    val cold=JSONObject(queue.poll(5,TimeUnit.SECONDS)!!.getStringExtra("response")!!)
    assertEquals("fail",cold.getString("status"))
@@ -54,6 +54,7 @@ class VoiceScrapE2ETest {
    var response=JSONObject(queue.poll(5,TimeUnit.SECONDS)!!.getStringExtra("response")!!)
    assertEquals("success",response.getString("status"))
    assertTrue(JSONArray(response.getString("data")).getJSONObject(0).getBoolean("persisted"))
+   assertFalse(JSONArray(response.getString("data")).getJSONObject(0).has("apartmentId"))
    assertEquals(detail.id,rows.getAll().single().apartmentId)
    market.publish(listOf(seed.copy(apartmentId="other"))) // Evicted cache must not prevent already-saved success.
    handler.handle(Intent("SCRAP_APARTMENT"))

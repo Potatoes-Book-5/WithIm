@@ -35,7 +35,7 @@
       "type": "function",
       "function": {
         "name": "SCRAP_APARTMENT",
-        "description": "Contextual apartment saving is implemented internally, but unavailable on this unauthenticated public debug route. Returns a failure and does not read or change personal data.",
+        "description": "Activate the scrap button on the currently visible recommended apartment notification. No action is performed if that notification has expired or is not visible.",
         "parameters": {
           "type": "object",
           "properties": {},

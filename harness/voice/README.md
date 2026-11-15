@@ -56,10 +56,12 @@ python3 harness/voice/tts_probe.py generate --out /tmp/gleo-wavs
 
 ## 입력과 보호 조건
 
-[cases.json](cases.json)은 명시한 시군구 가격, 브리핑 미지원, 대상 없는 스크랩의 세 발화다. 가격은 해당 시군구의 fresh prepared 데이터와 foreground/동의가 선행 조건이며 실제 값으로 응답한다. 브리핑은 fail/UNSUPPORTED를 기대한다. 스크랩은 공개 호출 인증이 미확인인 조건에서 fail을 기대하며 개인 문맥/저장소를 읽지 않는다. 영구 사용자 DB를 변경하지 않으며, 성공 저장 경로는 별도 in-memory Room 계측으로 검사한다. 생성하는 발화 텍스트만 fixture이며 가격 응답을 합성하지 않는다.
+[cases.json](cases.json)은 명시한 시군구 가격, 브리핑 미지원, 대상 없는 스크랩의 세 발화다. 가격은 해당 시군구의 fresh prepared 데이터와 foreground/동의가 선행 조건이며 실제 값으로 응답한다. 브리핑은 fail/UNSUPPORTED를 기대한다. 대상 없는 스크랩은 asking을 기대한다. 공개 debug 스크랩은 현재 보이는 유효 추천 배너만 저장하며 상세 화면·외부 전달 ID는 사용하지 않는다. 따라서 이 기본 세 케이스는 영구 저장을 하지 않는다. 성공 저장은 별도 in-memory Room 계측 또는 명시적인 추천 배너 음성 수동 시험으로 구분한다. 생성하는 발화 텍스트만 fixture이며 가격 응답을 합성하지 않는다.
 
 RPC는 loopback에만 열고 JWT를 유지한다. [emulator-access.json](emulator-access.json)은 오디오 주입과 마이크 상태 제어 3개 RPC만 테스트 인스턴스에 허용한다. 실 마이크는 끄며 호스트 녹음·스피커 재생을 하지 않는다. 관리 도구가 발급한 활성 read-only 세션과 RPC 소유 PID가 일치해야 주입한다. SDK에 배포된 proto 필드·enum이 바뀌면 중단한다. 원문 발화는 고정 합성 fixture이며 로그에는 사용자 위치·식별자·응답 본문을 남기지 않는다. emulator.log 등 로컬 파일은 공개 결과로 커밋하지 않는다.
 
-Gleo가 알려진 null 연결 상태이면 기다린 뒤 BLOCKED 처리한다. non-null 연결도 STT listening을 증명하지 않는다. Gleo UI/로그인/등록된 함수 스키마가 정상인지 별도 확인해야 하며, 이 도구는 vendor private DB나 인증 정보를 고치지 않는다.
+표준 VoiceInteractionService binder의 null은 진단 정보로만 기록한다. Gleo 4.2.0.15에서 이 값이 null이어도 실제 STT와 앱 호출이 성공했으므로 음성 입력을 차단하는 조건으로 쓰지 않는다. non-null도 listening의 증거는 아니다. Gleo 호출 반응·듣기 준비를 확인한 뒤 명령을 보내고, 실제 앱 수신·callback으로 판정한다. vendor private DB나 인증 정보를 고치지 않는다.
+
+오디오 전송은 설치 SDK proto의 `MODE_UNSPECIFIED` 흐름 제어를 따른다. 이 모드는 에뮬레이터가 오디오 프레임을 요구할 때까지 서버 큐가 차단하므로 클라이언트에서 20ms씩 추가로 쉬지 않는다. 재생·렌더링 부하가 있는 상태에서도 음성 조각이 연속 전달되도록 한다. `MODE_REAL_TIME`은 별도 실험 모드이며 이 도구에서 사용하지 않는다.
 
 공식 근거(확인 2026-11-15): 설치 SDK의 `emulator/lib/emulator_controller.proto`와 [AOSP inject_audio.py 예제](https://android.googlesource.com/platform/external/qemu/+/08aefd1f57c653d17e9ef972df9d82c978f7695c/android/android-grpc/python/samples/audio/inject_audio.py). 상세 결과·TC 범위는 [TTS 검증 기록](../../docs/testing/gleo-tour/synthesized-speech.md)을 참고한다.

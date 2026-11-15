@@ -66,6 +66,7 @@ object AppViewModels {
             DrivingViewModel(
                 createSavedStateHandle(), c.observeNearbyRanking, c.observeLeaderChanges, c.refreshMarket,
                 c.observeInterestAlerts, c.toggleScrapById, c.voiceContext, c.observeScrappedIds, c.scrapVoiceTarget,
+                c.announceDrivingAlert,
             )
         }
         initializer { MyPageViewModel(container().observeMyPage) }

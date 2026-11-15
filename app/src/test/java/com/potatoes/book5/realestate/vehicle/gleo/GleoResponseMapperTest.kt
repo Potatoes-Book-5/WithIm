@@ -3,6 +3,15 @@ import com.potatoes.book5.realestate.domain.error.*
 import org.junit.Assert.*
 import org.junit.Test
 class GleoResponseMapperTest {
+ @org.junit.Test fun publicScrapCallbackDoesNotExposeApartmentId() {
+  val result=com.potatoes.book5.realestate.domain.error.Outcome.Success(
+   com.potatoes.book5.realestate.domain.model.appaction.ActionResult.Completed(
+    com.potatoes.book5.realestate.domain.usecase.VoiceScrapResult("private-id",false)))
+  val response=GleoResponseMapper().mapScrap(result,includeApartmentId=false)
+  org.junit.Assert.assertEquals("success",response.status)
+  org.junit.Assert.assertEquals(true,response.data.single()["persisted"])
+  org.junit.Assert.assertFalse(response.data.single().containsKey("apartmentId"))
+ }
  @Test fun askingMessagesAndTimeoutMetadataMatchAction() {
   assertTrue(GleoCallback.asking(GleoAction.SCRAP_APARTMENT,"apartment").message.contains("apartment"))
   assertTrue(GleoCallback.asking(GleoAction.GET_AREA_PRICE_SUMMARY,"target").message.contains("area"))

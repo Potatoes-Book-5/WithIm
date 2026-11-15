@@ -32,6 +32,8 @@ target 누락/잘못된 enum/이름 누락은 해당 요청을 실행하지 않�
 
 ## 3. Intent wire profile
 
+설치 버전 관찰(2026-11-15, Pleos Connect 2.1.0 / Gleo 4.2.0.15): 음성 STT와 서버 appAction 결과는 SCRAP_APARTMENT를 선택했지만 실제 Android action은 `com.potatoes.book5.realestate.SCRAP_APARTMENT`였다. debug manifest와 decoder에서 확인된 이 별칭만 정규화한다. 다른 패키지·임의 접두사나 미관찰 함수의 형식은 추측해서 허용하지 않는다. callback functionName은 등록된 SCRAP_APARTMENT를 유지한다.
+
 공식 예제에는 ACTION_PARAM JSON과 actionParameters 등 상이한 표현이 있어 실제 설치 버전 검증이 필요하다. 자동 테스트는 ACTION_PARAM 객체와 개별 extra 두 profile을 검증한다. 설치 버전에서 음성 호출 확인은 별도다.
 
 현재 decoder는 ACTION_PARAM 객체 JSON 또는 개별 target/areaQuery extras를 지원한다. 복수 키가 충돌하면 거부하고, 임의 fallback/이중 JSON 문자열 자동 복구/여러 형식 추측은 하지 않는다. 다른 profile은 설치 버전 검증 후 추가한다. 일반화한 profile 선택 계층은 아직 없다.
@@ -75,7 +77,7 @@ dummy 저장에는 success를 쓰지 않으므로 F-011의 영속 저장 후 성
 - 송신 action/extra는 실제 Gleo 문서/설치 버전과 맞춰 검증한다. 공식 예제의 APP_ACTION_RESPONSE와 packageName/response 필드를 근거로 하되, packageName extra를 ‘목적지 패키지’로 오인하지 않는다.
 - debug 앱은 DI가 고정한 공식 APP_ACTION_RESPONSE broadcast로 보내고, 입력 extras가 임의의 수신 앱/주소를 정하지 못하게 한다.
 - 실제 Gleo 수신 패키지·권한·호출자 인증은 미결이다. 임의의 vendor permission이나 패키지명을 만들어 쓰지 않는다.
-- debug 공개 receiver에는 개인 정보/위치/실제 DB 접근을 연결하지 않는다. release 외부 진입을 열기 전에 인증·최소 권한·데이터 처리 정책을 별도 검토한다.
+- debug 공개 receiver는 일반 개인 정보·위치·임의 대상 DB 접근을 허용하지 않는다. 사용자가 요청한 현재 보이는 추천 알림 버튼의 멱등 스크랩만 아래 제한 경로로 실행한다. release 외부 진입을 열기 전에 인증·최소 권한·데이터 처리 정책을 별도 검토한다.
 
 ## 7. 후속 대화와 지원 경계
 
@@ -103,6 +105,8 @@ dummy 저장에는 success를 쓰지 않으므로 F-011의 영속 저장 후 성
 
 ## T-041 현재 등록 함수와 실제 저장
 
+2026-11-15 사용자 요청 후속: 공개 SCRAP_APARTMENT는 `scrapVisibleNudge`로 현재 알림 버튼만 실행한다. 상세 단지 fallback은 없고 만료·대체·화면 숨김이면 저장하지 않는다. callback에서 단지 식별자를 제외한다. 다른 개인 API의 trusted=false 차단은 유지한다. 이 debug 한정 UI 명령도 호출자 인증 완료를 뜻하지 않으며 release로 공개하지 않는다.
+
 현재 assets schema는 GET_AREA_PRICE_SUMMARY / SCRAP_APARTMENT / GET_REAL_ESTATE_BRIEFING이다. SAVE_INTEREST_AREA는 이전 debug 호출 호환을 위해 receiver/decoder에만 남는다. SCRAP_APARTMENT는 무인자이며 외부 단지 ID/프로필/좌표 주입을 거부한다. 앱 수신 시 확보한 context로 대상을 확정한다. 실제 로컬 저장 성공은 persisted=true, executionMode=LOCAL로 반환하고 dummy로 표시하지 않는다. timeout/예외도 LOCAL로 표시하며 저장 결과를 확인할 수 없을 때 ‘데이터 변경 없음’으로 단정하지 않는다. 모든 callback은 현재 silent다. [context](voice-context.md).
 
 ## T-044 현재 실행 계약 — 실제 가격
@@ -117,4 +121,4 @@ dummy 저장에는 success를 쓰지 않으므로 F-011의 영속 저장 후 성
 
 ## T-045 현재 내부 임장 API
 
-현재 구현은 [임장 Intent API](tour-intent-api.md)를 따른다. 이전 dummy/미구현 설명은 해당 작업 당시 기록이다. 지역 저장·확인·추천·분석·읽음/브리핑·내비 요청은 내부 신뢰 문맥에 실제 구현을 연결했다. 공개 debug 경로는 인증 미확인으로 named-area 가격만 허용하며 스크랩·지역 저장·개인 브리핑은 거부한다. 새 내부 Intent를 공개 Gleo 함수로 등록한 상태가 아니다.
+현재 구현은 [임장 Intent API](tour-intent-api.md)를 따른다. 이전 dummy/미구현 설명은 해당 작업 당시 기록이다. 지역 저장·확인·추천·분석·읽음/브리핑·내비 요청은 내부 신뢰 문맥에 실제 구현을 연결했다. 공개 debug 경로는 named-area 가격과 위 T-041의 보이는 추천 알림 버튼만 허용하며 일반 개인 스크랩·지역 저장·개인 브리핑은 거부한다. 새 내부 Intent를 공개 Gleo 함수로 등록한 상태가 아니다.

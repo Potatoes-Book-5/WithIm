@@ -1,4 +1,6 @@
 <resources>
+    <string name="leader_found_speech">새로운 대장 아파트를 발견했어요. %1$s입니다.</string>
+    <string name="recommendation_found_speech">%1$s, 스크랩할까요?</string>
     <string name="app_name">임과 함께</string>
 
     <!-- SCR-006 동의와 설정 -->

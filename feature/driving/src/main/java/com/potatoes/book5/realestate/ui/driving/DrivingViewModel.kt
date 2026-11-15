@@ -34,6 +34,7 @@ class DrivingViewModel(
     private val voiceContext: com.potatoes.book5.realestate.domain.model.appaction.VoiceContextPort? = null,
     private val observeScrappedIds: com.potatoes.book5.realestate.domain.usecase.ObserveScrappedIdsUseCase? = null,
     private val ensureScrap: com.potatoes.book5.realestate.domain.usecase.ScrapVoiceTargetUseCase? = null,
+    private val announceDrivingAlert: com.potatoes.book5.realestate.domain.usecase.AnnounceDrivingAlertUseCase? = null,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -44,6 +45,7 @@ class DrivingViewModel(
     private val alertCount get() = alertIds.incrementAndGet()
     private var tradeLookup: Job? = null
     private var savedIds: Set<String> = emptySet()
+    private var entered = false
 
     private fun loadTradeRanking() {
         if (tradeLookup?.isActive == true) return
@@ -132,16 +134,37 @@ class DrivingViewModel(
         }
     }
 
-    /** 화면 알림은 자동으로 닫는다(F-006 규칙 3). TTS 연동은 이후 작업이다. */
+    /** Visible recommendation, voice target and announcement share the banner's lifetime. */
     private fun show(alert: DrivingAlertUi) {
+        if (!entered) return
         val previous=_state.value.alert
+        // Keep the apartment being announced stable while the user invokes Gleo.
+        // Other discoveries are already recorded in the drive summary by the domain observer.
+        if (previous is InterestAlertUi) return
+        announceDrivingAlert?.stop()
         if(previous != null) voiceContext?.dismissNudge(previous.key)
         val displayed=if(alert is InterestAlertUi && alert.apartmentId in savedIds)
             alert.copy(scrap=ScrapButtonState.SAVED) else alert
         apply(DrivingResult.AlertShown(displayed))
-        if(alert is InterestAlertUi) voiceContext?.showNudge(alert.key,alert.apartmentId,durationOf(alert))
+        if(alert is InterestAlertUi) {
+            voiceContext?.showNudge(alert.key,alert.apartmentId,durationOf(alert))
+        }
+        val speechName = when (alert) {
+            is InterestAlertUi -> alert.name
+            is LeaderAlertUi -> alert.currentName
+        }
+        val speechKind = when (alert) {
+            is InterestAlertUi -> com.potatoes.book5.realestate.domain.port.DrivingAlertSpeechKind.RECOMMENDATION
+            is LeaderAlertUi -> com.potatoes.book5.realestate.domain.port.DrivingAlertSpeechKind.LEADER
+        }
+        viewModelScope.launch {
+            announceDrivingAlert?.invoke(alert.key, speechName, speechKind) {
+                entered && _state.value.alert?.key == alert.key
+            }
+        }
         viewModelScope.launch {
             delay(durationOf(alert))
+            announceDrivingAlert?.stop(alert.key)
             voiceContext?.dismissNudge(alert.key)
             apply(DrivingResult.AlertExpired(alert.key))
         }
@@ -167,8 +190,17 @@ class DrivingViewModel(
 
     fun onIntent(intent: DrivingIntent) {
         when (intent) {
-            DrivingIntent.Enter -> loadTradeRanking()
+            DrivingIntent.Enter -> {
+                entered = true
+                loadTradeRanking()
+            }
             DrivingIntent.Exit -> {
+                entered = false
+                announceDrivingAlert?.stop()
+                _state.value.alert?.let {
+                    voiceContext?.dismissNudge(it.key)
+                    apply(DrivingResult.AlertExpired(it.key))
+                }
                 tradeLookup?.cancel()
                 tradeLookup = null
             }
@@ -185,6 +217,7 @@ class DrivingViewModel(
     }
 
     override fun onCleared() {
+        announceDrivingAlert?.stop()
         _state.value.alert?.let { voiceContext?.dismissNudge(it.key) }
         super.onCleared()
     }
@@ -192,8 +225,8 @@ class DrivingViewModel(
         private val alertIds=java.util.concurrent.atomic.AtomicLong()
         /** 대장 교체 알림 표시 시간(F-006 규칙 3, 2026-11-14 사용자 결정 10초) */
         const val LEADER_ALERT_DURATION_MILLIS = 10_000L
-        /** 관심 매물 배너 표시 시간(F-006 규칙 3, 제안값 8초) */
-        const val INTEREST_ALERT_DURATION_MILLIS = 8_000L
+        /** TTS question plus time to invoke Gleo and answer (F-006, T-041 follow-up). */
+        const val INTEREST_ALERT_DURATION_MILLIS = 15_000L
 
         fun durationOf(alert: DrivingAlertUi): Long = when (alert) {
             is LeaderAlertUi -> LEADER_ALERT_DURATION_MILLIS

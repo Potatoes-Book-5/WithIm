@@ -123,7 +123,9 @@ def inject(path, endpoint):
         def packets():
             for chunk in pcm_chunks(data):
                 yield P(format=F(samplingRate=16000, channels=0, format=1, mode=0), audio=chunk)
-                time.sleep(.020)
+                # MODE_UNSPECIFIED already blocks on the emulator's audio queue.
+                # Client sleeps add a second clock and can starve the virtual mic
+                # while the guest is busy rendering or synthesizing speech.
         try:
             channel.stream_unary(SERVICE + 'injectAudio', request_serializer=P.SerializeToString, response_deserializer=Empty.FromString)(
                 packets(), timeout=len(data) / 32000 + 15)
@@ -206,19 +208,14 @@ def run_cases(cases, args):
                 before = events()
                 command(adb + ['shell', 'cmd', 'voiceinteraction', 'show'], 8)
                 time.sleep(1)
-                for attempt in range(5):
-                    dump = command(adb + ['shell', 'dumpsys', 'voiceinteraction'], 6)
-                    if 'mBound=true mService=null' not in dump:
-                        break
-                    time.sleep(1)
+                dump = command(adb + ['shell', 'dumpsys', 'voiceinteraction'], 6)
                 result['assistant_binding_null'] = 'mBound=true mService=null' in dump
-                if result['assistant_binding_null']:
-                    result.update(status='BLOCKED', reason='ASSISTANT_NOT_BOUND', events=[])
-                else:
-                    # A non-null binder still does not prove the recognizer is listening.
-                    result['injection'] = inject(args.out / (case['id'] + '.wav'), args.endpoint)
-                    time.sleep(7)
-                    result['status'], result['events'] = classify(before, events(), case)
+                # Gleo 4.2.0.15 can recognize speech and dispatch app actions while
+                # the standard VoiceInteractionService binder is null. Record
+                # that observation without turning it into a false input gate.
+                result['injection'] = inject(args.out / (case['id'] + '.wav'), args.endpoint)
+                time.sleep(7)
+                result['status'], result['events'] = classify(before, events(), case)
             except Exception as exc:
                 result.update(status='BLOCKED', **error_info(exc))
             finally:

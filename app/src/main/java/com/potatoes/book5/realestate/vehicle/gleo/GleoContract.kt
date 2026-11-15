@@ -4,7 +4,13 @@ import com.potatoes.book5.realestate.domain.model.appaction.AreaTarget
 
 enum class GleoAction {
     GET_AREA_PRICE_SUMMARY, SAVE_INTEREST_AREA, GET_REAL_ESTATE_BRIEFING, SCRAP_APARTMENT;
-    companion object { fun fromWire(value: String?): GleoAction? = entries.firstOrNull { it.name == value } }
+    companion object {
+        fun fromWire(value: String?): GleoAction? = when (value) {
+            // Observed from Gleo 4.2.0.15 on Pleos Connect 2.1.0 (2026-11-15).
+            "com.potatoes.book5.realestate.SCRAP_APARTMENT" -> SCRAP_APARTMENT
+            else -> entries.firstOrNull { it.name == value }
+        }
+    }
 }
 data class GleoInput(
     val action: GleoAction,
@@ -29,7 +35,7 @@ data class GleoCallback(
             listOf(mapOf("code" to code, "executionMode" to if(action == GleoAction.SCRAP_APARTMENT) "LOCAL" else "UNAVAILABLE", "synthetic" to false)),
         )
         fun asking(action: GleoAction, field: String) = GleoCallback(
-            action, "asking", if(action == GleoAction.SCRAP_APARTMENT) "Select an apartment or use an active scrap suggestion before trying again." else "Additional target area information is required.",
+            action, "asking", if(action == GleoAction.SCRAP_APARTMENT) "Use the scrap command while a recommended apartment notification is visible." else "Additional target area information is required.",
             listOf(mapOf("requiredField" to field, "executionMode" to if(action == GleoAction.SCRAP_APARTMENT) "LOCAL" else "UNAVAILABLE", "synthetic" to false)),
         )
     }

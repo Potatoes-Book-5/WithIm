@@ -34,7 +34,13 @@ class RealEstateApplication : Application() {
         }
         container.fusedLocationBridge.start(appScope)
         appScope.launch {
-            container.consentChanges.collect { container.voiceContext.setConsented(it?.locationConsented == true) }
+            container.consentChanges.collect {
+                container.voiceContext.setConsented(it?.locationConsented == true)
+                container.drivingAlertSpeech.setAllowed(
+                    recommendation = it?.locationConsented == true && it.interestAlertEnabled,
+                    leader = it?.locationConsented == true && it.leaderAlertEnabled,
+                )
+            }
         }
     }
     fun launchGleoRequest(intent: android.content.Intent, receivedAtMillis: Long): kotlinx.coroutines.Job {

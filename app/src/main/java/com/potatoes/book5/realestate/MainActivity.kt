@@ -21,8 +21,10 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         (application as RealEstateApplication).container.voiceContext.setForeground(true)
+        (application as RealEstateApplication).container.drivingAlertSpeech.setForeground(true)
     }
     override fun onStop() {
+        (application as RealEstateApplication).container.drivingAlertSpeech.setForeground(false)
         (application as RealEstateApplication).container.voiceContext.setForeground(false)
         super.onStop()
     }

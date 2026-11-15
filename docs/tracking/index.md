@@ -32,7 +32,7 @@
 | F-003 | feature | 아파트 가격 순위 경쟁 | draft | `product/features/F-003-apartment-ranking.md` | T-009 | S-001, S-005, S-010, S-009, SCR-001, SCR-004, SCR-005, SCR-008 |
 | F-004 | feature | 관심 조건 설정 | draft | `product/features/F-004-interest-conditions.md` | T-009 | S-002, SCR-003, SCR-006 |
 | F-005 | feature | 관심 매물 근접 판정 | draft | `product/features/F-005-proximity-matching.md` | T-009 | F-010, S-003, SCR-005 |
-| F-006 | feature | 알림과 TTS 안내 | draft | `product/features/F-006-tts-alert.md` | T-003 | F-010, S-003, S-004, S-010, SCR-004, SCR-005 |
+| F-006 | feature | 알림과 TTS 안내 | draft | `product/features/F-006-tts-alert.md` | T-003, T-041 | F-010, S-003, S-004, S-010, SCR-004, SCR-005 |
 | F-007 | feature | 동의와 설정 | draft | `product/features/F-007-consent-settings.md` | T-009 | S-002, S-007, SCR-006 |
 | S-001 | scenario | 주차 중 주변 순위 확인 | draft | `product/scenarios/S-001-parked-browse-ranking.md` | T-010 | F-002, F-003, F-008, SCR-001, SCR-002 |
 | S-002 | scenario | 첫 실행과 관심 조건 설정 | draft | `product/scenarios/S-002-parked-register-interest.md` | T-010 | F-004, F-007, SCR-006, SCR-003, SCR-001 |

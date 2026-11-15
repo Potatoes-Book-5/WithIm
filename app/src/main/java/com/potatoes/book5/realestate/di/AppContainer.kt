@@ -132,6 +132,8 @@ class AppContainer(context: Context) {
         driveRecordRepository = driveRecordRepository,
         recommendationFeedbackRepository = recommendationFeedbackRepository,
     )
+    val drivingAlertSpeech by lazy { com.potatoes.book5.realestate.vehicle.audio.PleosDrivingAlertSpeech(context) }
+    val announceDrivingAlert by lazy { com.potatoes.book5.realestate.domain.usecase.AnnounceDrivingAlertUseCase(consentRepository, drivingAlertSpeech) }
 
     val simulateDriving = SimulateDrivingUseCase(vehicleSimulation)
     val refreshMarket = RefreshMarketUseCase(marketRepository)
