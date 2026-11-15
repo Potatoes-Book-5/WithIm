@@ -4,6 +4,7 @@ import androidx.room.withTransaction
 import com.potatoes.book5.realestate.data.local.db.AppDatabase
 import com.potatoes.book5.realestate.data.local.db.DriveLeaderChangeEntity
 import com.potatoes.book5.realestate.data.local.db.DrivePassedInterestEntity
+import com.potatoes.book5.realestate.data.local.db.DriveRecommendationEntity
 import com.potatoes.book5.realestate.data.local.db.DriveRankEntity
 import com.potatoes.book5.realestate.data.local.db.DriveSessionEntity
 import com.potatoes.book5.realestate.data.local.db.DriveRegionRoundEntity
@@ -13,6 +14,8 @@ import com.potatoes.book5.realestate.domain.model.MarketRound
 import com.potatoes.book5.realestate.domain.model.LeaderEventKind
 import com.potatoes.book5.realestate.domain.model.DriveLeaderChange
 import com.potatoes.book5.realestate.domain.model.DriveRank
+import com.potatoes.book5.realestate.domain.model.DriveRecommendation
+import com.potatoes.book5.realestate.domain.model.RecommendationKey
 import com.potatoes.book5.realestate.domain.model.DriveSummary
 import com.potatoes.book5.realestate.domain.model.PassedInterest
 import com.potatoes.book5.realestate.domain.port.DriveRecordRepository
@@ -36,7 +39,13 @@ class RoomDriveRecordRepository(
         DriveSessionEntity(startedAt = at.millis(), endedAt = null, lastRecordedAt = at.millis(), radiusKm = radiusKm, distanceKm = null, seen = false)
     )
 
-    override suspend fun recordSnapshot(sessionId: Long, at: LocalDateTime, top: List<DriveRank>, passed: List<PassedInterest>) {
+    override suspend fun recordSnapshot(
+        sessionId: Long,
+        at: LocalDateTime,
+        top: List<DriveRank>,
+        passed: List<PassedInterest>,
+        recommendations: List<DriveRecommendation>,
+    ) {
         db.withTransaction {
             dao.replaceRanks(sessionId, top.map { DriveRankEntity(sessionId, it.rank, it.apartmentId, it.name, it.priceManwon) })
             passed.forEach { p ->
@@ -50,6 +59,24 @@ class RoomDriveRecordRepository(
                         priceManwon = p.priceManwon,
                         firstSeenAt = old?.firstSeenAt ?: at.millis(),
                     )
+                )
+            }
+            recommendations.forEach { item ->
+                val old = dao.recommendation(sessionId, item.apartmentId)
+                dao.upsertRecommendation(
+                    DriveRecommendationEntity(
+                        sessionId = sessionId,
+                        apartmentId = item.apartmentId,
+                        name = item.name,
+                        priceManwon = item.priceManwon,
+                        areaPyeong = item.areaPyeong,
+                        scorePercent = item.scorePercent,
+                        closestKm = minOf(item.closestKm, old?.closestKm ?: item.closestKm),
+                        mainRecoKey = item.mainRecoKey.name,
+                        neighborhoodName = item.neighborhoodName,
+                        households = item.households,
+                        builtYear = item.builtYear,
+                    ),
                 )
             }
             dao.touch(sessionId, at.millis())
@@ -80,7 +107,7 @@ class RoomDriveRecordRepository(
 
     override suspend fun finishSession(sessionId: Long, endedAt: LocalDateTime?): Boolean = db.withTransaction {
         val session = dao.session(sessionId) ?: return@withTransaction false
-        if (dao.rankCount(sessionId) == 0 && dao.roundRankCount(sessionId) == 0) {
+        if (dao.rankCount(sessionId) == 0 && dao.roundRankCount(sessionId) == 0 && dao.recommendationCount(sessionId) == 0) {
             dao.deleteSession(sessionId)
             return@withTransaction false
         }
@@ -97,7 +124,9 @@ class RoomDriveRecordRepository(
         dao.observeRanks(id),
         dao.observeLeaderChanges(id),
         dao.observePassed(id),
-        combine(dao.observeRounds(id), dao.observeRoundRanks(id)) { rounds, ranks -> rounds to ranks },
+        combine(dao.observeRounds(id), dao.observeRoundRanks(id), dao.observeRecommendations(id)) { rounds, ranks, recommendations ->
+            (rounds to ranks) to recommendations
+        },
     ) { session, ranks, changes, passed, roundData ->
         session ?: return@combine null
         DriveSummary(
@@ -113,12 +142,17 @@ class RoomDriveRecordRepository(
             },
             passedInterests = passed.map { PassedInterest(it.apartmentId, it.name, it.closestKm, it.priceManwon) },
             seen = session.seen,
-            rounds = roundData.first.map { round ->
+            rounds = roundData.first.first.map { round ->
                 DriveRegionRound(MarketRound(round.roundId, round.districtCode, round.districtName),
                     round.startedAt.dateTime(), round.endedAt?.dateTime(),
-                    roundData.second.filter { it.roundId == round.roundId }.map {
+                    roundData.first.second.filter { it.roundId == round.roundId }.map {
                         DriveRank(it.rank, it.apartmentId, it.name, it.priceManwon)
                     })
+            },
+            recommendations = roundData.second.mapNotNull { item ->
+                val key = RecommendationKey.entries.firstOrNull { it.name == item.mainRecoKey } ?: return@mapNotNull null
+                DriveRecommendation(item.apartmentId, item.name, item.priceManwon, item.areaPyeong,
+                    item.scorePercent, item.closestKm, key, item.neighborhoodName, item.households, item.builtYear)
             },
         )
     }

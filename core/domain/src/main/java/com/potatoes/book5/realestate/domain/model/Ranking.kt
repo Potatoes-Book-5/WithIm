@@ -13,6 +13,11 @@ data class Apartment(
     val dealDate: LocalDate,
     /** 단지 좌표. 데이터 출처(T-005)가 좌표를 주지 않으면 null */
     val location: GeoPoint? = null,
+    /** 관심 조건 점수에 쓰는 법정동 코드 */
+    val neighborhoodCode: String? = null,
+    val neighborhoodName: String? = null,
+    val households: Int? = null,
+    val builtYear: Int? = null,
 )
 
 /** WGS84 위경도. */
@@ -60,6 +65,8 @@ data class RankingSnapshot(
     val referenceLabel: String? = null,
     /** Confirmed district visit. Returning to a district starts a different round. */
     val round: MarketRound? = null,
+    /** 10km 내 위치가 확인된 추천 후보. 지도용 핀 목록과 별개다. */
+    val recommendationCandidates: List<NearbyApartment> = emptyList(),
 ) {
     val leader: NearbyApartment? get() = top.firstOrNull()
 }

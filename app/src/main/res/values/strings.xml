@@ -144,6 +144,27 @@
     <string name="summary_leader_changes">지역 대장 기록 %d건</string>
     <string name="summary_no_leader_change">지역 대장 기록 없음</string>
     <string name="summary_passed">지나친 관심 매물 %d</string>
+    <string name="summary_recommendations">지나친 관심 매물 3</string>
+    <string name="recommendation_keyword_price_under_5">5억 이하 선호</string>
+    <string name="recommendation_keyword_price_5_10">실속 가격대</string>
+    <string name="recommendation_keyword_price_10_15">선호 가격대</string>
+    <string name="recommendation_keyword_price_15_20">상위 가격대</string>
+    <string name="recommendation_keyword_price_over_20">프리미엄 가격대</string>
+    <string name="recommendation_keyword_area_small">소형 평형</string>
+    <string name="recommendation_keyword_area_medium">중형 평형</string>
+    <string name="recommendation_keyword_area_preferred">선호 평형</string>
+    <string name="recommendation_keyword_area_large">대형 평형</string>
+    <string name="recommendation_keyword_neighborhood">%s 선호 지역</string>
+    <string name="recommendation_keyword_neighborhood_generic">선호 지역</string>
+    <string name="recommendation_keyword_households_large">대단지</string>
+    <string name="recommendation_keyword_households_medium">중대형 단지</string>
+    <string name="recommendation_keyword_households_300">규모 있는 단지</string>
+    <string name="recommendation_keyword_households_near">세대수 조건 근접</string>
+    <string name="recommendation_keyword_households_unknown">세대수 선호</string>
+    <string name="recommendation_keyword_newness_new">신축</string>
+    <string name="recommendation_keyword_newness_recent">준신축</string>
+    <string name="recommendation_keyword_newness_near">연식 조건 근접</string>
+    <string name="recommendation_keyword_newness_unknown">준공 정보 확인 필요</string>
     <string name="summary_open_scraps">스크랩 목록 보기 ›</string>
     <string name="summary_open_catch_up">관심 매물 모아보기 ›</string>
     <!-- SCR-011 관심 매물 모아보기 -->
