@@ -24,13 +24,16 @@ class GleoResponseMapper {
         }
     }
 
-    fun mapScrap(outcome: Outcome<ActionResult<com.potatoes.book5.realestate.domain.usecase.VoiceScrapResult>>): GleoCallback {
+    fun mapScrap(outcome: Outcome<ActionResult<com.potatoes.book5.realestate.domain.usecase.VoiceScrapResult>>, includeApartmentId: Boolean = true): GleoCallback {
         val action = GleoAction.SCRAP_APARTMENT
         return when(outcome) {
             is Outcome.Failure -> map(action, outcome).let { callback -> callback.copy(data=callback.data.map { it + mapOf("executionMode" to "LOCAL", "synthetic" to false) }) }
             is Outcome.Success -> when(val result=outcome.value) {
                 is ActionResult.NeedsInput -> GleoCallback.asking(action,result.field)
-                is ActionResult.Completed -> GleoCallback(action,"success","The apartment is saved in your scraps.", listOf(mapOf("apartmentId" to result.payload.apartmentId,"persisted" to true,"alreadySaved" to result.payload.alreadySaved,"executionMode" to "LOCAL")))
+                is ActionResult.Completed -> GleoCallback(action,"success","The apartment is saved in your scraps.", listOf(
+                    mapOf("persisted" to true,"alreadySaved" to result.payload.alreadySaved,"executionMode" to "LOCAL") +
+                        if (includeApartmentId) mapOf("apartmentId" to result.payload.apartmentId) else emptyMap()
+                ))
             }
         }
     }

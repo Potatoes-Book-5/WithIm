@@ -30,7 +30,9 @@ class GleoIntentAdapter(
                         GleoAction.GET_AREA_PRICE_SUMMARY -> mapper.map(request.action, getPrice(requireNotNull(request.target), context))
                         GleoAction.SAVE_INTEREST_AREA -> mapper.map(request.action, saveArea(requireNotNull(request.target), context))
                         GleoAction.GET_REAL_ESTATE_BRIEFING -> mapper.map(request.action, getBriefing(context))
-                        GleoAction.SCRAP_APARTMENT -> scrapTarget?.let { mapper.mapScrap(it(context)) }
+                        GleoAction.SCRAP_APARTMENT -> scrapTarget?.let {
+                            mapper.mapScrap(it.scrapVisibleNudge(context), includeApartmentId = false)
+                        }
                             ?: GleoCallback.failure(request.action, "UNSUPPORTED")
                     }
                 }

@@ -22,6 +22,17 @@ class ScrapVoiceTargetUseCase(
   val id=snapshot.apartmentId() ?: return Outcome.Success(ActionResult.NeedsInput("apartment"))
   return save(id) { contexts.isCurrent(snapshot) }
  }
+ /** The public debug action can only activate the scrap button of the visible Nudge. */
+ suspend fun scrapVisibleNudge(context: AppCallContext): Outcome<ActionResult<VoiceScrapResult>> {
+  val snapshot = context.voice ?: return Outcome.Success(ActionResult.NeedsInput("apartment"))
+  val nudge = snapshot.nudge
+   ?.takeIf { snapshot.foreground && snapshot.enabled && it.expiresAt > snapshot.capturedAt }
+   ?: return Outcome.Success(ActionResult.NeedsInput("apartment"))
+  return save(nudge.apartmentId) {
+   val current = contexts.snapshot()
+   contexts.isCurrent(snapshot) && current.nudge == nudge && nudge.expiresAt > current.capturedAt
+  }
+ }
  /** Banner taps share the same serialized ensure-saved operation as voice. */
  suspend fun ensure(apartmentId: String) = save(apartmentId) { true }
  private suspend fun save(id: String, allowed: () -> Boolean): Outcome<ActionResult<VoiceScrapResult>> = mutex.withLock {

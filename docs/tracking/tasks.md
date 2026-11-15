@@ -44,7 +44,7 @@
 | T-038 | feature | 지도 탭에 실거래 상위 5개 단지 표시 | review | - | P1 | F-003, SCR-009 | T-031 |
 | T-039 | feature | 시세 순위 조회 기간을 최근 3개월로 변경 | review | - | P1 | F-002, F-003, SCR-009 | T-038 |
 | T-040 | feature | Gleo adapter 모듈 통합 및 debug 음성 E2E | review | - | P1 | - | - |
-| T-041 | feature | Nudge와 앱 상태 기반 음성 실행 context | review | - | P1 | - | - |
+| T-041 | feature | Nudge와 앱 상태 기반 음성 실행 context 및 추천·대장 TTS | review | - | P1 | F-006, S-003, S-010, SCR-005 | - |
 | T-042 | feature | 음성용 메모리 read model과 스크랩 빠른 조회 | review | - | P1 | - | - |
 | T-043 | feature | TTS 음성 입력 기반 Pleos Gleo 자동 검증 | review | - | P1 | F-011, S-012 | T-041, T-042 |
 | T-044 | feature | Gleo 가격 API에 실제 준비된 실거래 연결 | review | - | P0 | F-011, F-002 | T-042, T-043 |

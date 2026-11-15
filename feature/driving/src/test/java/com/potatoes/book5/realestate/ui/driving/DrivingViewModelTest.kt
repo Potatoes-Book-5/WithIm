@@ -104,7 +104,8 @@ class DrivingViewModelTest {
         override suspend fun latestDeal(apartmentId: String) = Outcome.Success(deal)
     }
 
-    private fun viewModel(ranking: RankingRepository, scraps: ScrapRepository = FakeScrapRepository(), handle: SavedStateHandle = SavedStateHandle()) =
+    private fun viewModel(ranking: RankingRepository, scraps: ScrapRepository = FakeScrapRepository(), handle: SavedStateHandle = SavedStateHandle(),
+        speech: com.potatoes.book5.realestate.domain.port.DrivingAlertSpeech? = null) =
         DrivingViewModel(
             handle,
             ObserveNearbyRankingUseCase(ranking),
@@ -112,7 +113,9 @@ class DrivingViewModelTest {
             emptyMarketRefresh(),
             ObserveInterestMatchAlertsUseCase(ranking, consent, scraps),
             ToggleScrapByIdUseCase(apartments, ToggleScrapUseCase(scraps)),
-        )
+            observeScrappedIds = com.potatoes.book5.realestate.domain.usecase.ObserveScrappedIdsUseCase(scraps),
+            announceDrivingAlert = speech?.let { com.potatoes.book5.realestate.domain.usecase.AnnounceDrivingAlertUseCase(consent, it) },
+        ).also { it.onIntent(DrivingIntent.Enter) }
 
     /**
      * leaderIds 순서대로 1위부터 채운 스냅샷. 알림은 실제 차량 위치가 있는 스냅샷에서만 나오므로(T-027 삼성전자 임시 기준)
@@ -226,5 +229,33 @@ class DrivingViewModelTest {
 
     private companion object {
         val VEHICLE = VehiclePose(GeoPoint(37.3670, 127.1080))
+    }
+
+    @Test fun `추천 질문은 보이는 알림에서 한 번 읽고 화면을 나가면 중단한다`() = runTest(dispatcher) {
+        val spoken = mutableListOf<Pair<Long, String>>()
+        val stopped = mutableListOf<Long?>()
+        val speech = object : com.potatoes.book5.realestate.domain.port.DrivingAlertSpeech {
+            override fun announce(key: Long, apartmentName: String, kind: com.potatoes.book5.realestate.domain.port.DrivingAlertSpeechKind) { spoken += key to apartmentName }
+            override fun stop(key: Long?) { stopped += key }
+        }
+        val ranking = FakeRankingRepository(snapshotOf("a"))
+        val vm = viewModel(ranking, speech = speech)
+        vm.onIntent(DrivingIntent.Enter)
+        runCurrent()
+        val near = NearbyApartment(Apartment("h", "Synthetic apartment", 158_000, 34, LocalDate.of(2026, 10, 1)), 1.2, 0.0)
+        ranking.snapshots.value = snapshotOf("a").copy(interestMatches = listOf(near))
+        runCurrent()
+        val alert = vm.state.value.alert as InterestAlertUi
+        assertEquals(listOf(alert.key to "Synthetic apartment"), spoken)
+        vm.onIntent(DrivingIntent.SelectMode(DrivingMode.MAP))
+        runCurrent()
+        assertEquals(1, spoken.size)
+        vm.onIntent(DrivingIntent.Exit)
+        runCurrent()
+        assertNull(vm.state.value.alert)
+        assertTrue(stopped.contains(null))
+        advanceTimeBy(DrivingViewModel.INTEREST_ALERT_DURATION_MILLIS + 1)
+        runCurrent()
+        assertEquals(1, spoken.size)
     }
 }

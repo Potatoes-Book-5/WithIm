@@ -23,6 +23,7 @@ pleosVehicle = "2.3.2"
 # FusedLocation SDK(F-001, T-029). 문서 예시 1.1.2는 저장소에 없어 저장소 최신 릴리스를 쓴다
 pleosFusedLocation = "1.1.3"
 pleosNaviHelper = "3.0.5"
+pleosTextToSpeech = "3.3.1"
 
 # 네이버 지도 SDK (ADR-004)
 naverMap = "3.24.1"
@@ -58,6 +59,7 @@ pleos-vehicle = { module = "ai.pleos.playground:Vehicle", version.ref = "pleosVe
 pleos-fused-location = { module = "ai.pleos.playground:FusedLocation", version.ref = "pleosFusedLocation" }
 
 pleos-navi-helper = { module = "ai.pleos.playground:NaviHelper", version.ref = "pleosNaviHelper" }
+pleos-text-to-speech = { module = "ai.pleos.playground:TextToSpeech", version.ref = "pleosTextToSpeech" }
 
 json-test = { module = "org.json:json", version.ref = "jsonTest" }
 

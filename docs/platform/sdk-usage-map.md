@@ -5,7 +5,7 @@
 | 기능 | 사용 API | 지원 확인 | 미지원 시 동작 | 관련 규칙 | 상태 |
 |---|---|---|---|---|---|
 | F-001 차량 위치 | FusedLocation SDK 1.1.3(`ai.pleos.playground:FusedLocation`) | `isSupported` | 위치 입력 UNSUPPORTED, 안내 화면 S-006은 미구현 | CP-004 | 사용 중(T-029) |
-| F-006 TTS 알림 | TextToSpeech SDK | 전체 호환 | - | CP-003, AF-001 | 미확정 |
+| F-006 추천 매물 TTS 알림 | TextToSpeech SDK 3.3.1, ON_DEVICE | automotive·TTS_SERVICE 권한·initialize 성공 | 화면 알림 유지, 음성 건너뜀 | CP-003, AF-001, AF-003 | T-041 연결 중 |
 | 주행 중·주행 완료(F-009, S-005, S-009) | AAOS `CarPropertyManager` `GEAR_SELECTION`(`useLibrary("android.car")`) | `getCarPropertyConfig`와 지원 기어에 P 포함 | 기어를 못 읽으면 주차 유지, 개발 빌드는 수동 전환 | API-002, CP-005, CP-006 | 사용 중(T-034) |
 | 주행 규제 상태(DO 선언 앱의 화면 제한) | `CarUxRestrictionsManager`(`useLibrary("android.car")`) | `FEATURE_AUTOMOTIVE`, 차량 서비스 연결 | 기어 기준 주행 상태만 사용 | DI-001, DI-002, HW-003 | 사용 중(T-035) |
 | SCR-009 주행 지도 | 네이버 지도 Android SDK(외부, [ADR-004](../decisions/ADR-004-map-sdk.md)) | 클라이언트 ID 유무 | 지도 사용 불가 상태 표시 | API-001 | 사용 중 |
@@ -58,6 +58,12 @@ T-027은 SDK 위치 획득을 구현하지 않고 [차량 위치 입력](locatio
 ## Gleo debug 통합
 
 T-040: SDK 추가 없이 Android broadcast를 app/vehicle/gleo에 격리한다. debug assets/schema.json·GleoActionReceiver로 가격·브리핑 합성 action과 실제 단지 스크랩 action을 받고 APP_ACTION_RESPONSE로 반환한다. T-040에서 Nudge와 앱 상태의 실행 context를 연결했다. release에는 외부 진입점이 없다. 설치 버전의 schema 승인·음성 동작은 [E2E](../testing/gleo-tour/e2e.md)에서 확인한다.
+
+## 추천 알림 TTS(T-041 후속)
+
+확인일 2026-11-15. [공식 TTS 소개](https://document.pleos.ai/en/docs/pleos-only/connect-sdk-pleos/TextToSpeech/intro), [권한](https://document.pleos.ai/en/docs/pleos-only/connect-sdk-pleos/TextToSpeech/declaring-permissions), [초기화](https://document.pleos.ai/en/api-reference/connect-sdk-pleos/TextToSpeech/initialization-and-release), [이벤트](https://document.pleos.ai/en/docs/pleos-only/connect-sdk-pleos/TextToSpeech/event-listeners), [오디오 포커스](https://document.pleos.ai/en/docs/pleos-only/vehicle-app-developer-guide/audio-focus-development-guide/audio-focus-development).
+
+`vehicle/audio`에 SDK 호출을 격리한다. ON_DEVICE는 앱 등록과 네트워크 없이 사용하며 키를 추가하지 않는다. 알림이 보이는 foreground에서 ‘{단지명}, 스크랩할까요?’라고 짧게 읽는다(긴 안내와 응답 시간에 대한 사용자 후속 요청). 추천 질문 중에는 대상 단지를 고정한다. 알림 만료·화면 종료·동의 해제는 즉시 중단하고 재생 대기열은 만들지 않는다. Android AudioAttributes의 NOTIFICATION/SPEECH와 MAY_DUCK 포커스를 요청하고, 거절·상실 시 음성을 폐기한다. Gleo 호출 중 LOSS_TRANSIENT에도 즉시 중단한다. 앱이 내비 우선순위를 별도 수치로 하드코딩하지 않는다.
 
 ## T-045 내비와 플랫폼 Gate
 

@@ -77,4 +77,37 @@ class VoiceContextTest {
   assertEquals(Outcome.Success(ActionResult.NeedsInput("apartment")),api(call()));assertEquals(0,fetches)
   store.showNudge(1,"a",8000);assertEquals(Outcome.Failure(DomainError.Offline),api(call()));assertEquals(0,rows.writes)
  }
+ @Test fun publicNudgeCommandUsesVisibleButtonAndNeverFallsBackToDetail()=runTest {
+  active(); val rows=Scraps(); var reads=0
+  val api=ScrapVoiceTargetUseCase(rows,apartments { reads++;Outcome.Success(detail) },store)
+  store.setAppState(true,"selected",true)
+  assertEquals(Outcome.Success(ActionResult.NeedsInput("apartment")),api.scrapVisibleNudge(call().copy(trusted=false)))
+  assertEquals(0,reads)
+  store.showNudge(1,"a",8000)
+  assertTrue(api.scrapVisibleNudge(call().copy(trusted=false)) is Outcome.Success)
+  assertTrue(api.scrapVisibleNudge(call().copy(trusted=false)) is Outcome.Success)
+  assertTrue(api.ensure("a") is Outcome.Success)
+  assertEquals(1,rows.writes)
+  assertEquals("a",rows.rows.value.single().apartmentId)
+ }
+ @Test fun expiredHiddenAndReplacedNudgeCommandsCannotSave()=runTest {
+  active(); val rows=Scraps();var reads=0
+  val api=ScrapVoiceTargetUseCase(rows,apartments { reads++;Outcome.Success(detail) },store)
+  store.showNudge(1,"a",8000);val captured=call().copy(trusted=false)
+  assertEquals(Outcome.Success(ActionResult.NeedsInput("apartment")),
+   api.scrapVisibleNudge(captured.copy(voice=captured.voice!!.copy(capturedAt=time.plusSeconds(8)))))
+  store.showNudge(2,"b",8000)
+  assertTrue(api.scrapVisibleNudge(captured) is Outcome.Failure)
+  store.setAppState(true,null,false)
+  assertEquals(Outcome.Success(ActionResult.NeedsInput("apartment")),api.scrapVisibleNudge(call().copy(trusted=false)))
+  assertEquals(0,reads);assertEquals(0,rows.writes)
+ }
+ @Test fun replacementDuringPreparedReadCancelsPublicButtonCommand()=runTest {
+  active();store.showNudge(1,"a",8000);val rows=Scraps()
+  val api=ScrapVoiceTargetUseCase(rows,apartments {
+   store.showNudge(2,"b",8000);Outcome.Success(detail)
+  },store)
+  assertTrue(api.scrapVisibleNudge(call().copy(trusted=false)) is Outcome.Failure)
+  assertEquals(0,rows.writes)
+ }
 }

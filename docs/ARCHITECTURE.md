@@ -367,4 +367,6 @@ Android 실행·계측 검증은 Pleos Connect에서만 수행한다. 일반 Pho
 
 T-044: 가격 API는 domain PreparedPriceReader를 통해 실제 완료 배치를 읽고 LiveAreaPriceSummaryRepository가 시군구/문맥/기준시각을 검증한다. LiveMarketRepository의 백그라운드 공식 POINT 결과는 InMemoryPriceLocation에 게시하며 DI가 수신 snapshot을 제공한다. voice 요청에서 resolver/HTTP/collector 잠금을 호출하지 않는다. 공개 debug 경로는 이름을 명시한 시군구만 허용하고 위치·직전 지역은 domain UseCase policy로 사전 차단한다. 가격 runtime dummy를 제거하고, 미구현 지역 저장/브리핑은 Unsupported로 구성한다. 테스트 runner는 기본 JUnit과 opt-in 실제 공급자 probe를 지원하며 SDK/DB 환경을 바꾸지 않는다.
 
-T-045([ADR-012](decisions/ADR-012-tour-area-briefing.md)): `TourIntentAdapter`는 정규화된 `TourIntent`를 domain UseCase와 준비된 시장/상세 모델·Room v7(`RoomTourStore`)·공식 RSS/청약홈 클라이언트·`PleosTourNavigator`(`vehicle/nav`)에 연결한다. 공개 debug receiver는 named-area 가격만 허용하고 개인 저장·스크랩·브리핑은 거부한다. [내부 API](api/tour-intent-api.md), [검증](testing/gleo-tour/spec-actions.md).
+T-045([ADR-012](decisions/ADR-012-tour-area-briefing.md)): `TourIntentAdapter`는 정규화된 `TourIntent`를 domain UseCase와 준비된 시장/상세 모델·Room v7(`RoomTourStore`)·공식 RSS/청약홈 클라이언트·`PleosTourNavigator`(`vehicle/nav`)에 연결한다. 공개 debug receiver는 named-area 가격과 현재 보이는 추천 알림 버튼의 멱등 스크랩만 허용한다. 일반 개인 저장·상세 단지 스크랩·브리핑은 거부한다. [내부 API](api/tour-intent-api.md), [검증](testing/gleo-tour/spec-actions.md).
+
+T-041 후속: `AnnounceDrivingAlertUseCase`가 알림 설정과 화면 유효성을 확인하고 domain `DrivingAlertSpeech` 포트를 호출한다. 구현 `vehicle/audio/PleosDrivingAlertSpeech`는 ON_DEVICE TTS와 NOTIFICATION 오디오 포커스를 소유하며 알림 key·foreground·동의·초기화 세대별로 종료한다. 배너 대체·만료와 Gleo 포커스 상실 뒤 재생을 재개하지 않는다.
