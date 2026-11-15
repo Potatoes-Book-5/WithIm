@@ -17,7 +17,7 @@ task: T-049
 - [x] 지정된 `apk/` 경로에 복사
 - [x] APK 패키지 정보와 파일 체크섬 확인
 - [x] APK 서명 및 검증
-- [ ] GitHub에 제출 가능한 방식으로 APK 게시
+- [x] GitHub에 제출 가능한 방식으로 APK 게시
 
 ## 검증 방법
 - `./gradlew :app:assembleRelease`
@@ -35,4 +35,5 @@ task: T-049
 - Release 빌드 성공. 결과 APK는 지정 경로에 복사했고 application ID/version을 확인함.
 - 기본 Gradle release 산출물은 unsigned였으나, 사용자가 지정 경로 APK에 v3 서명을 적용하고 기기 실행을 확인함. `apksigner verify`도 v3 서명을 검증함.
 - APK 133 MB라 Git LFS를 설치하고 `apk/*.apk`를 추적하도록 설정함.
-- APK와 Git LFS pointer를 원격 작업 브랜치로 푸시하는 중.
+- Git LFS object(140 MB)와 APK 경로를 `chore/T-049-release-apk-lfs` 브랜치로 푸시 완료.
+- 원격에서 canonical repository 주소가 `https://github.com/Potatoes-Book-5/WithIm`으로 이전된 안내를 받음. 기존 origin URL은 리다이렉트되어 업로드됨.
