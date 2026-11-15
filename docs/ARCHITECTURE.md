@@ -351,7 +351,7 @@ King-of-real-estate/
 
 ### T-031 지역 순위
 
-MarketRoundTracker(domain)는 공식 지역 코드가 연속 확인된 관측 시각으로 30초 전환을 판정한다. LiveMarketRepository(data)는 현재 구 안 3km의 실제 거래만 선정한다. 지도 축척은 feature/driving에서 독립적으로 근거리 배율(최소 줌 18.5)로 유지한다. 주행 기록은 Room v4의 지역 방문·최고가 기록을 사용하며 기존 기록을 보존한다. SDK 환경과 차량 위치 입력 포트는 변경하지 않는다.
+MarketRoundTracker(domain)는 공식 지역 코드가 연속 확인된 관측 시각으로 30초 전환을 판정한다. LiveMarketRepository(data)는 현재 구 안 3km의 실제 거래만 선정한다. 지도 축척은 feature/driving에서 독립적으로 정한다. T-046부터 차량 주변 1km를 담는 줌을 `Projection.getMetersPerDp`와 지도 크기로 계산한다. 주행 기록은 Room v4의 지역 방문·최고가 기록을 사용하며 기존 기록을 보존한다. SDK 환경과 차량 위치 입력 포트는 변경하지 않는다.
 
 ## Gleo 앱 호출
 

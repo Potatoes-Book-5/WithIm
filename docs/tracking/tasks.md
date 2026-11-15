@@ -49,3 +49,4 @@
 | T-043 | feature | TTS 음성 입력 기반 Pleos Gleo 자동 검증 | review | - | P1 | F-011, S-012 | T-041, T-042 |
 | T-044 | feature | Gleo 가격 API에 실제 준비된 실거래 연결 | review | - | P0 | F-011, F-002 | T-042, T-043 |
 | T-045 | feature | 명세 발화별 실제 App API와 단위 테스트 완성 | review | geonu | P0 | F-011, S-012, ADR-012 | T-044 |
+| T-046 | feature | 주행 지도 표시 반경을 차량 주변 1km로 확대 | review | - | P1 | F-003, SCR-009 | T-031 |
