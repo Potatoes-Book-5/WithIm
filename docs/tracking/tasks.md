@@ -46,4 +46,4 @@
 | T-040 | feature | Nudge와 앱 상태 기반 음성 실행 context | review | - | P1 | - | - |
 | T-041 | feature | 음성용 메모리 read model과 스크랩 빠른 조회 | review | - | P1 | - | - |
 | T-042 | feature | TTS 음성 입력 기반 Pleos Gleo 자동 검증 | review | - | P1 | F-010, S-011 | T-040, T-041 |
-| T-043 | feature | Gleo 가격 API에 실제 준비된 실거래 연결 | todo | - | P0 | - | - |
+| T-043 | feature | Gleo 가격 API에 실제 준비된 실거래 연결 | review | - | P0 | F-010, F-002 | T-041, T-042 |

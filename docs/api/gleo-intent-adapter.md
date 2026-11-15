@@ -20,12 +20,11 @@ task: T-039
 
 ## 2. 스키마 vNext
 
-[schema.example.json](../platform/examples/gleo/schema.example.json)은 아래 target 계약으로 갱신했다. debug assets/schema.json에 동일한 합성 계약을 배포한다. release에는 배포하지 않는다.
+[schema.example.json](../platform/examples/gleo/schema.example.json)은 아래 target 계약으로 갱신했다. debug assets/schema.json에 동일한 계약을 배포한다. 현재 공개 target 제한은 하단 T-043 절을 따른다. release에는 배포하지 않는다.
 
-- GET_AREA_PRICE_SUMMARY와 SAVE_INTEREST_AREA에 `target: string enum`을 추가한다.
-- enum: CURRENT_LOCATION / LAST_REFERENCED_AREA / NAMED_AREA.
-- `target`을 required로 지정한다. 누락 가능성은 앱이 다시 검사한다.
-- `areaQuery: string`은 NAMED_AREA에만 필요하다. 조건부 필수는 앱이 검사하며 JSON Schema의 oneOf/if 같은 미확인 기능에 의존하지 않는다.
+- 현재 공개 GET_AREA_PRICE_SUMMARY는 `target: string enum [NAMED_AREA]`, `areaQuery: string`을 모두 required로 지정한다. 누락 가능성은 앱이 다시 검사한다.
+- CURRENT_LOCATION / LAST_REFERENCED_AREA는 내부 API 타입과 이전 decoder 호환에만 남으며 공개 debug DI에서는 저장소 읽기 전 거부한다.
+- SAVE_INTEREST_AREA는 현재 schema에서 제외된 이전 debug 호환 action이고 runtime은 미지원이다.
 - GET_REAL_ESTATE_BRIEFING은 무인자를 유지한다. 음성 함수는 총 3개다.
 - raw utterance, profileId, 좌표, requestId, 권한 우회 플래그, 임의의 Callback 주소를 LLM 입력으로 받지 않는다.
 
@@ -56,9 +55,9 @@ target 누락/잘못된 enum/이름 누락은 해당 요청을 실행하지 않�
 
 Android 동작 근거(확인일 2026-11-14): [BroadcastReceiver.goAsync](https://developer.android.com/reference/android/content/BroadcastReceiver#goAsync()), [Broadcasts overview](https://developer.android.com/develop/background-work/background-tasks/broadcasts). goAsync는 무제한 실행을 보장하지 않으며 완료 시 finish가 필요하다.
 
-## 5. Callback 변환과 dummy 의미
+## 5. Callback 변환과 초기 dummy fixture 의미
 
-Gleo envelope의 functionName/status/message/mode/data는 [공식 Callback 규격](https://document.pleos.ai/docs/pleos-only/app-integration-guide/guide/action_callback)을 따른다(확인일 2026-11-14). data는 객체 배열을 직렬화한 문자열이다. Gleo enum/status/영문 문구를 domain으로 들여보내지 않는다.
+현재 runtime 실제 가격 응답은 하단 T-043 절을 따른다. 아래 dummy 표는 초기 테스트 fixture용이다. Gleo envelope의 functionName/status/message/mode/data는 [공식 Callback 규격](https://document.pleos.ai/docs/pleos-only/app-integration-guide/guide/action_callback)을 따른다(확인일 2026-11-14). data는 객체 배열을 직렬화한 문자열이다. Gleo enum/status/영문 문구를 domain으로 들여보내지 않는다.
 
 | 내부 결과 | Callback | 의미 |
 |---|---|---|
@@ -105,3 +104,13 @@ dummy 저장에는 success를 쓰지 않으므로 F-011의 영속 저장 후 성
 ## T-040 현재 등록 함수와 실제 저장
 
 현재 assets schema는 GET_AREA_PRICE_SUMMARY / SCRAP_APARTMENT / GET_REAL_ESTATE_BRIEFING이다. SAVE_INTEREST_AREA는 이전 debug 호출 호환을 위해 receiver/decoder에만 남는다. SCRAP_APARTMENT는 무인자이며 외부 단지 ID/프로필/좌표 주입을 거부한다. 앱 수신 시 확보한 context로 대상을 확정한다. 실제 로컬 저장 성공은 persisted=true, executionMode=LOCAL로 반환하고 dummy로 표시하지 않는다. timeout/예외도 LOCAL로 표시하며 저장 결과를 확인할 수 없을 때 ‘데이터 변경 없음’으로 단정하지 않는다. 모든 callback은 현재 silent다. [context](voice-context.md).
+
+## T-043 현재 실행 계약 — 실제 가격
+
+위 T-039 dummy 설명은 이전 구현 기록이다. 현재 debug DI는 실제 가격 repository를 사용하며 schema/example을 함께 변경했다. 함수 수는 가격/스크랩/브리핑 3개를 유지한다.
+
+- 공개 가격 schema는 `target=NAMED_AREA`, `areaQuery` 필수다. 실제 준비된 시군구 가격만 반환한다. 호출자 인증/응답 대상이 확인되기 전에는 CURRENT_LOCATION과 LAST_REFERENCED_AREA를 schema에서 제외하고, 이전 수동 호출도 API 진입 전에 Unsupported로 거부한다. 클라이언트가 target이나 sender 문자열을 바꿔 우회하지 못한다.
+- 가격 success는 `executionMode=LIVE`, `synthetic=false`, 실제 출처/시각과 DISTRICT 범위를 포함한다. 빈 표본의 금액은 null이며 EMPTY/INSUFFICIENT/AVAILABLE을 전달한다. 합성일 때만 합성 message를 사용한다.
+- 결과가 없는 fail/asking은 `executionMode=UNAVAILABLE`, `synthetic=false`다. 스크랩은 기존 LOCAL 규칙이다. 가격/저장/브리핑 오류를 DUMMY 실행으로 표시하지 않는다.
+- 관심 지역 저장과 브리핑 runtime은 UNSUPPORTED다. 없는 청약·뉴스 3건이나 지역 저장 성공을 만들어내지 않는다.
+- 실제 Gleo 수락과 출력 검증이 남아 있으므로 callback mode는 silent를 유지한다. 본 변경으로 release receiver, Gleo 권한/공개 정책, 자동 발화를 활성화하지 않는다.

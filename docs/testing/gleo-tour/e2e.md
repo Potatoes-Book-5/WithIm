@@ -3,7 +3,7 @@ task: T-039
 ---
 # Gleo E2E
 
-최신 합성 음성/기기 검증은 [T-042 TTS 검증](synthesized-speech.md)을 따른다. 생성 음성 주입 3개와 Pleos 전체 Android 계측 17개를 확인했으며, 실제 Gleo 음성 실행은 assistant 연결 부재로 BLOCKED다. 아래 이전 실행 기록과 구분한다.
+최신 실제 가격 계약/검증은 [T-043 실제 가격](live-price.md), 이전 합성 음성/기기 기록은 [T-042](synthesized-speech.md)을 따른다. T-042 당시 생성 음성 주입 3개와 Pleos 계측 17개를 확인했다. T-043 현재 전체 계측은 18개이며, 실제 Gleo 음성 실행은 assistant 연결 부재로 BLOCKED다. 아래 이전 실행 기록과 구분한다.
 
 ## 자동 검증
 
@@ -16,14 +16,14 @@ JDK 17과 Android SDK, 온라인 Pleos 기기가 필요하다. 저장소 루트�
 
 macOS에서 기본 Java가 17이 아니면 먼저 `export JAVA_HOME=$(/usr/libexec/java_home -v 17)`을 실행한다. 기기가 여러 개면 `export ANDROID_SERIAL=emulator-5556`처럼 adb devices의 대상 serial을 지정한다.
 
-두 번째 명령은 앱 설치 후 GleoWireTest를 실행한다. 명시적 manifest receiver → Application → variant DI → adapter → domain UseCase → debug dummy repository → 공식 APP_ACTION_RESPONSE broadcast 전체를 확인한다. 가격 12억원·합성 표시, 저장 fail/persisted=false, 브리핑 3개, 잘못된 입력, flat extras와 혼합 거부를 검사한다. 이는 Gleo LLM을 거치지 않는 앱 경계 E2E다. 결과는 app/build/reports/androidTests/connected/debug/에 생성된다.
+두 번째 명령은 앱 설치 후 GleoWireTest를 실행한다. 명시적 manifest receiver → Application → variant DI → adapter → domain UseCase → runtime repository → 공식 APP_ACTION_RESPONSE broadcast 전체를 확인한다. 실제 가격 또는 미준비 응답, 지역 저장/브리핑 미지원, 잘못된 입력, flat extras와 혼합 거부를 검사한다. 이는 Gleo LLM을 거치지 않는 앱 경계 E2E다. 결과는 app/build/reports/androidTests/connected/debug/에 생성된다.
 
 ## 실제 음성 E2E
 
 1. debug 앱 설치 후 schema가 들어 있는지 확인한다. release에는 schema/receiver가 없다.
 2. Gleo가 실행되는 Pleos 환경에서 설치/부팅 시 schema 재스캔과 승인 상태를 확인한다. 스키마 승인·Gleo 계정/서비스 상태는 앱 코드만으로 보장하지 않는다.
 3. “부동산 앱에서 이 동네 집값 알려줘”, “이 단지 스크랩해 줘”, “부동산 브리핑 알려줘”를 순서대로 말한다.
-4. 각 요청이 GET_AREA_PRICE_SUMMARY / SCRAP_APARTMENT / GET_REAL_ESTATE_BRIEFING으로 전달되는지 확인한다. target 누락은 asking, 실제 지역명을 지정한 요청은 dummy가 실거래를 가장하지 않고 unsupported를 반환해야 한다.
+4. 각 요청이 GET_AREA_PRICE_SUMMARY / SCRAP_APARTMENT / GET_REAL_ESTATE_BRIEFING으로 전달되는지 확인한다. target 누락은 asking, 명시한 준비된 시군구는 실제 집계를 반환하며, 공개 debug의 현재 위치/직전 지역 요청은 unsupported다.
 5. callback은 공식 ai.pleos.playground.intent.action.APP_ACTION_RESPONSE, packageName과 response extra를 사용한다. mode=silent이므로 소리가 안 나는 것만으로 실패라고 판단하지 않는다. 합성 결과는 음성으로 재생하지 않는다.
 6. 하나의 요청이 진행 중일 때 추가 요청을 보내 중복 응답이 없는지 확인한다. D/P를 전환해 기존 주행 화면이 유지되는지도 확인한다.
 

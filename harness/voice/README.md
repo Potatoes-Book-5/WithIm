@@ -26,7 +26,8 @@ python3 -m unittest discover -s harness/voice -p 'test_*.py' -v
 python3 harness/voice/run-pleos.py --out /tmp/gleo-voice --instrumentation all
 ```
 
-- `--instrumentation all`: 앱의 전체 Android 계측 17개. `--instrumentation`만 주면 Gleo 경계 10개. 생략하면 음성 경로만 실행한다.
+- `--instrumentation all`: 앱의 전체 Android 계측 18개. `--instrumentation`만 주면 Gleo 경계 11개. 생략하면 음성 경로만 실행한다.
+- `--live-provider-probe`: 기존 앱 DI와 실제 원천으로 가격 callback을 점검한다. 가격을 주입하거나 동의를 변경하지 않는다. 결과는 `live-provider.json`의 제한된 상태/건수이며, 환경이 미준비이면 BLOCKED다.
 - `--skip-build`: 이미 빌드된 debug 앱·테스트 APK를 사용한다.
 - 기존 실행 환경에서 Java 17 설정이 필요하면 `JAVA_HOME`을 기존 JDK 경로로 지정한다.
 - 다른 테스트 포트가 필요하면 `--port 5558 --grpc-port 8556`. 이미 사용 중인 기기·포트는 교체하지 않고 중단한다.
@@ -55,7 +56,7 @@ python3 harness/voice/tts_probe.py generate --out /tmp/gleo-wavs
 
 ## 입력과 보호 조건
 
-[cases.json](cases.json)은 합성 가격, 합성 브리핑, 대상 없는 스크랩의 세 발화다. 가격·브리핑은 debug dummy 결과를 기대한다. 스크랩은 Home 화면에 선택 상세와 활성 Nudge가 없는 조건에서 asking을 기대한다. 실제 대상 문맥이 생기면 불일치로 처리한다. 영구 사용자 DB를 변경하지 않으며, 성공 저장 경로는 별도 in-memory Room 계측으로 검사한다.
+[cases.json](cases.json)은 명시한 시군구 가격, 브리핑 미지원, 대상 없는 스크랩의 세 발화다. 가격은 해당 시군구의 fresh prepared 데이터와 foreground/동의가 선행 조건이며 실제 값으로 응답한다. 브리핑은 fail/UNSUPPORTED를 기대한다. 스크랩은 Home 화면에 선택 상세와 활성 Nudge가 없는 조건에서 asking을 기대한다. 실제 대상 문맥이 생기면 불일치로 처리한다. 영구 사용자 DB를 변경하지 않으며, 성공 저장 경로는 별도 in-memory Room 계측으로 검사한다. 생성하는 발화 텍스트만 fixture이며 가격 응답을 합성하지 않는다.
 
 RPC는 loopback에만 열고 JWT를 유지한다. [emulator-access.json](emulator-access.json)은 오디오 주입과 마이크 상태 제어 3개 RPC만 테스트 인스턴스에 허용한다. 실 마이크는 끄며 호스트 녹음·스피커 재생을 하지 않는다. 관리 도구가 발급한 활성 read-only 세션과 RPC 소유 PID가 일치해야 주입한다. SDK에 배포된 proto 필드·enum이 바뀌면 중단한다. 원문 발화는 고정 합성 fixture이며 로그에는 사용자 위치·식별자·응답 본문을 남기지 않는다. emulator.log 등 로컬 파일은 공개 결과로 커밋하지 않는다.
 

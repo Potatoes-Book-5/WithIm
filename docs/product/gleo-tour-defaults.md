@@ -26,3 +26,7 @@
 - 법정동은 공간 경계, 역세권은 중심+반경이다. 근접 API에 동 경계를 원형으로 가장해 전달하지 않는다.
 - 실거래 계산 규칙은 [F-002](features/F-002-nearby-price-lookup.md), 추천 산식은 [F-004](features/F-004-interest-conditions.md), 가격 순위는 [F-003](features/F-003-apartment-ranking.md)이 소유한다.
 - 카테고리·DO·개인정보 처리 방식과 보관기간은 승인하지 않았다. [시나리오의 미결 사항](scenarios/S-011-conversational-property-tour.md)을 검토한 뒤 확정한다.
+
+## T-043 현재 가격 실행 경로
+
+위 S-011 초기 제안 표와 현재 실행 정책을 혼동하지 않는다. 실제 가격 API는 F-002/T-038의 달력 3개월(`today.minusMonths(3)`~당일 포함), T-041의 5분 prepared cache를 사용한다. 90일·24시간 캐시를 제공한다고 응답하지 않는다. 공개 debug 요청은 명시한 준비된 시군구만 허용하며 위치/직전 지역은 인증 확인 전 비활성이다.

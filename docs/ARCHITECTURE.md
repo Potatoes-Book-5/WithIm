@@ -357,3 +357,5 @@ T-040: app 상태·DrivingViewModel은 domain VoiceContextPort로 화면/Nudge �
 [ADR-011](decisions/ADR-011-prepared-market-read-model.md): LiveMarketRepository가 완료된 원본 거래로 최소 저장 후보와 구 가격 집계를 준비한다. InMemoryPreparedMarket은 bounded immutable snapshot을 AtomicReference로 게시한다. domain PreparedScrapReader는 즉시 읽기만 허용한다. 음성·배너 저장은 네트워크 수집/지오코딩/12개월 상세/세대수 조회와 분리되며 Room 영속 저장만 수행한다. cold/stale는 빠른 명시적 실패다.
 
 Android 실행·계측 검증은 Pleos Connect에서만 수행한다. 일반 Phone AVD는 유효한 개발/실행 환경이 아니며 대체 검증으로 사용하지 않는다. JVM 단위 테스트와 Android APK 빌드는 기존 하네스로 검증한다.
+
+T-043: 가격 API는 domain PreparedPriceReader를 통해 실제 완료 배치를 읽고 LiveAreaPriceSummaryRepository가 시군구/문맥/기준시각을 검증한다. LiveMarketRepository의 백그라운드 공식 POINT 결과는 InMemoryPriceLocation에 게시하며 DI가 수신 snapshot을 제공한다. voice 요청에서 resolver/HTTP/collector 잠금을 호출하지 않는다. 공개 debug 경로는 이름을 명시한 시군구만 허용하고 위치·직전 지역은 domain UseCase policy로 사전 차단한다. 가격 runtime dummy를 제거하고, 미구현 지역 저장/브리핑은 Unsupported로 구성한다. 테스트 runner는 기본 JUnit과 opt-in 실제 공급자 probe를 지원하며 SDK/DB 환경을 바꾸지 않는다.

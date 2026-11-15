@@ -70,6 +70,8 @@
 
 ## 검증 기록
 
+현재 실제 가격 API와 공급자 검증은 [T-043 실제 가격](live-price.md)을 따른다. 과거 dummy/TTS 검증과 실행 범위를 구분한다.
+
 원본 90개 제품 TC는 미실행 상태를 유지한다. 설계 초기 문서·fixture 검사는 [T-039 계획](../../plans/active/T-039-gleo-integration.md), 이후 앱 구현의 하위 계층 검증은 아래 별도 기록에서 확인한다. 앱 Intent/계측 성공을 실제 Gleo/차량 여정 TC의 PASS로 올리지 않는다.
 
 ## Dummy 처리 경로의 별도 검증

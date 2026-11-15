@@ -22,9 +22,9 @@ Gleo 음성 요청을 지역 가격 조회·관심 지역 저장·관심 지역 
 
 | 함수 | 선택 입력 | 처리 | 기본 component |
 |---|---|---|---|
-| GET_AREA_PRICE_SUMMARY | target: enum, areaQuery: string | 현재 또는 지정 지역의 가격 요약 | service |
+| GET_AREA_PRICE_SUMMARY | target=NAMED_AREA, areaQuery: string (모두 필수) | 명시한 준비된 시군구의 실제 가격 요약. 위치/직전 지역은 외부 비활성 | service |
 | SCRAP_APARTMENT | 없음 | 현재 상세 또는 보이는 관심 매물 Nudge의 단지를 멱등 스크랩 | service |
-| GET_REAL_ESTATE_BRIEFING | 없음 | 활성 프로필 관심 지역 변동 요약 | service |
+| GET_REAL_ESTATE_BRIEFING | 없음 | 현재 미지원. 실제 관심 지역/소식 공급자 구현 후 연결 | service |
 
 - MVP의 음성 입력은 지역 지정으로 제한한다. 면적·기간은 F-002의 저장 조건/기본값을 사용하며, 발화만으로 면적 필터를 바꾸는 기능은 지원 범위가 아니다. 원래 발화가 앱에 전달된다고 가정하지 않는다.
 - 각 함수는 앱에서 권한·상태·입력을 확인한다. 알 수 없는 action이나 파라미터 타입 오류는 실행하지 않는다.
@@ -152,3 +152,11 @@ SCR-005의 ‘스크랩해 줘’ 제안이 보이는 동안 해당 단지 ID와
 실제 단지 스크랩은 로컬 저장을 수행하며 음성 재요청과 배너 탭은 동일 ensure-saved 명령을 사용한다. 성공 후 DB 관찰로 배너와 상세의 스크랩 상태를 갱신한다. 이미 저장된 단지는 다시 저장하거나 해제하지 않는다. 가격·지역 저장·브리핑의 dummy 계약은 유지한다. 명시 단지명 검색·‘두 번째’ 같은 순위 지시는 이번 SCRAP_APARTMENT의 지원 범위가 아니며 schema description으로 지원을 가장하지 않는다.
 
 앱 context가 Gleo에 자동 전송된다고 가정하지 않는다. 자연어 해석 및 자체 대화 context는 Gleo, 실행 snapshot·대상 검증·데이터 조회·저장·callback은 앱 책임이다. [실행 계약](../../api/voice-context.md), [E2E](../../testing/gleo-tour/e2e.md).
+
+## T-043 실제 가격 연결과 공개 범위
+
+현재 debug 가격 요청은 준비된 실제 MOLIT 집계를 사용한다. 전체 시군구·달력 3개월·전용 [80,90)㎡ 평균과 최고 단일 거래이며 반경 3km 순위/법정동 평균으로 말하지 않는다. 지역·범위·기간·표본 상태·출처·수집 시각을 callback에 포함한다. empty는 null 가격, 1~2건은 표본 부족이다. 원천 단지 이름/ID가 없으면 미확인으로 둔다.
+
+현재 공개 schema는 가격의 target을 NAMED_AREA로 제한하고 areaQuery를 필수로 한다. 호출자 인증이 검증되지 않은 debug broadcast로 차량 위치나 직전 조회 지역을 노출하지 않는다. 내부 현재 위치/직전 지역 API는 구현했으나 외부 활성화는 별도이며, 위치 정확도 단위 미제공은 추정하지 않는다. 명시한 지역도 준비된 시군구의 정확한/유일한 이름만 조회하고 모호/미준비이면 확인한다. 외부 Gleo가 앱 문맥을 해석 전에 받는 API도 여전히 미확인이다.
+
+관심 지역 저장·브리핑은 runtime dummy를 제거하고 미지원으로 응답한다. 이 변경을 실제 관심 지역 저장, 청약/뉴스 수집, 자동 브리핑 완료로 보지 않는다. 단지 스크랩과 release 공개 정책은 기존과 같다. 상세 계약은 [App API](../../api/app-action-api.md), [검증](../../testing/gleo-tour/live-price.md)을 따른다.

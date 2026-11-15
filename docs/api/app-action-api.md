@@ -4,7 +4,7 @@ task: T-039
 
 # UseCase 기반 App Action API 초안
 
-T-039의 dummy 구현 계약이다. 실제 Gleo/원천 데이터 연동은 미검증이다. [ARCHITECTURE](../ARCHITECTURE.md)의 domain/port/usecase 규칙과 [ADR-003](../decisions/ADR-003-clean-architecture-mvi.md)을 따른다. Android wire 규칙은 [어댑터 계약](gleo-intent-adapter.md)에서 별도로 정의한다.
+T-039의 초기 계약과 후속 구현을 기록한다. 현재 가격의 실제 데이터 계약은 하단 T-043 절을 따른다. 실제 Gleo 음성 연동은 별도 검증이다. [ARCHITECTURE](../ARCHITECTURE.md)의 domain/port/usecase 규칙과 [ADR-003](../decisions/ADR-003-clean-architecture-mvi.md)을 따른다. Android wire 규칙은 [어댑터 계약](gleo-intent-adapter.md)에서 별도로 정의한다.
 
 ## 1. API의 의미와 소유 계층
 
@@ -117,3 +117,17 @@ repository 상세 조회 후 snapshot 세대를 재검증하고 Room ScrapReposi
 core/data의 InMemoryPreparedMarket은 최대 256개 단지·8개 구 집계를 유지한다. 완료된 구 전체 배치는 빠진 단지를 제거하고, 부분 게시에는 수집 세대로 검증한 provenance를 사용한다. TTL 기준 sourceAsOf는 실제 응답 완료 시각이며 재표시로 늘리지 않는다. 조회용 모델은 영속 DB가 아니다.
 
 가격 집계 준비는 구 전체·달력 3개월·전용 80㎡ 이상 90㎡ 미만·해제 거래 제외 원본 평균이다. 식별자 없는 유효 거래도 표본에 포함하며 최고 단지 ID는 null일 수 있다. 원 단위 안전 변환과 큰 정수 누적을 사용한다. scope=DISTRICT로 3km 순위와 구별한다. 현재 가격 음성 API는 여전히 dummy이며 이 집계를 실제 응답에 연결하는 작업은 별도다.
+
+## T-043 실제 가격 API
+
+Runtime debug DI는 `LiveAreaPriceSummaryRepository`를 사용한다. 기존 dummy 클래스는 테스트 fixture용으로 남고 실제 요청에 연결하지 않는다. 관심 지역 저장·브리핑은 실제 공급자/영속 구현이 없어 `Unsupported`이며 합성 성공을 반환하지 않는다.
+
+- 입력: 기존 `AreaTarget`과 수신 시 동결한 `AppCallContext`. 내부 context에 `priceLocation`(시군구·위치 관측 시각·제공된 정확도·출처·권한 세대)을 추가했다. 좌표/프로필을 외부 extras에서 받지 않는다.
+- 실제 가격: 완료된 MOLIT 구 전체 배치, 최근 달력 3개월, 전용 [80,90)㎡, 해제 거래 제외. 현재 구 3km 순위/법정동 평균이 아니며 `scope=DISTRICT`다.
+- 결과: `executionMode=LIVE`, `synthetic=false`, `sourceId=molit-apartment-sale`, 실제 수집 기준 시각. 금액은 원 단위다. 기간 끝은 원천의 당일 포함→다음날 exclusive로 변환한다.
+- `averagePriceKrw`, `highestPriceKrw`, `highestComplexId/Name`은 nullable이다. 표본 0이면 가격 null, 1~2이면 INSUFFICIENT, 3 이상이면 AVAILABLE이다. 단지 ID/이름이 원천에 없으면 생성하지 않는다.
+- 읽기: immutable prepared batch만 읽으며 수집 Mutex/fetch/geocode/districtAt을 호출하지 않는다. 미준비 DATA_NOT_READY, 5분 이상/미래 시각 STALE_DATA. 완료된 빈 표본은 success/EMPTY이며 공급자 실패와 구분한다.
+- 지역명: 준비된 시군구의 전체 이름 또는 유일한 마지막 시군구 이름만 일치시킨다. 동명/법정동/미준비 지역은 `NeedsInput(areaQuery)`이고 네트워크 검색을 기다리지 않는다.
+- 내부 CURRENT_LOCATION: 실제 SDK 입력의 공식 POINT 판별 snapshot만 허용한다. 10초/50m 기준, 권한 세대, 참고 좌표 제외를 확인한다. 정확도 미제공이면 추정하지 않고 areaQuery를 요청한다. 현재 bridge의 정확도는 null이므로 named-area 경로가 필요하다. 경계 비중첩/법정동 내부 판정은 지원하지 않는다.
+- 내부 LAST_REFERENCED_AREA: 성공 조회의 세션·프로필·동의 세대가 같고 60초 이내일 때만 사용한다. 재참조로 TTL을 연장하지 않는다. 현재 위치 요청을 직전 지역으로 대체하지 않는다.
+- 공개 debug 경로는 호출자 인증이 미확인이라 `contextualTargetsAllowed=false`다. CURRENT_LOCATION/LAST_REFERENCED_AREA는 저장소를 읽기 전에 Unsupported로 거부한다. 내부 구현 가능 범위와 공개 schema 범위를 구분한다.

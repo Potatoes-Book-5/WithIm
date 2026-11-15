@@ -10,12 +10,12 @@ GET_AREA_PRICE_SUMMARY의 runtime dummy 연결을 제거하고 기존 MOLIT 완�
 SDK/DB 버전 변경, 키/로컬 설정 읽기, Phone 실행, release 공개, 청약/뉴스 공급자 신설, 관심 지역 영속 저장, 지역 진입 판정·Gleo private API. 기존 브리핑과 지역 저장의 허위 dummy 응답은 제거하되 별도 기능을 스크랩 브리핑으로 가장하지 않는다.
 
 ## 작업 체크리스트
-- [ ] 구 집계의 최고 단지 이름·빈/부족 표본·범위 메타데이터 완성
-- [ ] 실제 위치 판별 결과의 수신 snapshot, 명시 지역/직전 조회 지역, TTL/동의 검증
-- [ ] prepared read 전용 실제 repository와 debug DI·callback 연결
-- [ ] JVM/Intent/수집 경합·빈 결과/부족 표본/만료/위치 없는 조건 테스트
-- [ ] Pleos Connect 전체 계측·빌드·lint·독립 리뷰
-- [ ] API/spec/재실행 방법·실행 결과 갱신, 코드와 문서 분리 커밋·push
+- [x] 구 집계의 최고 단지 이름·빈/부족 표본·범위 메타데이터 완성
+- [x] 실제 위치 판별 결과의 수신 snapshot, 명시 지역/직전 조회 지역, TTL/동의 검증
+- [x] prepared read 전용 실제 repository와 debug DI·callback 연결
+- [x] JVM/Intent/수집 경합·빈 결과/부족 표본/만료/위치 없는 조건 테스트
+- [x] Pleos Connect 전체 계측·빌드·lint·독립 리뷰
+- [x] API/spec/재실행 방법·실행 결과 갱신, 코드와 문서 분리 커밋
 
 ## 검증 방법
 합성 원천 fixture를 실제 수집/집계/실제 가격 repository/adapter에 통과시켜 데이터 변동이 callback에 반영되는지 확인한다. 실제 공급자·차량 위치 검증과 구분한다. 가격 처리 경로에 fetch/districtAt/geocode를 연결하지 않는다. 고정 12억 응답을 제거했는지, 원→만원 변환/기간/구 전체 범위/출처가 정확한지 검사한다. TTS의 Gleo 연결이 여전히 불가하면 별도 BLOCKED로 기록한다.
@@ -30,3 +30,10 @@ SDK/DB 버전 변경, 키/로컬 설정 읽기, Phone 실행, release 공개, �
 
 ## 진행 기록
 2026-11-15: 실제 수집·prepared 집계는 있으나 debug GleoBindings가 dummy를 사용함을 확인. 가격 모델의 금액/최고 단지 필드가 non-null이라 빈 표본을 표현하지 못하고, 최고 단지 이름도 집계에 없음을 확인했다.
+
+
+2026-11-15 구현/검증: JVM 173개·호스트 17개·Pleos 계측 18개 통과, debug/release 빌드·lint 통과. 무주입 production DI의 실제 공급자 probe에서 336개 표본의 LIVE/synthetic=false callback을 확인했다. 후속 콜드 실행은 MARKET_NOT_READY/PROVIDER_REJECTED로 BLOCKED였으며 공급자 가용성 정상화로 기록하지 않는다. Gleo 음성은 기존 연결 null로 3건 BLOCKED다. [결과](../../testing/gleo-tour/live-price.md), [JSON](../../testing/gleo-tour/runs/2026-11-15-live-price.json).
+
+독립 리뷰 지적: 공개 debug receiver에서 위치/조회 문맥을 외부 응답으로 연결하지 않도록 GetAreaPriceSummaryUseCase policy와 runtime DI에서 CURRENT_LOCATION/LAST_REFERENCED_AREA를 사전 차단했다. 외부 schema는 NAMED_AREA/areaQuery 필수이며 0-read 단위 테스트와 실제 wire 단언을 추가했다. 내부 현재 위치/직전 지역 지원과 외부 활성화는 구분한다. 재검토 차단 지적 없음.
+
+범위 편차: 가격 제공 범위를 명시한 준비된 시군구로 제한했다. 정확도 단위/공식 호출자 인증을 추정하지 않았으며 네트워크 검색 fallback·새 데이터 공급자·미지원 청약/뉴스의 대체 합성 응답을 추가하지 않았다. 테스트 runner의 opt-in 실제 공급자 점검을 추가했고 기존 일반 JUnit 실행을 보존했다.

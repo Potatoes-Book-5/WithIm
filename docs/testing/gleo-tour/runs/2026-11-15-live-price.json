@@ -1,0 +1,166 @@
+{
+  "task": "T-043",
+  "date": "2026-11-15",
+  "timezone": "Asia/Seoul",
+  "runtime": {
+    "avd": "Pleos_Connect_v2.1.0",
+    "read_only": true,
+    "phone_used": false
+  },
+  "jvm": {
+    "tests": 173,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "host": {
+    "tests": 17,
+    "failures": 0
+  },
+  "android": {
+    "status": "PASS",
+    "expected_tests": 18,
+    "speech_test": false,
+    "events": [
+      {
+        "event": "received",
+        "action": "UNKNOWN"
+      },
+      {
+        "event": "received",
+        "action": "GET_AREA_PRICE_SUMMARY"
+      },
+      {
+        "event": "callback_sent",
+        "action": "GET_AREA_PRICE_SUMMARY",
+        "status": "fail",
+        "persisted": false
+      },
+      {
+        "event": "received",
+        "action": "SAVE_INTEREST_AREA"
+      },
+      {
+        "event": "callback_sent",
+        "action": "SAVE_INTEREST_AREA",
+        "status": "fail",
+        "persisted": false
+      },
+      {
+        "event": "received",
+        "action": "GET_REAL_ESTATE_BRIEFING"
+      },
+      {
+        "event": "callback_sent",
+        "action": "GET_REAL_ESTATE_BRIEFING",
+        "status": "fail",
+        "persisted": false
+      },
+      {
+        "event": "received",
+        "action": "GET_AREA_PRICE_SUMMARY"
+      },
+      {
+        "event": "callback_sent",
+        "action": "GET_AREA_PRICE_SUMMARY",
+        "status": "fail",
+        "persisted": false
+      },
+      {
+        "event": "received",
+        "action": "SAVE_INTEREST_AREA"
+      },
+      {
+        "event": "callback_sent",
+        "action": "SAVE_INTEREST_AREA",
+        "status": "fail",
+        "persisted": false
+      },
+      {
+        "event": "received",
+        "action": "SAVE_INTEREST_AREA"
+      },
+      {
+        "event": "callback_sent",
+        "action": "SAVE_INTEREST_AREA",
+        "status": "asking",
+        "persisted": false
+      },
+      {
+        "event": "received",
+        "action": "GET_AREA_PRICE_SUMMARY"
+      },
+      {
+        "event": "callback_sent",
+        "action": "GET_AREA_PRICE_SUMMARY",
+        "status": "fail",
+        "persisted": false
+      }
+    ],
+    "prepared_1000_reads_ms": [
+      9
+    ]
+  },
+  "real_provider_success": {
+    "probeCallback": "true",
+    "probeMarketPrepared": "true",
+    "probeReason": "REAL_PROVIDER_CALLBACK",
+    "probeSamples": "336",
+    "probeStatus": "PASS",
+    "probeSynthetic": "false"
+  },
+  "subsequent_cold_provider_probe": {
+    "probeMarketPrepared": "false",
+    "probeProviderState": "PROVIDER_REJECTED",
+    "probeReason": "MARKET_NOT_READY",
+    "probeStatus": "BLOCKED"
+  },
+  "speech": [
+    {
+      "id": "speech-briefing",
+      "text": "임과 함께에서 부동산 브리핑 알려줘",
+      "expected_action": "GET_REAL_ESTATE_BRIEFING",
+      "expected_status": "fail",
+      "stt_transcript_verified": false,
+      "status": "BLOCKED",
+      "assistant_binding_null": true,
+      "reason": "ASSISTANT_NOT_BOUND",
+      "events": []
+    },
+    {
+      "id": "speech-price",
+      "text": "임과 함께에서 서울특별시 강남구 집값 알려줘",
+      "expected_action": "GET_AREA_PRICE_SUMMARY",
+      "expected_status": "success",
+      "stt_transcript_verified": false,
+      "status": "BLOCKED",
+      "assistant_binding_null": true,
+      "reason": "ASSISTANT_NOT_BOUND",
+      "events": []
+    },
+    {
+      "id": "speech-scrap-no-target",
+      "text": "임과 함께에서 이 단지 스크랩해 줘",
+      "expected_action": "SCRAP_APARTMENT",
+      "expected_status": "asking",
+      "stt_transcript_verified": false,
+      "status": "BLOCKED",
+      "assistant_binding_null": true,
+      "reason": "ASSISTANT_NOT_BOUND",
+      "events": []
+    }
+  ],
+  "full_voice_e2e_verified": false,
+  "notes": [
+    "Collector fixture regression is separate from the real production-DI provider probe.",
+    "The actual provider completed a 336-sample callback once; subsequent cold runs were not all ready.",
+    "Public debug price calls accept named districts only; private location/history targets are rejected before data reads.",
+    "No observed prices, resolved location names, coordinates, credentials or private database contents are recorded. Fixed test utterances may include public district names."
+  ],
+  "product_tc_status_changed": false,
+  "review": {
+    "findings_fixed": 1,
+    "follow_up_blockers": 0
+  },
+  "implementation_commit": "3bbf0ab"
+}

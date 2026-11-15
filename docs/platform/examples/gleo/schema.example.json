@@ -1,32 +1,31 @@
 {
   "packageName": "com.potatoes.book5.realestate",
-  "appDescription": "An apartment exploration app with contextual apartment scrap saving and synthetic test price summaries and briefings.",
+  "appDescription": "An apartment exploration app with contextual scrap saving and previously collected published district sale summaries.",
   "version": "0.1.0",
   "actionCalls": [
     {
       "type": "function",
       "function": {
         "name": "GET_AREA_PRICE_SUMMARY",
-        "description": "Returns fictional synthetic test prices only, never real market prices. Named real areas are unsupported.",
+        "description": "Returns previously collected published apartment sales for an explicitly named prepared city or district, using the last three calendar months and exclusive area from 80 up to 90 square meters. Reports district-wide scope, source date and sample limitations. Does not use private location or earlier query context on this public debug route, and does not fetch new regions during the request.",
         "parameters": {
           "type": "object",
           "properties": {
             "target": {
               "type": "string",
               "enum": [
-                "CURRENT_LOCATION",
-                "LAST_REFERENCED_AREA",
                 "NAMED_AREA"
               ],
-              "description": "The source of the target area: the current vehicle location, an explicitly referenced earlier area, or a named area."
+              "description": "NAMED_AREA is the only supported target on the public debug route. Current location and earlier query context require a verified authenticated integration route."
             },
             "areaQuery": {
               "type": "string",
-              "description": "The name of the requested area when the target is NAMED_AREA."
+              "description": "The full city or district name for NAMED_AREA. Only unambiguous prepared districts can be answered; neighborhoods and unprepared areas require clarification."
             }
           },
           "required": [
-            "target"
+            "target",
+            "areaQuery"
           ]
         },
         "component": "service"
@@ -49,7 +48,7 @@
       "type": "function",
       "function": {
         "name": "GET_REAL_ESTATE_BRIEFING",
-        "description": "Returns three fictional test briefing items, never live news or housing announcements.",
+        "description": "Interest-area announcements and news are currently unavailable. Returns an unsupported result and never invents briefing items.",
         "parameters": {
           "type": "object",
           "properties": {},
