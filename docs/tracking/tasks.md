@@ -41,3 +41,5 @@
 | T-035 | feature | 주행 화면 DO 선언과 CarUxRestrictions 적용 | review | - | P1 | F-007, S-005, SCR-004, SCR-009 | T-034 |
 | T-036 | fix | 이동 중 조회 취소 감소와 실거래 메모리 캐시 재사용 개선 | review | - | P1 | F-002, F-003, SCR-009 | T-031 |
 | T-037 | feature | 주행 관심 매물 실시간 추천 | doing | - | P1 | F-010, S-011, SCR-008 | T-001, T-005, T-027, T-034, T-036 |
+| T-038 | feature | 지도 탭에 실거래 상위 5개 단지 표시 | review | - | P1 | F-003, SCR-009 | T-031 |
+| T-039 | feature | 시세 순위 조회 기간을 최근 3개월로 변경 | review | - | P1 | F-002, F-003, SCR-009 | T-037 |

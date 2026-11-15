@@ -64,6 +64,8 @@ data class DrivingScreenState(
     val alert: DrivingAlertUi? = null,
     val actualTrades: DrivingTradeRankingUi? = null,
     val referenceLabel: String? = null,
+    /** Map-only top five; rank cards and drive records continue to use [ranking]. */
+    val mapRanking: List<RankItemUi> = ranking,
 )
 
 sealed interface DrivingIntent {
@@ -84,6 +86,7 @@ sealed interface DrivingResult {
         val vehicle: VehiclePose? = null,
         val mapCenter: VehiclePose? = null,
         val referenceLabel: String? = null,
+        val mapRanking: List<RankItemUi> = ranking,
     ) : DrivingResult
     data class ModeSelected(val mode: DrivingMode) : DrivingResult
     data class AlertShown(val alert: DrivingAlertUi) : DrivingResult

@@ -84,7 +84,10 @@ fun DrivingMap(state: DrivingScreenState, naverMapAvailable: Boolean, modifier: 
         }
         return
     }
-    NaverDrivingMap(center, vehicle, state.ranking, state.interestMatches, state.others, modifier)
+    val rankedIds = state.mapRanking.mapTo(mutableSetOf()) { it.id }
+    NaverDrivingMap(center, vehicle, state.mapRanking,
+        state.interestMatches.filterNot { it.id in rankedIds },
+        state.others.filterNot { it.id in rankedIds }, modifier)
 }
 
 /**

@@ -19,6 +19,7 @@ import com.potatoes.book5.realestate.domain.model.MarketRound
 import com.potatoes.book5.realestate.domain.model.TradePage
 import com.potatoes.book5.realestate.domain.model.VehiclePose
 import com.potatoes.book5.realestate.domain.policy.GeoMath
+import com.potatoes.book5.realestate.domain.policy.MarketPeriod
 import com.potatoes.book5.realestate.domain.policy.MarketRoundTracker
 import com.potatoes.book5.realestate.domain.port.AddressGeocoder
 import com.potatoes.book5.realestate.domain.port.ApartmentTradeRepository
@@ -114,7 +115,7 @@ class LiveMarketRepository(
                 vehicle = null,
                 mapCenter = SAMSUNG_REFERENCE_POSE,
                 loading = true,
-                periodStart = todayAtStart.minusMonths(1),
+                periodStart = todayAtStart.minusMonths(MarketPeriod.MONTHS),
                 periodEnd = todayAtStart,
                 referenceLabel = SAMSUNG_REFERENCE_LABEL,
             ),
@@ -153,7 +154,7 @@ class LiveMarketRepository(
         val generation = requestGeneration
         val now = clock.instant()
         val today = LocalDate.now(clock)
-        val from = today.minusMonths(1)
+        val from = today.minusMonths(MarketPeriod.MONTHS)
         val pose = currentPose
         val reference = usingReference
         val source = currentLocationSource
@@ -298,14 +299,15 @@ class LiveMarketRepository(
                     traceLookup("scan-start generation=$generation")
                     val today = LocalDate.now(clock)
                     val coverage = loadedCoverage
-                    if (coverage == null || coverage.from != today.minusMonths(1) || coverage.to != today ||
+                    if (coverage == null || coverage.from != today.minusMonths(MarketPeriod.MONTHS) || coverage.to != today ||
+                        coverage.districts.singleOrNull()?.code != currentRound()?.districtCode ||
                         coverage.roundId != currentRound()?.id ||
                         GeoMath.distanceKm(coverage.center, pose.location) >= RERANK_DISTANCE_KM ||
                         Duration.between(coverage.dataAsOf, LocalDateTime.now(clock)) >= SUCCESS_TTL) {
                         refresh()
                     } else {
                         mutex.withLock {
-                            val from = today.minusMonths(1)
+                            val from = today.minusMonths(MarketPeriod.MONTHS)
                             val representatives = representativeById.entries.map { it.key to it.value }
                                 .sortedWith(compareByDescending<Pair<String, ApartmentTrade>> { it.second.priceManwon }
                                     .thenByDescending { it.second.contractDate })
@@ -470,7 +472,7 @@ class LiveMarketRepository(
             } ?: continue
             if (found.distanceKm > RADIUS_KM) continue
             top += found
-            if (top.size == TOP_LIMIT) break
+            if (top.size == MAP_RANK_LIMIT) break
         }
         val condition = interestRepository.get()
         val topIds = top.mapTo(mutableSetOf()) { it.apartment.id }
@@ -752,6 +754,7 @@ class LiveMarketRepository(
         const val RADIUS_KM = 3
         const val RECOMMENDATION_RADIUS_KM = 10
         const val TOP_LIMIT = 3
+        const val MAP_RANK_LIMIT = 5
         const val MAX_MAP_PINS = 12
         const val MAX_EXTRA_GEOCODES = 18
         const val PAGE_SIZE = 1000

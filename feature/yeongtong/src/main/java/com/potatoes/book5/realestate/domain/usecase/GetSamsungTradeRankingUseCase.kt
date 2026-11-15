@@ -1,5 +1,7 @@
 package com.potatoes.book5.realestate.domain.usecase
 
+import com.potatoes.book5.realestate.domain.policy.MarketPeriod
+
 import com.potatoes.book5.realestate.domain.error.DomainError
 import com.potatoes.book5.realestate.domain.error.Outcome
 import com.potatoes.book5.realestate.domain.model.ApartmentTrade
@@ -17,7 +19,7 @@ class GetSamsungTradeRankingUseCase(
     suspend operator fun invoke(today: LocalDate = LocalDate.now(ZoneId.of("Asia/Seoul")), limit: Int = 3): Outcome<List<LocatedApartmentTrade>> {
         if (limit !in 1..3) return Outcome.Failure(DomainError.Invalid("invalid-result-limit"))
 
-        val fromDate = today.minusMonths(1)
+        val fromDate = today.minusMonths(MarketPeriod.MONTHS)
         val trades = mutableListOf<ApartmentTrade>()
         var month = YearMonth.from(fromDate)
         val lastMonth = YearMonth.from(today)
