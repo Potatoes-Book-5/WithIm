@@ -3,6 +3,8 @@ package com.potatoes.book5.realestate.data.repository
 import com.potatoes.book5.realestate.domain.error.*
 import com.potatoes.book5.realestate.domain.model.*
 import com.potatoes.book5.realestate.domain.port.PreparedScrapReader
+import com.potatoes.book5.realestate.domain.port.PreparedPriceReader
+import com.potatoes.book5.realestate.domain.model.appaction.ResolvedArea
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
@@ -14,7 +16,7 @@ class InMemoryPreparedMarket(
     private val ttl: Duration = Duration.ofMinutes(5),
     private val maxCandidates: Int = 256,
     private val maxDistricts: Int = 8,
-) : PreparedScrapReader {
+) : PreparedScrapReader, PreparedPriceReader {
     private data class State(
         val candidates: Map<String, PreparedScrapCandidate> = emptyMap(),
         val districts: Map<String, PreparedDistrictPrices> = emptyMap(),
@@ -73,7 +75,9 @@ class InMemoryPreparedMarket(
     override fun readScrapCandidate(apartmentId: String): Outcome<PreparedScrapCandidate> =
         read(state.get().candidates[apartmentId]) { it.sourceAsOf }
 
-    fun readDistrictPrices(districtCode: String): Outcome<PreparedDistrictPrices> {
+    override fun knownDistricts(): List<ResolvedArea> = state.get().districts.values.map { ResolvedArea(it.districtCode, it.districtName) }
+
+    override fun readDistrictPrices(districtCode: String): Outcome<PreparedDistrictPrices> {
         val result = read(state.get().districts[districtCode]) { it.sourceAsOf }
         if (result is Outcome.Success && result.value.periodEndInclusive !=
             clock.instant().atZone(java.time.ZoneId.of("Asia/Seoul")).toLocalDate())

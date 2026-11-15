@@ -42,7 +42,7 @@ class GleoWireTest {
                 assertTrue(matches.any { it.activityInfo.name == GleoActionReceiver::class.java.name })
             }
             context.sendBroadcast(Intent(price.name).setPackage(context.packageName).putExtra("target", "CURRENT_LOCATION"))
-            assertEquals("success", take(responses).getString("status"))
+            assertPublicLocationRejected(take(responses))
         }
     }
     @Test fun decoderBoundsPayloadAndDoesNotCoerceValues() {
@@ -63,23 +63,22 @@ class GleoWireTest {
         withResponseReceiver { context, responses ->
             send(context, GleoAction.GET_AREA_PRICE_SUMMARY, "{\"target\":\"CURRENT_LOCATION\"}")
             val priceResponse = take(responses)
-            assertEquals("success", priceResponse.getString("status"))
+            assertPublicLocationRejected(priceResponse)
             assertEquals("silent", priceResponse.getString("mode"))
-            val prices = JSONArray(priceResponse.getString("data")).getJSONObject(0)
-            assertEquals(1200000000L, prices.getLong("averagePriceKrw"))
-            assertTrue(prices.getBoolean("synthetic"))
 
             send(context, GleoAction.SAVE_INTEREST_AREA, "{\"target\":\"CURRENT_LOCATION\"}")
             val save = take(responses)
             assertEquals("fail", save.getString("status"))
             val mutation = JSONArray(save.getString("data")).getJSONObject(0)
-            assertFalse(mutation.getBoolean("persisted"))
-            assertEquals("DUMMY_NOT_PERSISTED", mutation.getString("code"))
+            assertEquals("UNSUPPORTED", mutation.getString("code"))
+            assertFalse(mutation.getBoolean("synthetic"))
 
             send(context, GleoAction.GET_REAL_ESTATE_BRIEFING, "{}")
             val briefing = take(responses)
-            assertEquals("success", briefing.getString("status"))
-            assertEquals(3, JSONArray(briefing.getString("data")).length())
+            assertEquals("fail", briefing.getString("status"))
+            val unsupported = JSONArray(briefing.getString("data")).getJSONObject(0)
+            assertEquals("UNSUPPORTED", unsupported.getString("code"))
+            assertFalse(unsupported.getBoolean("synthetic"))
             assertNull(responses.poll(250, TimeUnit.MILLISECONDS))
         }
     }
@@ -90,7 +89,7 @@ class GleoWireTest {
             send(context, GleoAction.SAVE_INTEREST_AREA, "{}")
             assertEquals("asking", take(responses).getString("status"))
             send(context, GleoAction.GET_AREA_PRICE_SUMMARY, "{\"target\":\"CURRENT_LOCATION\"}")
-            assertEquals("success", take(responses).getString("status"))
+            assertPublicLocationRejected(take(responses))
         }
     }
     @Test fun receiverIgnoresUnknownAction() {
@@ -98,6 +97,13 @@ class GleoWireTest {
             context.sendBroadcast(Intent("UNKNOWN").setComponent(ComponentName(context, GleoActionReceiver::class.java)))
             assertNull(responses.poll(500, TimeUnit.MILLISECONDS))
         }
+    }
+    private fun assertPublicLocationRejected(response: JSONObject) {
+        assertEquals("fail", response.getString("status"))
+        val data = JSONArray(response.getString("data")).getJSONObject(0)
+        assertEquals("UNSUPPORTED", data.getString("code"))
+        assertFalse(data.getBoolean("synthetic"))
+        assertEquals("UNAVAILABLE", data.getString("executionMode"))
     }
     private fun send(context: Context, action: GleoAction, json: String) {
         context.sendBroadcast(Intent(action.name).setComponent(ComponentName(context, GleoActionReceiver::class.java))

@@ -30,4 +30,5 @@ data class PreparedDistrictPrices(
     val areaMinM2: Int = 80,
     val areaMaxExclusiveM2: Int = 90,
     val scope: String = "DISTRICT",
+    val highestComplexName: String? = null,
 )

@@ -78,11 +78,13 @@ class AppContainer(context: Context) {
     /** Pleos FusedLocation → [vehicleLocationProvider](T-029). RealEstateApplication이 시작한다. */
     val fusedLocationBridge by lazy { PleosFusedLocationBridge(context, vehicleLocationProvider, consentRepository) }
     val preparedMarket = com.potatoes.book5.realestate.data.repository.InMemoryPreparedMarket()
+    private val priceLocations = com.potatoes.book5.realestate.data.repository.InMemoryPriceLocation()
     val marketRepository by lazy {
         LiveMarketRepository(MolitRepositoryFactory.create(BuildConfig.MOLIT_API_KEY),
             VworldGeocoderFactory.create(BuildConfig.VWORLD_API_KEY), interestRepository, vehicleLocationProvider,
             VworldDistrictResolverFactory.create(BuildConfig.VWORLD_API_KEY),
-            householdRepository = KaptRepositoryFactory.create(BuildConfig.KAPT_API_KEY), preparedMarket = preparedMarket)
+            householdRepository = KaptRepositoryFactory.create(BuildConfig.KAPT_API_KEY), preparedMarket = preparedMarket,
+            priceLocations = priceLocations)
     }
     private val neighborhoodRepository get() = marketRepository
     private val rankingRepository get() = marketRepository
@@ -153,5 +155,8 @@ class AppContainer(context: Context) {
     val voiceContext: com.potatoes.book5.realestate.domain.model.appaction.VoiceContextPort =
         com.potatoes.book5.realestate.data.repository.InMemoryVoiceContext()
     val scrapVoiceTarget by lazy { com.potatoes.book5.realestate.domain.usecase.ScrapVoiceTargetUseCase(scrapRepository, preparedMarket, voiceContext) }
-    val gleoIntentHandler by lazy { GleoBindings.create(context, voiceContext, scrapVoiceTarget) }
+    private val liveAreaPrices by lazy {
+        com.potatoes.book5.realestate.data.repository.LiveAreaPriceSummaryRepository(preparedMarket, priceLocations, voiceContext)
+    }
+    val gleoIntentHandler by lazy { GleoBindings.create(context, voiceContext, scrapVoiceTarget, liveAreaPrices, liveAreaPrices::captureLocation) }
 }

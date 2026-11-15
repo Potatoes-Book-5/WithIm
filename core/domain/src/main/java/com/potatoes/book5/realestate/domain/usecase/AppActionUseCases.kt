@@ -23,9 +23,16 @@ private suspend fun <T> withValidTarget(
     else -> operation()
 }
 
-class GetAreaPriceSummaryUseCase(private val repository: AreaPriceSummaryRepository) {
+class GetAreaPriceSummaryUseCase(
+    private val repository: AreaPriceSummaryRepository,
+    private val contextualTargetsAllowed: Boolean = true,
+) {
     suspend operator fun invoke(target: AreaTarget, context: AppCallContext): Outcome<ActionResult<PriceSummaryPayload>> =
-        withValidTarget(target, context) { repository.get(target, context) }
+        withValidTarget(target, context) {
+            if (!contextualTargetsAllowed && target.kind != AreaTargetKind.NAMED_AREA)
+                Outcome.Failure(DomainError.Unsupported("authenticated_location_route"))
+            else repository.get(target, context)
+        }
 }
 class SaveInterestAreaUseCase(private val repository: InterestAreaRepository) {
     suspend operator fun invoke(target: AreaTarget, context: AppCallContext): Outcome<ActionResult<InterestAreaSavePayload>> =

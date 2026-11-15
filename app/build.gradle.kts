@@ -60,7 +60,7 @@ android {
         // SDK는 매니페스트 meta-data(com.naver.maps.map.NCP_KEY_ID)에서 Client ID를 읽는다.
         manifestPlaceholders["naverMapClientId"] = naverMapClientId
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner = "com.potatoes.book5.realestate.probe.RealEstateTestRunner"
     }
 
     buildTypes {

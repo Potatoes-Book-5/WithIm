@@ -46,6 +46,12 @@ class GleoResponseMapper {
                 "sampleCount" to payload.sampleCount, "areaMinM2" to payload.areaMinM2,
                 "areaMaxExclusiveM2" to payload.areaMaxExclusiveM2, "periodStart" to payload.periodStart,
                 "periodEndExclusive" to payload.periodEndExclusive,
+                "scope" to payload.scope,
+                "sampleStatus" to when { payload.sampleCount == 0 -> "EMPTY"; payload.sampleCount < 3 -> "INSUFFICIENT"; else -> "AVAILABLE" },
+                "highestComplexIdentified" to (payload.highestComplexId != null),
+                "locationObservedAt" to payload.locationObservedAt,
+                "locationAccuracyMeters" to payload.locationAccuracyMeters,
+                "locationSource" to payload.locationSource,
             )
             is InterestAreaSavePayload -> mapOf("areaId" to payload.area.id, "areaName" to payload.area.name,
                 "persisted" to payload.persisted, "mutationState" to payload.mutationState.name,
@@ -57,6 +63,11 @@ class GleoResponseMapper {
         } else listOf(common + fields)
         return if (payload is InterestAreaSavePayload) GleoCallback(action, "fail",
             "This is a test response. No area was saved.", data)
-        else GleoCallback(action, "success", "This is synthetic test data, not real market information.", data)
+        else GleoCallback(action, "success", when {
+            meta.synthetic -> "This is synthetic test data, not real market information."
+            payload is PriceSummaryPayload && payload.sampleCount == 0 -> "No published sales match this district, period and area range. Prices are unavailable, not zero."
+            payload is PriceSummaryPayload && payload.sampleCount < 3 -> "Published district sales are available, but fewer than three samples are insufficient to describe a typical market price. State the sample count and source date."
+            else -> "These are previously collected published district sales, not live asking prices. State the district-wide scope, period, area range, sample count and collection time."
+        }, data)
     }
 }

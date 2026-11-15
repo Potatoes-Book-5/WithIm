@@ -2,9 +2,17 @@ package com.potatoes.book5.realestate.domain.model.appaction
 
 enum class AreaTargetKind { CURRENT_LOCATION, LAST_REFERENCED_AREA, NAMED_AREA }
 data class AreaTarget(val kind: AreaTargetKind, val query: String? = null)
-data class AppCallContext(val requestId: String, val appSessionId: String, val profileScope: String, val voice: VoiceContextSnapshot? = null)
+data class AppCallContext(val requestId: String, val appSessionId: String, val profileScope: String, val voice: VoiceContextSnapshot? = null,
+    val priceLocation: PriceLocationSnapshot? = null)
 data class ResolvedArea(val id: String, val name: String)
-enum class ExecutionMode { DUMMY }
+data class PriceLocationSnapshot(
+    val revision: Long,
+    val area: ResolvedArea?,
+    val observedAt: java.time.Instant?,
+    val accuracyMeters: Double?,
+    val source: com.potatoes.book5.realestate.domain.port.LocationSource?,
+)
+enum class ExecutionMode { DUMMY, LIVE }
 data class ResultMetadata(
     val executionMode: ExecutionMode,
     val synthetic: Boolean,
@@ -18,16 +26,20 @@ sealed interface ActionResult<out T> {
 sealed interface AppActionPayload { val metadata: ResultMetadata }
 data class PriceSummaryPayload(
     val area: ResolvedArea,
-    val averagePriceKrw: Long,
-    val highestPriceKrw: Long,
-    val highestComplexId: String,
-    val highestComplexName: String,
+    val averagePriceKrw: Long?,
+    val highestPriceKrw: Long?,
+    val highestComplexId: String?,
+    val highestComplexName: String?,
     val sampleCount: Int,
     val areaMinM2: Int,
     val areaMaxExclusiveM2: Int,
     val periodStart: String,
     val periodEndExclusive: String,
     override val metadata: ResultMetadata,
+    val scope: String = "DISTRICT",
+    val locationObservedAt: String? = null,
+    val locationAccuracyMeters: Double? = null,
+    val locationSource: String? = null,
 ) : AppActionPayload
 enum class MutationState { NOT_APPLIED }
 data class InterestAreaSavePayload(

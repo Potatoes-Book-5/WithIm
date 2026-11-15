@@ -26,11 +26,11 @@ data class GleoCallback(
     companion object {
         fun failure(action: GleoAction, code: String) = GleoCallback(
             action, "fail", "The request could not be completed. Please check the current state before retrying.",
-            listOf(mapOf("code" to code, "executionMode" to if(action == GleoAction.SCRAP_APARTMENT) "LOCAL" else "DUMMY", "synthetic" to (action != GleoAction.SCRAP_APARTMENT))),
+            listOf(mapOf("code" to code, "executionMode" to if(action == GleoAction.SCRAP_APARTMENT) "LOCAL" else "UNAVAILABLE", "synthetic" to false)),
         )
         fun asking(action: GleoAction, field: String) = GleoCallback(
             action, "asking", if(action == GleoAction.SCRAP_APARTMENT) "Select an apartment or use an active scrap suggestion before trying again." else "Additional target area information is required.",
-            listOf(mapOf("requiredField" to field, "executionMode" to if(action == GleoAction.SCRAP_APARTMENT) "LOCAL" else "DUMMY", "synthetic" to (action != GleoAction.SCRAP_APARTMENT))),
+            listOf(mapOf("requiredField" to field, "executionMode" to if(action == GleoAction.SCRAP_APARTMENT) "LOCAL" else "UNAVAILABLE", "synthetic" to false)),
         )
     }
 }

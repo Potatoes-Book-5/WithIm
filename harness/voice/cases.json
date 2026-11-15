@@ -1,5 +1,23 @@
 [
-  {"id":"speech-briefing","text":"임과 함께에서 부동산 브리핑 알려줘","action":"GET_REAL_ESTATE_BRIEFING","status":"success","scope":"synthetic briefing only"},
-  {"id":"speech-price","text":"임과 함께에서 현재 위치의 집값 알려줘","action":"GET_AREA_PRICE_SUMMARY","status":"success","scope":"synthetic price only"},
-  {"id":"speech-scrap-no-target","text":"임과 함께에서 이 단지 스크랩해 줘","action":"SCRAP_APARTMENT","status":"asking","scope":"requires no selected detail and no active nudge"}
+  {
+    "id": "speech-briefing",
+    "text": "임과 함께에서 부동산 브리핑 알려줘",
+    "action": "GET_REAL_ESTATE_BRIEFING",
+    "status": "fail",
+    "scope": "real interest-area sources unavailable; must not return fictional news"
+  },
+  {
+    "id": "speech-price",
+    "text": "임과 함께에서 서울특별시 강남구 집값 알려줘",
+    "action": "GET_AREA_PRICE_SUMMARY",
+    "status": "success",
+    "scope": "requires a foreground consented app and fresh prepared 서울특별시 강남구 data; public route supports explicit district names only"
+  },
+  {
+    "id": "speech-scrap-no-target",
+    "text": "임과 함께에서 이 단지 스크랩해 줘",
+    "action": "SCRAP_APARTMENT",
+    "status": "asking",
+    "scope": "requires no selected detail and no active nudge"
+  }
 ]

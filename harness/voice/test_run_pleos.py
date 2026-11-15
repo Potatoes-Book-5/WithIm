@@ -19,14 +19,14 @@ class LauncherTest(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.args = argparse.Namespace(out=self.root, sdk=self.root / 'sdk', avd='Pleos_Connect_v2.1.0',
-                                       port=5556, grpc_port=8554, skip_build=True, instrumentation='gleo')
+                                       port=5556, grpc_port=8554, skip_build=True, instrumentation='gleo', live_provider_probe=False)
 
-    def test_instrumentation_requires_all_ten_tests(self):
-        self.assertTrue(launcher.instrumentation_passed('INSTRUMENTATION_RESULT: stream=\nOK (10 tests)\n'))
-        self.assertTrue(launcher.instrumentation_passed('OK (17 tests)', expected=17))
-        self.assertFalse(launcher.instrumentation_passed('OK (10 tests)', expected=17))
-        for output in ['OK (0 tests)', 'OK (9 tests)', 'OK (10 tests)\nFAILURES!!!',
-                       'OK (10 tests)\nINSTRUMENTATION_FAILED', 'Process crashed', '']:
+    def test_instrumentation_requires_all_expected_tests(self):
+        self.assertTrue(launcher.instrumentation_passed('INSTRUMENTATION_RESULT: stream=\nOK (11 tests)\n'))
+        self.assertTrue(launcher.instrumentation_passed('OK (18 tests)', expected=18))
+        self.assertFalse(launcher.instrumentation_passed('OK (11 tests)', expected=18))
+        for output in ['OK (0 tests)', 'OK (9 tests)', 'OK (11 tests)\nFAILURES!!!',
+                       'OK (11 tests)\nINSTRUMENTATION_FAILED', 'Process crashed', '']:
             self.assertFalse(launcher.instrumentation_passed(output))
 
     def test_manifest_failure_still_closes_owned_emulator(self):

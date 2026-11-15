@@ -75,6 +75,7 @@ class LiveMarketRepository(
     private val householdRepository: ApartmentHouseholdRepository? = null,
     private val preparedMarket: InMemoryPreparedMarket = InMemoryPreparedMarket(clock),
     private val traceSink: ((String) -> Unit)? = null,
+    private val priceLocations: InMemoryPriceLocation = InMemoryPriceLocation(clock),
 ) : MarketRepository {
     private data class MarketState(val snapshot: RankingSnapshot, val located: List<NearbyApartment>)
     private data class VerifiedCandidate(val id: String, val trade: ApartmentTrade, val point: GeoPoint)
@@ -348,6 +349,7 @@ class LiveMarketRepository(
                 lastCheck = clock.instant()
                 lastEpoch = epoch
                 val districtGeneration = requestGeneration
+                val priceLocationRevision = priceLocations.revision()
                 districtJob = launch {
                     traceLookup("district-start generation=$districtGeneration")
                     val resolved = districtResolver.districtAt(livePose.location)
@@ -363,6 +365,7 @@ class LiveMarketRepository(
                                 GeoMath.distanceKm(currentPose.location, livePose.location) < RERANK_DISTANCE_KM &&
                                 Duration.between(fix.observedAt, clock.instant()) <= MAX_FIX_AGE) {
                                 val district = resolved.value
+                                priceLocations.publish(fix, district, priceLocationRevision)
                                 districtNamesByCode = districtNamesByCode + (district.code to district.name)
                                 rounds.value = roundTracker.observe(district, fix.observedAt!!)
                             } else roundTracker.interrupt()
@@ -373,6 +376,7 @@ class LiveMarketRepository(
             }
         }
         combine(locationProvider.locations, rounds) { fix, round -> fix to round }.collect { (fix, _) ->
+            priceLocations.updateFix(fix)
             val livePose = fix.usablePose()
             val pose = livePose ?: SAMSUNG_REFERENCE_POSE
             val accessBlocked = fix.status == LocationStatus.CONSENT_REQUIRED || fix.status == LocationStatus.PERMISSION_REQUIRED

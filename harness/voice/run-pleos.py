@@ -29,13 +29,14 @@ def parse_args():
     ap.add_argument('--avd', default='Pleos_Connect_v2.1.0')
     ap.add_argument('--port', type=int, default=5556)
     ap.add_argument('--grpc-port', type=int, default=8554)
+    ap.add_argument('--live-provider-probe', action='store_true', help='Opt-in real MOLIT/production DI smoke; never changes consent')
     ap.add_argument('--skip-build', action='store_true', help='Use the already built debug APK')
     ap.add_argument('--instrumentation', nargs='?', const='gleo', choices=['gleo', 'all'],
-                    help='Run 10 Gleo boundary tests or all 17 app tests (neither is speech E2E)')
+                    help='Run 11 Gleo boundary tests or all 18 app tests (neither is speech E2E)')
     return ap.parse_args()
 
 
-def instrumentation_passed(output, expected=10):
+def instrumentation_passed(output, expected=11):
     return bool(re.search(r'OK \(' + str(expected) + r' tests\)', output)) and not any(
         word in output for word in ["FAILURES!!!", "INSTRUMENTATION_FAILED", "Process crashed"])
 
@@ -55,7 +56,7 @@ def execute(args):
         available(port)
     if not args.skip_build:
         # Keep the existing SDK/build environment. Never read local.properties here.
-        tasks = [':app:assembleDebug'] + ([':app:assembleDebugAndroidTest'] if args.instrumentation else [])
+        tasks = [':app:assembleDebug'] + ([':app:assembleDebugAndroidTest'] if args.instrumentation or args.live_provider_probe else [])
         subprocess.run([str(ROOT / 'gradlew')] + tasks, cwd=ROOT, check=True, timeout=300)
     apk = ROOT / 'app/build/outputs/apk/debug/app-debug.apk'
     if not apk.is_file():
@@ -94,18 +95,20 @@ def execute(args):
             print('Installing debug app…', flush=True)
             command(selected + ['install', '--no-streaming', '-r', str(apk)], 60)
             instrumentation_ok = True
-            if args.instrumentation:
-                print('Running app-boundary instrumentation (not a speech test)…', flush=True)
+            if args.instrumentation or args.live_provider_probe:
+                print('Installing verification APK…', flush=True)
                 test_apk = ROOT / 'app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk'
                 command(selected + ['install', '--no-streaming', '-r', '-t', str(test_apk)], 60)
+            if args.instrumentation:
+                print('Running app-boundary instrumentation (not a speech test)…', flush=True)
                 classes = ','.join('com.potatoes.book5.realestate.vehicle.gleo.' + name for name in
-                    ['GleoWireTest', 'VoiceScrapE2ETest', 'PreparedMarketE2ETest'])
+                    ['GleoWireTest', 'VoiceScrapE2ETest', 'PreparedMarketE2ETest', 'LivePriceE2ETest'])
                 filters = ['-e', 'class', classes] if args.instrumentation == 'gleo' else []
-                expected = 10 if args.instrumentation == 'gleo' else 17
+                expected = 11 if args.instrumentation == 'gleo' else 18
                 log_args = ['logcat', '-d', '-v', 'brief', '-s', 'GleoE2E:I', 'PreparedMarketPerf:I', '*:S']
                 before = command(selected + log_args, 6).splitlines()
                 output = command(selected + ['shell', 'am', 'instrument', '-w', '-r'] + filters + [
-                    'com.potatoes.book5.realestate.test/androidx.test.runner.AndroidJUnitRunner'], 120)
+                    'com.potatoes.book5.realestate.test/com.potatoes.book5.realestate.probe.RealEstateTestRunner'], 120)
                 (args.out / 'instrumentation.txt').write_text(output)
                 instrumentation_ok = instrumentation_passed(output, expected)
                 after = command(selected + log_args, 6).splitlines()
@@ -115,6 +118,22 @@ def execute(args):
                             'speech_test': False, 'events': parse_events(fresh), 'prepared_1000_reads_ms': metrics}
                 (args.out / 'app-boundary.json').write_text(json.dumps(evidence, indent=2) + '\n')
                 print('App-boundary instrumentation: ' + ('PASS' if instrumentation_ok else 'FAIL'), flush=True)
+            if args.live_provider_probe:
+                print('Checking real provider with production DI (no seeded data)…', flush=True)
+                time.sleep(2)  # Let the previous instrumentation process finish detaching.
+                try:
+                    output = command(selected + ['shell', 'am', 'instrument', '-w', '-r', '-e', 'livePriceProbe', 'true',
+                        'com.potatoes.book5.realestate.test/com.potatoes.book5.realestate.probe.RealEstateTestRunner'], 85)
+                except subprocess.CalledProcessError as exc:
+                    # Retain only the runner's fixed status/count fields, never raw error text.
+                    output = exc.stdout + exc.stderr
+                fields = dict(re.findall(r'^INSTRUMENTATION_RESULT: (probe[A-Za-z]+)=([A-Z_a-z0-9]+)$', output, re.MULTILINE))
+                if not fields:
+                    fields = {'probeStatus': 'BLOCKED', 'probeReason': 'INSTRUMENTATION_START_FAILED'}
+                (args.out / 'live-provider.json').write_text(json.dumps(fields, indent=2) + '\n')
+                provider_ok = fields.get('probeStatus') == 'PASS'
+                instrumentation_ok = instrumentation_ok and provider_ok
+                print('Real provider probe: ' + fields.get('probeStatus', 'BLOCKED'), flush=True)
             probe = [sys.executable, str(Path(__file__).with_name('tts_probe.py'))]
             subprocess.run(probe + ['generate', '--out', str(args.out)], check=True, timeout=210)
             speech_code = subprocess.run(probe + ['run', '--out', str(args.out), '--serial', serial,

@@ -43,5 +43,6 @@ internal fun prepareMarketBatch(
         .thenBy { it.second.contractDate }.thenBy { it.first })
     return PreparedMarketBatch(candidates, PreparedDistrictPrices(districtCode, districtName, from, to, samples.size,
         if (samples.isEmpty()) null else BigDecimal(sum).divide(BigDecimal(samples.size), 0, RoundingMode.HALF_UP).longValueExact(),
-        highest?.second?.priceManwon?.times(10_000), highest?.first, sourceAsOf))
+        highest?.second?.priceManwon?.times(10_000), highest?.first, sourceAsOf,
+        highestComplexName = highest?.second?.apartmentName?.takeIf { it.isNotBlank() }))
 }
